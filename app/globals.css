@@ -1,14 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f7f1e3;
-  --surface: #fffdf8;
-  --ink: #16202a;
-  --blue: #173f7a;
-  --blue-strong: #0f305d;
-  --cyan: #74d7f7;
-  --orange: #ff7a45;
-  --line: rgba(23, 63, 122, 0.12);
+  --bg-page: #f6f3ee;
+  --bg-surface: #ffffff;
+  --bg-soft: #f1ece4;
+  --bg-soft-strong: #e7dfd3;
+  --text-strong: #201b17;
+  --text-muted: #85786d;
+  --line-subtle: #e5ddd1;
+  --accent-primary: #d96d5e;
+  --accent-primary-strong: #c45c4e;
+  --accent-tint: #f7e2dd;
+  --success-tint: #e5f1e8;
+  --success-ink: #2f7750;
+  --danger-tint: #fae5e5;
+  --danger-ink: #9b4747;
+  --shadow-soft: 0 18px 40px rgba(67, 48, 33, 0.06);
 }
 
 * {
@@ -23,10 +30,11 @@ body {
   margin: 0;
   font-family: var(--font-body), "Microsoft YaHei", sans-serif;
   background:
-    radial-gradient(circle at top right, rgba(116, 215, 247, 0.2), transparent 25%),
-    radial-gradient(circle at left center, rgba(255, 122, 69, 0.18), transparent 18%),
-    var(--paper);
-  color: var(--ink);
+    radial-gradient(circle at top right, rgba(217, 109, 94, 0.08), transparent 28%),
+    radial-gradient(circle at left top, rgba(244, 232, 214, 0.55), transparent 22%),
+    var(--bg-page);
+  color: var(--text-strong);
+  min-height: 100vh;
 }
 
 a {
@@ -45,6 +53,43 @@ textarea {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--text-muted) 72%, white);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-primary) 72%, white);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--bg-soft-strong) 86%, white);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 ::selection {
-  background: rgba(116, 215, 247, 0.34);
+  background: color-mix(in srgb, var(--accent-primary) 24%, white);
 }

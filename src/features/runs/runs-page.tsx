@@ -9,29 +9,40 @@ type RunsPageProps = {
   runs: RunTrace[];
 };
 
+const stageLabels: Record<RunTrace["stage"], string> = {
+  preprocess: "素材准备",
+  generate: "首次生成",
+  regenerate: "重新生成",
+  confirm: "确认保存",
+};
+
 const traceSections = [
-  { key: "rawPath", label: "原始评论数据" },
-  { key: "eventsPath", label: "Event 数据集" },
+  { key: "rawPath", label: "原始评论" },
+  { key: "eventsPath", label: "事件数据" },
   { key: "routePath", label: "route.md" },
-  { key: "posterPath", label: "底片图" },
-  { key: "mapPath", label: "HTML / 地图视图模型" },
+  { key: "posterPath", label: "地图主图" },
+  { key: "mapPath", label: "地图视图文件" },
 ] as const;
 
 export function RunsPage(props: RunsPageProps) {
   const [selectedRunId, setSelectedRunId] = useState(props.runs[0]?.runId ?? "");
   const selectedRun = props.runs.find((run) => run.runId === selectedRunId) ?? props.runs[0];
+  const traceFlow = selectedRun
+    ? traceSections
+        .filter((section) => selectedRun.artifacts[section.key])
+        .map((section) => section.label)
+    : [];
 
   return (
     <SiteShell
       title="测试追踪页"
-      eyebrow="留痕壳层"
-      description="本期只建设结构壳层与文件留痕，不把真实飞书运行链路接进来。左侧是 run 列表，右侧保留 6 类追溯入口。"
+      eyebrow="生成记录"
+      description="查看每一次生成的阶段、产物路径和处理留痕。"
+      activeHref="/runs"
     >
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="rounded-[32px] border border-[color:var(--line)] bg-white p-4 shadow-[0_18px_42px_rgba(23,63,122,0.08)]">
-          <p className="px-3 pt-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--blue)]/60">
-            Run 列表
-          </p>
+        <aside className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)]">
+          <p className="px-3 pt-2 text-xs tracking-[0.14em] text-[var(--text-muted)]">Run 列表</p>
           <div className="mt-4 grid gap-3">
             {props.runs.length ? (
               props.runs.map((run) => (
@@ -39,21 +50,21 @@ export function RunsPage(props: RunsPageProps) {
                   type="button"
                   key={run.runId}
                   onClick={() => setSelectedRunId(run.runId)}
-                  className={`rounded-[24px] border px-4 py-4 text-left transition ${
+                  className={`rounded-[22px] border px-4 py-4 text-left transition ${
                     selectedRun?.runId === run.runId
-                      ? "border-[var(--orange)] bg-[rgba(255,122,69,0.1)]"
-                      : "border-[color:var(--line)] bg-[var(--paper)]"
+                      ? "border-[var(--accent-primary)] bg-[var(--accent-tint)]"
+                      : "border-[color:var(--line-subtle)] bg-[var(--bg-soft)]"
                   }`}
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <p className="text-sm font-black text-[var(--ink)]">{run.runId}</p>
+                    <p className="text-sm font-semibold text-[var(--text-strong)]">{run.runId}</p>
                     <StatusPill status={run.status} />
                   </div>
-                  <p className="text-xs text-[var(--ink)]/62">{run.stage}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{stageLabels[run.stage]}</p>
                 </button>
               ))
             ) : (
-              <div className="rounded-[24px] border border-dashed border-[color:var(--line)] bg-[var(--paper)] px-4 py-6 text-sm text-[var(--ink)]/70">
+              <div className="rounded-[22px] border border-dashed border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-6 text-sm text-[var(--text-muted)]">
                 还没有 run 记录。先去工作台生成一次地图。
               </div>
             )}
@@ -63,19 +74,22 @@ export function RunsPage(props: RunsPageProps) {
         <section className="grid gap-4">
           {selectedRun ? (
             <>
-              <article className="rounded-[32px] border border-[color:var(--line)] bg-white p-6 shadow-[0_18px_42px_rgba(23,63,122,0.08)]">
+              <article className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--orange)]">
-                      当前选中 Run
+                    <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">当前记录</p>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                      {selectedRun.runId}
+                    </h2>
+                    <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+                      当前阶段：{stageLabels[selectedRun.stage]}
                     </p>
-                    <h2 className="mt-2 text-2xl font-black text-[var(--blue)]">{selectedRun.runId}</h2>
                   </div>
                   <StatusPill status={selectedRun.status} />
                 </div>
 
                 {selectedRun.errorMessage ? (
-                  <div className="mt-4 rounded-[20px] bg-[rgba(180,56,56,0.08)] px-4 py-3 text-sm text-[#9f1d1d]">
+                  <div className="mt-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
                     {selectedRun.errorMessage}
                   </div>
                 ) : null}
@@ -85,27 +99,40 @@ export function RunsPage(props: RunsPageProps) {
                 {traceSections.map((section) => (
                   <article
                     key={section.key}
-                    className="rounded-[28px] border border-[color:var(--line)] bg-[var(--surface)] p-5 shadow-sm"
+                    className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5"
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--blue)]/60">
-                      {section.label}
-                    </p>
-                    <p className="mt-3 break-all text-sm leading-6 text-[var(--ink)]/72">
+                    <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">{section.label}</p>
+                    <p className="mt-3 break-all text-sm leading-6 text-[var(--text-muted)]">
                       {selectedRun.artifacts[section.key] || "本期未接入真实内容，仅保留结构位置"}
                     </p>
                   </article>
                 ))}
-                <article className="rounded-[28px] border border-[color:var(--line)] bg-[var(--surface)] p-5 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--blue)]/60">
-                    报错与重试
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-[var(--ink)]/72">
+                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
+                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">提示与警告</p>
+                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
                     {selectedRun.warnings.length
                       ? selectedRun.warnings.join("；")
                       : "当前 run 没有额外警告。"}
                   </p>
                 </article>
               </div>
+
+              <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
+                <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">追溯链</p>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-1 text-xs text-[var(--text-muted)]">
+                    {stageLabels[selectedRun.stage]}
+                  </span>
+                  {traceFlow.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-1 text-xs text-[var(--text-muted)]"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </article>
             </>
           ) : null}
         </section>

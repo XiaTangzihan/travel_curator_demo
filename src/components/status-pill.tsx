@@ -3,20 +3,29 @@ type StatusPillProps = {
 };
 
 const styles: Record<StatusPillProps["status"], string> = {
-  draft: "bg-[rgba(23,63,122,0.12)] text-[var(--blue)]",
-  confirmed: "bg-[rgba(28,166,96,0.14)] text-[#1a7a4f]",
-  failed: "bg-[rgba(180,56,56,0.14)] text-[#9f1d1d]",
-  running: "bg-[rgba(255,122,69,0.14)] text-[var(--orange)]",
-  completed: "bg-[rgba(28,166,96,0.14)] text-[#1a7a4f]",
-  incomplete: "bg-[rgba(116,215,247,0.18)] text-[var(--blue)]",
+  draft: "border-[color:var(--line-subtle)] bg-[var(--bg-soft)] text-[var(--text-muted)]",
+  confirmed: "border-transparent bg-[var(--success-tint)] text-[var(--success-ink)]",
+  failed: "border-transparent bg-[var(--danger-tint)] text-[var(--danger-ink)]",
+  running: "border-transparent bg-[var(--accent-tint)] text-[var(--accent-primary-strong)]",
+  completed: "border-transparent bg-[var(--success-tint)] text-[var(--success-ink)]",
+  incomplete: "border-[color:var(--line-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]",
+};
+
+const labels: Record<StatusPillProps["status"], string> = {
+  draft: "草稿",
+  confirmed: "已确认",
+  failed: "失败",
+  running: "进行中",
+  completed: "已完成",
+  incomplete: "未完成",
 };
 
 export function StatusPill(props: StatusPillProps) {
   return (
     <span
-      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${styles[props.status]}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium tracking-[0.08em] ${styles[props.status]}`}
     >
-      {props.status}
+      {labels[props.status]}
     </span>
   );
 }

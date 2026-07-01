@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ImagePlus, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
+import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { useWorkspaceStore } from "@/src/store/workspace-store";
@@ -12,12 +12,31 @@ type WorkspacePageProps = {
   rawDataset: RawDatasetSnapshot;
 };
 
+const stylePreviewMap: Record<string, { label: string; description: string; image: string }> = {
+  "young-cartoon": {
+    label: "年轻卡通风",
+    description: "明亮轻快，适合把旅行内容整理成活泼、易读、适合分享的画面。",
+    image: "/ui-static/styles/young-cartoon.jpg",
+  },
+  watercolor: {
+    label: "清新水彩风",
+    description: "淡雅柔和，适合强调空气感、留白和更轻的叙事氛围。",
+    image: "/ui-static/styles/watercolor.jpg",
+  },
+  storybook: {
+    label: "治愈绘本插画风",
+    description: "温暖安静，适合更有故事感和收藏感的旅行作品。",
+    image: "/ui-static/styles/storybook.jpg",
+  },
+};
+
 export function WorkspacePage(props: WorkspacePageProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
   const mapName = useWorkspaceStore((state) => state.mapName);
+  const currentStyle = useWorkspaceStore((state) => state.style);
   const selectedCommentIds = useWorkspaceStore((state) => state.selectedCommentIds);
   const initialize = useWorkspaceStore((state) => state.initialize);
   const setMapName = useWorkspaceStore((state) => state.setMapName);
@@ -37,6 +56,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
     () => props.rawDataset.reviews.reduce((sum, review) => sum + review.attachments.length, 0),
     [props.rawDataset.reviews],
   );
+  const stylePreview = stylePreviewMap[currentStyle] ?? stylePreviewMap["young-cartoon"];
 
   async function handleGenerate() {
     try {
@@ -85,58 +105,37 @@ export function WorkspacePage(props: WorkspacePageProps) {
   return (
     <SiteShell
       title="作者工作台"
-      eyebrow="生成入口"
-      description="左侧配置这次地图，右侧直接挑选广州 11 条评论。今天只做本地 JSON 与文件目录，不接飞书运行链路。"
-      actions={
-        <>
-          <button
-            type="button"
-            onClick={handlePreprocess}
-            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line)] bg-white px-4 py-3 text-sm font-semibold text-[var(--blue)] transition hover:shadow-md"
-          >
-            {syncing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            重跑 Part1
-          </button>
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={submitting || !selectedCommentIds.length}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--blue)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--blue-strong)] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {submitting ? (
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="h-4 w-4" />
-            )}
-            一键生成旅行地图
-          </button>
-        </>
-      }
+      eyebrow="旅行地图制作"
+      description="确认这张地图的名称、风格和评论素材，再生成新的旅行作品。"
+      activeHref="/workspace"
     >
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="rounded-[32px] border border-[color:var(--line)] bg-[var(--surface)] p-6 shadow-[0_18px_40px_rgba(23,63,122,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--blue)]/60">
-            当前配置
-          </p>
-          <label className="mt-5 block text-sm font-semibold text-[var(--ink)]">
-            地图名称
-            <input
-              value={mapName}
-              onChange={(event) => setMapName(event.target.value)}
-              className="mt-2 w-full rounded-[20px] border border-[color:var(--line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--cyan)]"
-            />
-          </label>
+      <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="flex h-fit flex-col gap-5 rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
+          <div>
+            <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">当前配置</p>
+            <label className="mt-5 block text-sm font-medium text-[var(--text-strong)]">
+              地图名称
+              <input
+                value={mapName}
+                onChange={(event) => setMapName(event.target.value)}
+                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
+              />
+            </label>
+          </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="grid gap-3">
             {[
               { label: "目的地", value: "广州" },
-              { label: "风格", value: "年轻卡通" },
+              { label: "风格", value: stylePreview.label },
               { label: "样本评论", value: `${props.rawDataset.reviews.length} 条` },
               { label: "本地图片", value: `${totalPictures} 张` },
             ].map((item) => (
-              <div key={item.label} className="rounded-[24px] bg-white px-4 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--blue)]/60">{item.label}</p>
-                <p className="mt-2 text-lg font-black text-[var(--blue)]">{item.value}</p>
+              <div
+                key={item.label}
+                className="rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4"
+              >
+                <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">{item.label}</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--text-strong)]">{item.value}</p>
               </div>
             ))}
           </div>
@@ -144,66 +143,132 @@ export function WorkspacePage(props: WorkspacePageProps) {
           <button
             type="button"
             onClick={() => selectAll(props.rawDataset.reviews.map((review) => review.recordId))}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line)] bg-white px-4 py-3 text-sm font-semibold text-[var(--blue)] transition hover:shadow-md"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
           >
-            <ImagePlus className="h-4 w-4" />
-            全选广州 11 条评论
+            <CheckCheck className="h-4 w-4" />
+            全选当前评论
           </button>
 
-          <p className="mt-4 text-sm text-[var(--ink)]/68">
-            已选 <span className="font-black text-[var(--blue)]">{selectedCommentIds.length}</span> /
-            {props.rawDataset.reviews.length}
-          </p>
+          <button
+            type="button"
+            onClick={handlePreprocess}
+            className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft-strong)]"
+          >
+            {syncing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            更新素材列表
+          </button>
+
+          <div className="overflow-hidden rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)]">
+            <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-soft)]">
+              <Image src={stylePreview.image} alt={stylePreview.label} fill unoptimized className="object-cover" />
+            </div>
+            <div className="p-4">
+              <p className="text-sm font-medium text-[var(--text-strong)]">{stylePreview.label}</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{stylePreview.description}</p>
+            </div>
+          </div>
 
           {error ? (
-            <div className="mt-4 rounded-[20px] bg-[rgba(180,56,56,0.08)] px-4 py-3 text-sm text-[#9f1d1d]">
+            <div className="rounded-[18px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
               {error}
             </div>
           ) : null}
         </aside>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {props.rawDataset.reviews.map((review) => {
-            const selected = selectedCommentIds.includes(review.recordId);
-            return (
-              <button
-                type="button"
-                key={review.recordId}
-                onClick={() => toggleComment(review.recordId)}
-                className={`rounded-[28px] border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-                  selected
-                    ? "border-[var(--cyan)] bg-[rgba(116,215,247,0.16)]"
-                    : "border-[color:var(--line)] bg-white/90"
-                }`}
-              >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--blue)]/60">
-                    {review.sourceDay || "?"} / {review.sourceTime || "?"}
-                  </p>
-                  <span className="rounded-full bg-[rgba(23,63,122,0.08)] px-2 py-1 text-xs font-semibold text-[var(--blue)]">
-                    {selected ? "已选" : "未选"}
-                  </span>
-                </div>
-                <p className="text-lg font-black text-[var(--ink)]">{review.poiName}</p>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-[var(--ink)]/72">
-                  {review.commentText}
-                </p>
-                <div className="mt-4 flex gap-2 overflow-hidden">
-                  {review.attachments.slice(0, 3).map((attachment) => (
-                    <Image
-                      key={attachment.fileToken}
-                      src={attachment.publicPath}
-                      alt={attachment.name}
-                      width={64}
-                      height={64}
-                      unoptimized
-                      className="h-16 w-16 rounded-2xl object-cover"
-                    />
-                  ))}
-                </div>
-              </button>
-            );
-          })}
+        <section className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">评论素材</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                选择想放进这张地图的内容
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+                单屏默认展示 8 张，更多卡片向下滚动继续查看。
+              </p>
+            </div>
+            <p className="text-sm text-[var(--text-muted)]">
+              已选 <span className="font-semibold text-[var(--text-strong)]">{selectedCommentIds.length}</span> /{" "}
+              {props.rawDataset.reviews.length}
+            </p>
+          </div>
+
+          <div className="max-h-[780px] overflow-y-auto pr-2">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {props.rawDataset.reviews.map((review) => {
+                const selected = selectedCommentIds.includes(review.recordId);
+                const cover = review.attachments[0];
+
+                return (
+                  <button
+                    type="button"
+                    key={review.recordId}
+                    onClick={() => toggleComment(review.recordId)}
+                    className={`group flex min-h-[320px] flex-col overflow-hidden rounded-[24px] border text-left transition ${
+                      selected
+                        ? "border-[var(--accent-primary)] bg-[var(--accent-tint)]"
+                        : "border-[color:var(--line-subtle)] bg-[var(--bg-surface)] hover:border-[var(--bg-soft-strong)]"
+                    }`}
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
+                      {cover ? (
+                        <Image
+                          src={cover.publicPath}
+                          alt={cover.name}
+                          fill
+                          unoptimized
+                          className="object-cover transition duration-500 group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-[var(--text-muted)]">
+                          暂无图片
+                        </div>
+                      )}
+                      <span
+                        className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-medium ${
+                          selected
+                            ? "bg-[var(--accent-primary)] text-white"
+                            : "bg-[rgba(255,255,255,0.92)] text-[var(--text-strong)]"
+                        }`}
+                      >
+                        {selected ? "已选" : "选择"}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-1 flex-col p-4">
+                      <div className="mb-3">
+                        <p className="text-lg font-semibold text-[var(--text-strong)]">{review.poiName}</p>
+                        <p className="mt-1 text-xs tracking-[0.12em] text-[var(--text-muted)]">
+                          {review.sourceDay || "未标注日期"} · {review.sourceTime || "未标注时间"}
+                        </p>
+                      </div>
+                      <p className="line-clamp-4 text-sm leading-6 text-[var(--text-muted)]">
+                        {review.commentText || "暂时没有文字描述。"}
+                      </p>
+                      <div className="mt-auto flex items-center justify-between pt-4 text-xs text-[var(--text-muted)]">
+                        <span>{review.attachments.length} 张图片</span>
+                        <span>{selected ? "已加入地图" : "点击加入"}</span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-4 border-t border-[color:var(--line-subtle)] pt-5 lg:flex-row lg:items-center lg:justify-between">
+            <p className="text-sm leading-7 text-[var(--text-muted)]">
+              选出最能代表这趟行程的片段，再生成整张地图。
+            </p>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={submitting || !selectedCommentIds.length}
+              className="inline-flex items-center justify-center gap-2 self-end rounded-full bg-[var(--accent-primary)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
+            >
+              {submitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              一键生成旅行地图
+            </button>
+          </div>
         </section>
       </div>
     </SiteShell>

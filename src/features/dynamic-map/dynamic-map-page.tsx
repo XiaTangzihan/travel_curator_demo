@@ -18,16 +18,29 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
       props.map.events.find((event) => event.eventId === selectedEventId) ?? props.map.events[0],
     [props.map.events, selectedEventId],
   );
+  const primaryPicture = selectedEvent.commentPictures[0];
+  const galleryPictures = selectedEvent.commentPictures.slice(1);
 
   return (
     <SiteShell
-      title="动态地图页"
-      eyebrow="P5 确定性绑定"
-      description="底图只做展示；真正的交互发生在底部旅程轴与右侧常驻评论卡之间，节点和评论通过 event_id 一对一绑定。"
+      title={props.map.mapName}
+      eyebrow="动态地图"
+      description="沿着时间顺序浏览这趟旅行，在右侧查看当前地点的图文记录。"
+      activeHref="/"
+      actions={
+        <>
+          <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
+            {props.map.city}
+          </span>
+          <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
+            {props.map.nodes.length} 站
+          </span>
+        </>
+      }
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-[36px] border border-[color:var(--line)] bg-[var(--surface)] p-5 shadow-[0_20px_50px_rgba(23,63,122,0.08)]">
-          <div className="overflow-hidden rounded-[28px] border border-[color:var(--line)] bg-white">
+        <section className="rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-5">
+          <div className="overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
             <Image
               src={props.map.posterPath}
               alt={props.map.mapName}
@@ -38,14 +51,12 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
             />
           </div>
 
-          <div className="mt-5 rounded-[28px] border border-[color:var(--line)] bg-white px-4 py-4">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="mt-5 rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4">
+            <div className="mb-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--blue)]/60">
-                  底部旅程轴
-                </p>
-                <p className="text-sm text-[var(--ink)]/70">
-                  节点数 = {props.map.nodes.length}，所有节点都由 event_id 与评论卡绑定。
+                <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">旅程路线</p>
+                <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+                  按照时间顺序浏览每一站，点击下方节点切换右侧内容。
                 </p>
               </div>
             </div>
@@ -59,19 +70,25 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
                       type="button"
                       key={node.eventId}
                       onClick={() => setSelectedEventId(node.eventId)}
-                      className={`w-[220px] rounded-[24px] border p-3 text-left transition ${
+                      className={`w-[214px] rounded-[22px] border p-3 text-left transition ${
                         selected
-                          ? "border-[var(--orange)] bg-[rgba(255,122,69,0.12)] shadow-md"
-                          : "border-[color:var(--line)] bg-[var(--paper)] hover:border-[var(--cyan)]"
+                          ? "border-[var(--accent-primary)] bg-[var(--accent-tint)]"
+                          : "border-[color:var(--line-subtle)] bg-[var(--bg-soft)] hover:border-[var(--bg-soft-strong)]"
                       }`}
                     >
                       <div className="mb-3 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--blue)] text-sm font-black text-white">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
+                            selected
+                              ? "bg-[var(--accent-primary)] text-white"
+                              : "bg-[var(--bg-surface)] text-[var(--text-strong)]"
+                          }`}
+                        >
                           {index + 1}
                         </div>
                         <div>
-                          <p className="text-sm font-black text-[var(--ink)]">{node.title}</p>
-                          <p className="text-xs font-semibold text-[var(--blue)]/70">
+                          <p className="text-sm font-semibold text-[var(--text-strong)]">{node.title}</p>
+                          <p className="text-xs text-[var(--text-muted)]">
                             {node.day} · {node.time}
                           </p>
                         </div>
@@ -83,10 +100,10 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
                           width={240}
                           height={120}
                           unoptimized
-                          className="mb-3 h-28 w-full rounded-[18px] object-cover"
+                          className="mb-3 h-28 w-full rounded-[16px] object-cover"
                         />
                       ) : null}
-                      <p className="text-sm leading-6 text-[var(--ink)]/72">{node.excerpt}</p>
+                      <p className="text-sm leading-6 text-[var(--text-muted)]">{node.excerpt}</p>
                     </button>
                   );
                 })}
@@ -95,65 +112,92 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
           </div>
         </section>
 
-        <aside className="rounded-[32px] border border-[color:var(--line)] bg-white p-6 shadow-[0_20px_50px_rgba(23,63,122,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--orange)]">
-            右侧常驻评论卡
-          </p>
-          <h2 className="mt-3 text-2xl font-black text-[var(--blue)]">{selectedEvent.poiName}</h2>
-          <p className="mt-1 text-sm font-semibold text-[var(--blue)]/70">
+        <aside className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)] xl:sticky xl:top-6">
+          <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">当前地点</p>
+          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+            {selectedEvent.poiName}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{selectedEvent.poiLocation}</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
             {selectedEvent.day} · {selectedEvent.time}
           </p>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink)]/78">{selectedEvent.commentText}</p>
 
-          <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-[var(--blue)]">
+          {primaryPicture ? (
+            <button
+              type="button"
+              onClick={() => setPreviewImage(primaryPicture.url)}
+              className="mt-5 overflow-hidden rounded-[22px] border border-[color:var(--line-subtle)]"
+            >
+              <Image
+                src={primaryPicture.url}
+                alt={primaryPicture.name ?? selectedEvent.poiName}
+                width={560}
+                height={420}
+                unoptimized
+                className="h-[260px] w-full object-cover"
+              />
+            </button>
+          ) : (
+            <div className="mt-5 flex h-[260px] items-center justify-center rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] text-sm text-[var(--text-muted)]">
+              暂无地点图片
+            </div>
+          )}
+
+          <p className="mt-5 text-sm leading-7 text-[var(--text-muted)]">
+            {selectedEvent.commentText || "暂时没有文字描述。"}
+          </p>
+
+          <div className="mt-5 flex flex-wrap gap-2 text-xs text-[var(--text-muted)]">
             {[selectedEvent.categoryL1, selectedEvent.categoryL2, selectedEvent.categoryL3]
               .filter(Boolean)
               .map((item) => (
-                <span key={item} className="rounded-full bg-[rgba(23,63,122,0.08)] px-3 py-1">
+                <span key={item} className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-1">
                   {item}
                 </span>
               ))}
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {selectedEvent.commentPictures.map((picture) => (
-              <button
-                type="button"
-                key={picture.url}
-                onClick={() => setPreviewImage(picture.url)}
-                className="overflow-hidden rounded-[20px] border border-[color:var(--line)]"
-              >
-                <Image
-                  src={picture.url}
-                  alt={picture.name ?? selectedEvent.poiName}
-                  width={320}
-                  height={240}
-                  unoptimized
-                  className="h-36 w-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
+          {galleryPictures.length ? (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {galleryPictures.map((picture) => (
+                <button
+                  type="button"
+                  key={picture.url}
+                  onClick={() => setPreviewImage(picture.url)}
+                  className="overflow-hidden rounded-[18px] border border-[color:var(--line-subtle)]"
+                >
+                  <Image
+                    src={picture.url}
+                    alt={picture.name ?? selectedEvent.poiName}
+                    width={320}
+                    height={240}
+                    unoptimized
+                    className="h-32 w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
         </aside>
       </div>
 
       {previewImage ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(22,32,42,0.8)] p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(26,20,17,0.72)] p-6">
           <button
             type="button"
             onClick={() => setPreviewImage(null)}
-            className="absolute right-6 top-6 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-[var(--blue)]"
+            className="absolute right-6 top-6 rounded-full bg-white/92 px-4 py-2 text-sm font-medium text-[var(--text-strong)]"
           >
             关闭
           </button>
-          <div className="relative max-h-[90vh] max-w-[90vw] overflow-hidden rounded-[28px] border border-white/20 bg-white p-4 shadow-2xl">
+          <div className="relative max-h-[90vh] max-w-[90vw] overflow-hidden rounded-[24px] bg-[var(--bg-surface)] p-4 shadow-2xl">
             <Image
               src={previewImage}
               alt="评论原图预览"
               width={1600}
               height={1200}
               unoptimized
-              className="max-h-[82vh] rounded-[20px] object-contain"
+              className="max-h-[82vh] rounded-[18px] object-contain"
             />
           </div>
         </div>

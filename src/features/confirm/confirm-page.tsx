@@ -65,54 +65,64 @@ export function ConfirmPage(props: ConfirmPageProps) {
 
   return (
     <SiteShell
-      title="二次确认页"
-      eyebrow="P4 重生成"
-      description="左侧看底片，右侧给自然语言修改意见。确认后直接进入动态地图页。"
+      title={props.mapRecord.mapName}
+      eyebrow="静态图确认"
+      description="检查这张地图的画面和细节，确认后保存为正式作品。"
+      activeHref="/workspace"
       actions={<StatusPill status={props.mapRecord.status} />}
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="overflow-hidden rounded-[36px] border border-[color:var(--line)] bg-[var(--surface)] p-5 shadow-[0_18px_42px_rgba(23,63,122,0.08)]">
-          <div className="overflow-hidden rounded-[28px] border border-[color:var(--line)] bg-white">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="overflow-hidden rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-5">
+          <div className="overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
             <Image
               src={props.mapViewModel.posterPath}
               alt={props.mapViewModel.mapName}
               width={1600}
               height={1100}
               unoptimized
-              className="max-h-[760px] w-full object-contain"
+              className="max-h-[800px] w-full object-contain"
             />
           </div>
         </section>
 
-        <aside className="rounded-[32px] border border-[color:var(--line)] bg-white p-6 shadow-[0_18px_42px_rgba(23,63,122,0.08)]">
-          <h2 className="text-2xl font-black text-[var(--blue)]">{props.mapRecord.mapName}</h2>
-          <p className="mt-2 text-sm leading-7 text-[var(--ink)]/70">
-            当前已绑定 {props.mapRecord.eventCount} 个 event。默认会尽量保留已有构图；取消勾选后，会按你的新要求整体重绘。
+        <aside className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
+          <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+            调整这张地图
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--text-muted)]">
+            需要时补充修改意见，重新生成满意后再确认保存。
           </p>
 
-          <label className="mt-6 block text-sm font-semibold text-[var(--ink)]">
+          <div className="mt-5 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4">
+            <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">已选内容</p>
+            <p className="mt-2 text-lg font-semibold text-[var(--text-strong)]">
+              {props.mapRecord.eventCount} 个足迹
+            </p>
+          </div>
+
+          <label className="mt-6 block text-sm font-medium text-[var(--text-strong)]">
             修改 Prompt
             <textarea
               value={instruction}
               onChange={(event) => setInstruction(event.target.value)}
               rows={7}
               placeholder="例如：让广州塔更突出，右上角增加珠江夜景氛围，整体路线更清晰。"
-              className="mt-2 w-full rounded-[24px] border border-[color:var(--line)] bg-[var(--paper)] px-4 py-3 text-sm outline-none transition focus:border-[var(--cyan)]"
+              className="mt-2 w-full rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm leading-6 outline-none transition"
             />
           </label>
 
-          <label className="mt-4 flex items-center gap-3 rounded-[20px] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--ink)]">
+          <label className="mt-4 flex items-center gap-3 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm text-[var(--text-strong)]">
             <input
               type="checkbox"
               checked={basedOnExistingImage}
               onChange={(event) => setBasedOnExistingImage(event.target.checked)}
-              className="h-4 w-4 accent-[var(--orange)]"
+              className="h-4 w-4 accent-[var(--accent-primary)]"
             />
             是否基于旧图修改
           </label>
 
           {error ? (
-            <div className="mt-4 rounded-[20px] bg-[rgba(180,56,56,0.08)] px-4 py-3 text-sm text-[#9f1d1d]">
+            <div className="mt-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
               {error}
             </div>
           ) : null}
@@ -121,7 +131,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
             <button
               type="button"
               onClick={handleRegenerate}
-              className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line)] bg-white px-4 py-3 text-sm font-semibold text-[var(--blue)] transition hover:shadow-md"
+              className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
             >
               {pending === "regenerate" ? (
                 <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -133,7 +143,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
             <button
               type="button"
               onClick={handleConfirm}
-              className="inline-flex items-center justify-center gap-2 rounded-[20px] bg-[var(--blue)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--blue-strong)]"
+              className="inline-flex items-center justify-center gap-2 rounded-[20px] bg-[var(--accent-primary)] px-4 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
             >
               {pending === "confirm" ? (
                 <LoaderCircle className="h-4 w-4 animate-spin" />

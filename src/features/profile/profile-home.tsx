@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { MapRecord } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { StatusPill } from "@/src/components/status-pill";
@@ -10,84 +11,105 @@ type ProfileHomeProps = {
 };
 
 export function ProfileHome(props: ProfileHomeProps) {
+  const totalFootprints = props.maps.reduce((sum, map) => sum + map.eventCount, 0);
+
   return (
     <SiteShell
       title="个人主页"
-      eyebrow="作品集入口"
-      description="用广州两日行黄金评论把 AI 生成的底片图、旅程轴和原始评论卡绑成一个可追溯作品。"
+      eyebrow="旅行作品集"
+      description="把一次次出发整理成可以回看的路线、地图和画面。"
+      activeHref="/"
       actions={
         <Link
           href="/workspace"
-          className="inline-flex items-center gap-2 rounded-full bg-[var(--blue)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--blue-strong)]"
+          className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
         >
           进入工作台
           <ArrowRight className="h-4 w-4" />
         </Link>
       }
     >
-      <section className="mb-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <article className="rounded-[32px] border border-[color:var(--line)] bg-[var(--surface)] p-6 shadow-[0_20px_50px_rgba(23,63,122,0.08)]">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-[rgba(255,122,69,0.14)] px-3 py-1 text-xs font-semibold text-[var(--orange)]">
-            <Sparkles className="h-4 w-4" />
-            本地闭环演示
-          </p>
-          <h2 className="text-3xl font-black text-[var(--blue)]">旅行者小夏</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink)]/72">
-            当前作品集只围绕“广州两日行”黄金样本运行，但工程边界已经为未来飞书 Maps / Events / Files /
-            Runs 接入预留了替换面。
-          </p>
-        </article>
+      <section className="mb-8 rounded-[32px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)] sm:p-8">
+        <div className="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[28px] bg-[linear-gradient(145deg,#e9c9b4,#d86d5e)] text-2xl font-semibold text-white shadow-[0_14px_28px_rgba(95,61,45,0.18)]">
+              小夏
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-muted)]">你的旅行，值得一场展览。</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                旅行者小夏
+              </h2>
+              <p className="mt-3 max-w-[560px] text-sm leading-7 text-[var(--text-muted)]">
+                在这里保存去过的城市、停留过的时刻，以及那些值得反复回看的旅程片段。
+              </p>
+            </div>
+          </div>
 
-        <article className="grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
+          <article className="grid gap-3 sm:grid-cols-3">
           {[
-            { label: "原始评论", value: props.rawCount },
-            { label: "已生成地图", value: props.maps.length },
-            { label: "当前风格", value: "年轻卡通" },
+            { label: "旅行作品", value: props.maps.length },
+            { label: "旅程足迹", value: totalFootprints },
+            { label: "素材数量", value: props.rawCount },
           ].map((item) => (
             <div
               key={item.label}
-              className="rounded-[28px] border border-[color:var(--line)] bg-white/80 p-5 shadow-sm"
+              className="min-w-[132px] rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-4"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--blue)]/60">
-                {item.label}
+              <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">{item.label}</p>
+              <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                {item.value}
               </p>
-              <p className="mt-3 text-3xl font-black text-[var(--blue)]">{item.value}</p>
             </div>
           ))}
-        </article>
+          </article>
+        </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {props.maps.length ? (
           props.maps.map((map) => (
             <Link
               key={map.mapId}
               href={`/maps/${map.mapId}`}
-              className="group rounded-[32px] border border-[color:var(--line)] bg-[var(--surface)] p-5 shadow-[0_16px_40px_rgba(23,63,122,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(23,63,122,0.12)]"
+              className="group overflow-hidden rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-soft)] transition hover:-translate-y-1"
             >
-              <div className="mb-4 h-44 overflow-hidden rounded-[24px] border border-[color:var(--line)] bg-[linear-gradient(135deg,rgba(23,63,122,0.92),rgba(116,215,247,0.85))] p-5 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
-                  {map.city}
-                </p>
-                <div className="mt-12">
-                  <p className="text-2xl font-black">{map.mapName}</p>
-                  <p className="mt-2 text-sm text-white/80">{map.eventCount} 个 event 已绑定</p>
+              <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
+                {map.posterPath ? (
+                  <Image
+                    src={map.posterPath}
+                    alt={map.mapName}
+                    fill
+                    unoptimized
+                    className="object-cover transition duration-500 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-end bg-[linear-gradient(135deg,#f4e7d8,#e6d6c3)] p-6">
+                    <p className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                      {map.city}
+                    </p>
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgba(32,27,23,0.58))] p-5 text-white">
+                  <p className="text-xs tracking-[0.16em] text-white/76">{map.city}</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em]">{map.mapName}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
+
+              <div className="flex items-center justify-between gap-3 p-5">
                 <div>
-                  <p className="text-base font-bold text-[var(--ink)]">{map.mapName}</p>
-                  <p className="text-sm text-[var(--ink)]/60">{map.city}</p>
+                  <p className="text-base font-semibold text-[var(--text-strong)]">{map.mapName}</p>
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">{map.eventCount} 个足迹</p>
                 </div>
                 <StatusPill status={map.status} />
               </div>
             </Link>
           ))
         ) : (
-          <article className="col-span-full rounded-[32px] border border-dashed border-[color:var(--line)] bg-white/70 p-8 text-center">
-            <p className="text-lg font-bold text-[var(--blue)]">还没有生成地图</p>
-            <p className="mt-2 text-sm text-[var(--ink)]/70">
-              先进入工作台跑一次 `P1 → P5`，这里就会出现首张地图卡片。
+          <article className="col-span-full rounded-[28px] border border-dashed border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-6 py-10 text-center">
+            <p className="text-lg font-semibold text-[var(--text-strong)]">还没有作品</p>
+            <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+              先去工作台整理一次旅程，这里就会出现新的地图卡片。
             </p>
           </article>
         )}

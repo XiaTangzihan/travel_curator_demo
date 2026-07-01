@@ -14,8 +14,8 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "旅行策展人 Demo",
-  description: "广州黄金评论数据集驱动的本地旅行策展 Demo",
+  title: "旅行策展人",
+  description: "把一次旅行整理成一份可回看的作品。",
 };
 
 export default function RootLayout({

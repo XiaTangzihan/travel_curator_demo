@@ -5,7 +5,7 @@ export default async function WorkspaceRoute() {
   const rawDataset = await getRawDataset();
 
   if (!rawDataset) {
-    throw new Error("广州本地样本未初始化，请先执行 sync:guangzhou");
+    throw new Error("演示素材尚未准备完成，请先初始化本地样本。");
   }
 
   return <WorkspacePage rawDataset={rawDataset} />;
