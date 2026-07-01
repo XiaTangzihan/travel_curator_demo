@@ -22,22 +22,22 @@ npm run sync:guangzhou
 npm run preprocess:guangzhou
 ```
 
-3. 启动开发服务器
+3. 启动开发服务器（固定使用 `localhost:3001`）
 
 ```bash
-npm run dev
+npm run dev -- --hostname localhost --port 3001
 ```
 
 4. 打开：
 
 ```text
-http://localhost:3000
+http://localhost:3001
 ```
 
 ## 常用命令
 
 ```bash
-npm run dev
+npm run dev -- --hostname localhost --port 3001
 npm run build
 npm run test
 npm run lint
