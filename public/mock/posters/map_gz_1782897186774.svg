@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960">
+    <defs>
+      <linearGradient id="paper" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#f7f1e3" />
+        <stop offset="100%" stop-color="#fffdf8" />
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="960" fill="url(#paper)" />
+    <circle cx="1220" cy="160" r="120" fill="rgba(116,215,247,0.22)" />
+    <circle cx="220" cy="140" r="90" fill="rgba(255,122,69,0.18)" />
+    <text x="88" y="110" font-size="58" font-weight="900" font-family="'Microsoft YaHei', sans-serif" fill="#173F7A">广州两日行</text>
+    <text x="88" y="156" font-size="24" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">广州 · 年轻卡通 · 本地稳态底片</text>
+    <path d="M 194 244 L 530 244 L 794 244 L 1130 244 L 194 464 L 530 464 L 794 464 L 1130 464 L 194 684 L 530 684 L 794 684" fill="none" stroke="#74D7F7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+    
+      <g transform="translate(170, 220)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">1</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">粒上皇(叠景路店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:01 10:20:00</text>
+      </g>
+      <g transform="translate(506, 220)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">2</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">财记炭炉鸡锅(龙洞店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:01 11:48:00</text>
+      </g>
+      <g transform="translate(770, 220)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">3</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">幻境空间·超级元宇宙(广州旗舰店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:01 12:50:00</text>
+      </g>
+      <g transform="translate(1106, 220)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">4</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">华记煲仔华·煲仔饭(万胜围店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:01 17:44:00</text>
+      </g>
+      <g transform="translate(170, 440)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">5</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">金元泰·泰式按摩·SPA(丽影广场客</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 10:20:00</text>
+      </g>
+      <g transform="translate(506, 440)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">6</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">佳叽Jargee(广州嘉禾金铂天地店</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 11:22:00</text>
+      </g>
+      <g transform="translate(770, 440)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">7</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">大榕树下·臻品顺德菜(广州塔店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 12:52:00</text>
+      </g>
+      <g transform="translate(1106, 440)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">8</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">彬媽糖水(马场路店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 14:06:00</text>
+      </g>
+      <g transform="translate(170, 660)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">9</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">广州白云国际会议中心越秀万豪酒店</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 15:15:00</text>
+      </g>
+      <g transform="translate(506, 660)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">10</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">大鸽饭(汉溪长隆店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 17:49:00</text>
+      </g>
+      <g transform="translate(770, 660)">
+        <circle cx="24" cy="24" r="24" fill="#ff7a45" />
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">11</text>
+        <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
+        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">YOJO啤酒厂(保利广场店)</text>
+        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">2024:06:02 20:06:00</text>
+      </g>
+  </svg>
