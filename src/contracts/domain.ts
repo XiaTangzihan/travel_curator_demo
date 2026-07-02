@@ -140,6 +140,12 @@ export const runArtifactPathsSchema = z.object({
   mapPath: z.string().optional(),
 });
 
+export const runInputSummarySchema = z.object({
+  mapName: z.string(),
+  city: z.string(),
+  selectedCommentCount: z.number(),
+});
+
 export const runTraceSchema = z.object({
   runId: z.string(),
   mapId: z.string(),
@@ -147,6 +153,8 @@ export const runTraceSchema = z.object({
   stage: z.enum(["preprocess", "generate", "regenerate", "confirm"]),
   basedOnExistingImage: z.boolean().optional(),
   promptInstruction: z.string().optional(),
+  styleKey: z.string().optional(),
+  inputSummary: runInputSummarySchema.optional(),
   warnings: z.array(z.string()),
   artifacts: runArtifactPathsSchema,
   providerMode: z.enum(["live", "fallback"]).default("live"),
@@ -166,4 +174,5 @@ export type RouteArtifact = z.infer<typeof routeArtifactSchema>;
 export type MapRecord = z.infer<typeof mapRecordSchema>;
 export type MapNode = z.infer<typeof mapNodeSchema>;
 export type MapViewModel = z.infer<typeof mapViewModelSchema>;
+export type RunInputSummary = z.infer<typeof runInputSummarySchema>;
 export type RunTrace = z.infer<typeof runTraceSchema>;

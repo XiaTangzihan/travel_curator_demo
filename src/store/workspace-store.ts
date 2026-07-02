@@ -12,6 +12,8 @@ type WorkspaceState = {
     selectedCommentIds: string[];
   }) => void;
   setMapName: (mapName: string) => void;
+  setCity: (city: string) => void;
+  setStyle: (style: string) => void;
   toggleComment: (commentId: string) => void;
   selectAll: (commentIds: string[]) => void;
 };
@@ -23,6 +25,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectedCommentIds: [],
   initialize: (payload) => set(payload),
   setMapName: (mapName) => set({ mapName }),
+  setCity: (city) => set({ city }),
+  setStyle: (style) => set({ style }),
   toggleComment: (commentId) =>
     set((state) => ({
       selectedCommentIds: state.selectedCommentIds.includes(commentId)

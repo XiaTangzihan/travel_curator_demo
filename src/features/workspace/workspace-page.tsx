@@ -36,10 +36,13 @@ export function WorkspacePage(props: WorkspacePageProps) {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
   const mapName = useWorkspaceStore((state) => state.mapName);
+  const currentCity = useWorkspaceStore((state) => state.city);
   const currentStyle = useWorkspaceStore((state) => state.style);
   const selectedCommentIds = useWorkspaceStore((state) => state.selectedCommentIds);
   const initialize = useWorkspaceStore((state) => state.initialize);
   const setMapName = useWorkspaceStore((state) => state.setMapName);
+  const setCity = useWorkspaceStore((state) => state.setCity);
+  const setStyle = useWorkspaceStore((state) => state.setStyle);
   const toggleComment = useWorkspaceStore((state) => state.toggleComment);
   const selectAll = useWorkspaceStore((state) => state.selectAll);
 
@@ -56,19 +59,23 @@ export function WorkspacePage(props: WorkspacePageProps) {
     () => props.rawDataset.reviews.reduce((sum, review) => sum + review.attachments.length, 0),
     [props.rawDataset.reviews],
   );
+  const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
   const stylePreview = stylePreviewMap[currentStyle] ?? stylePreviewMap["young-cartoon"];
 
   async function handleGenerate() {
     try {
+      const trimmedMapName = mapName.trim();
+      const trimmedCity = currentCity.trim();
+
       setSubmitting(true);
       setError("");
       const response = await fetch("/api/maps/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mapName,
-          city: "广州",
-          style: "young-cartoon",
+          mapName: trimmedMapName,
+          city: trimmedCity,
+          style: currentStyle,
           selectedCommentIds,
         }),
       });
@@ -121,13 +128,36 @@ export function WorkspacePage(props: WorkspacePageProps) {
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               />
             </label>
+            <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
+              目的地
+              <input
+                value={currentCity}
+                onChange={(event) => setCity(event.target.value)}
+                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
+              />
+            </label>
+            <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">
+              当前 demo 仍基于广州素材源，修改目的地会影响生成文案与地图元数据，不会切换底层评论数据。
+            </p>
+            <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
+              风格
+              <select
+                value={currentStyle}
+                onChange={(event) => setStyle(event.target.value)}
+                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
+              >
+                {Object.entries(stylePreviewMap).map(([styleKey, option]) => (
+                  <option key={styleKey} value={styleKey}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {[
-              { label: "目的地", value: "广州" },
-              { label: "风格", value: stylePreview.label },
-              { label: "样本评论", value: `${props.rawDataset.reviews.length} 条` },
+              { label: "选中评论数", value: selectedSummary },
               { label: "本地图片", value: `${totalPictures} 张` },
             ].map((item) => (
               <div
@@ -187,8 +217,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
               </p>
             </div>
             <p className="text-sm text-[var(--text-muted)]">
-              已选 <span className="font-semibold text-[var(--text-strong)]">{selectedCommentIds.length}</span> /{" "}
-              {props.rawDataset.reviews.length}
+              已选 <span className="font-semibold text-[var(--text-strong)]">{selectedSummary}</span>
             </p>
           </div>
 
@@ -262,7 +291,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={submitting || !selectedCommentIds.length}
+              disabled={submitting || !selectedCommentIds.length || !mapName.trim() || !currentCity.trim()}
               className="inline-flex items-center justify-center gap-2 self-end rounded-full bg-[var(--accent-primary)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
             >
               {submitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}

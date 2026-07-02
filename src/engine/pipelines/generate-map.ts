@@ -6,7 +6,13 @@ import {
   type MapRecord,
   type RunTrace,
 } from "@/src/contracts/domain";
-import { demoConfig, promptLibrary } from "@/src/config/demo";
+import {
+  buildLandmarkPrompt,
+  buildPosterPrompt,
+  buildRegeneratePosterPrompt,
+  buildRouteMarkdownPrompt,
+  getStylePreset,
+} from "@/src/engine/prompts";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { preprocessDataset } from "@/src/engine/preprocess/part1";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
@@ -34,6 +40,18 @@ type GenerateMapInput = {
   style: string;
   selectedCommentIds?: string[];
 };
+
+function buildRunInputSummary(params: {
+  mapName: string;
+  city: string;
+  selectedCommentCount: number;
+}) {
+  return {
+    mapName: params.mapName,
+    city: params.city,
+    selectedCommentCount: params.selectedCommentCount,
+  };
+}
 
 function extractJsonArray(text: string) {
   const start = text.indexOf("[");
@@ -84,17 +102,12 @@ async function ensureEvents() {
 }
 
 async function generateKnowledge(city: string) {
-  const system = promptLibrary.p1System;
-  const user = [
-    `请基于公开、非敏感信息，列出 ${city} 最具代表性的地标与景点。`,
-    "按知名度排序，输出 8 到 12 个。",
-    '每个对象包含 name 和 visual 两个字段，严格输出 JSON 数组。',
-  ].join("\n");
+  const prompt = buildLandmarkPrompt(city);
 
   const content = await runDoubaoChat(
     [
-      { role: "system", content: system },
-      { role: "user", content: user },
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user },
     ],
     0.2,
   );
@@ -103,90 +116,49 @@ async function generateKnowledge(city: string) {
 }
 
 async function generateRouteMarkdown(params: {
-  mapName: string;
-  city: string;
-  styleLabel: string;
   events: EventRecord[];
 }) {
-  const prompt = [
-    "请把下面事件列表整理成 route.md。",
-    "要求：先按 day 升序，再按 time 升序；输出 YAML front matter 与 Day/Event 分层；每个 event 都要有 event标志生图提示。",
-    JSON.stringify(params.events, null, 2),
-  ].join("\n\n");
+  const prompt = buildRouteMarkdownPrompt({
+    events: params.events,
+  });
 
   return runDoubaoChat(
     [
-      { role: "system", content: promptLibrary.p2System },
-      { role: "user", content: prompt },
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user },
     ],
     0.2,
   );
-}
-
-function buildPosterPrompt(params: {
-  mapName: string;
-  city: string;
-  styleLabel: string;
-  events: EventRecord[];
-  knowledge: Landmark[];
-  instruction?: string;
-  basedOnExistingImage?: boolean;
-}) {
-  const safePointLabel = (event: EventRecord) => {
-    const name = event.poiName.replace(/\(.*?\)/g, "").trim();
-
-    if (/(按摩|spa|足疗)/i.test(event.poiName)) {
-      return "舒缓放松站";
-    }
-
-    if (/(酒吧|啤酒)/i.test(event.poiName) || /(酒吧|清吧)/.test(event.categoryL2 + event.categoryL3)) {
-      return "夜间氛围站";
-    }
-
-    if (/(酒店|宾馆|万豪)/i.test(event.poiName)) {
-      return "住宿休整站";
-    }
-
-    return name.slice(0, 18);
-  };
-
-  const base = [
-    promptLibrary.common,
-    promptLibrary.youngCartoon,
-    `城市：${params.city}`,
-    `地图名称：${params.mapName}`,
-    `路线点位：${params.events
-      .map((event, index) => `${index + 1}. ${safePointLabel(event)} / ${event.time}`)
-      .join("；")}`,
-    `城市地标参考：${params.knowledge
-      .slice(0, 6)
-      .map((item) => `${item.name}（${item.visual}）`)
-      .join("；")}`,
-    "不要在画面中输出可能触发内容审核的成人或酒精字样；若存在此类点位，请用中性旅行标签表达。",
-  ];
-
-  if (params.instruction) {
-    base.push(
-      params.basedOnExistingImage
-        ? `请尽量保留原有整体构图，只按这条意见调整：${params.instruction}`
-        : `请按这条意见重新组织画面：${params.instruction}`,
-    );
-  }
-
-  return base.join("\n");
 }
 
 async function writePosterFile(params: {
   mapId: string;
   mapName: string;
   city: string;
-  styleLabel: string;
+  styleKey: string;
   events: EventRecord[];
   knowledge: Landmark[];
   instruction?: string;
   basedOnExistingImage?: boolean;
 }) {
   const prompt = buildPosterPrompt(params);
+  const image = await runSeedreamImage(prompt);
+  const outputPath = posterOutputPath(params.mapId, "png");
+  await writeBinaryFile(outputPath, image);
+  return posterPublicPath(params.mapId, "png");
+}
+
+async function writeRegeneratedPosterFile(params: {
+  mapId: string;
+  mapName: string;
+  city: string;
+  styleKey: string;
+  events: EventRecord[];
+  knowledge: Landmark[];
+  instruction: string;
+  basedOnExistingImage: boolean;
+}) {
+  const prompt = buildRegeneratePosterPrompt(params);
   const image = await runSeedreamImage(prompt);
   const outputPath = posterOutputPath(params.mapId, "png");
   await writeBinaryFile(outputPath, image);
@@ -211,6 +183,13 @@ export async function generateMapDraft(input: GenerateMapInput) {
     throw new Error("没有可用于生成地图的事件");
   }
 
+  const stylePreset = getStylePreset(input.style);
+  const inputSummary = buildRunInputSummary({
+    mapName: input.mapName,
+    city: input.city,
+    selectedCommentCount: selectedEvents.length,
+  });
+
   let knowledge: Landmark[];
   try {
     knowledge = await generateKnowledge(input.city);
@@ -223,9 +202,6 @@ export async function generateMapDraft(input: GenerateMapInput) {
   let routeMarkdown: string;
   try {
     routeMarkdown = await generateRouteMarkdown({
-      mapName: input.mapName,
-      city: input.city,
-      styleLabel: demoConfig.styleLabel,
       events: selectedEvents,
     });
   } catch (error) {
@@ -234,7 +210,7 @@ export async function generateMapDraft(input: GenerateMapInput) {
     routeMarkdown = createDeterministicRouteMarkdown({
       mapName: input.mapName,
       city: input.city,
-      styleLabel: demoConfig.styleLabel,
+      styleLabel: stylePreset.label,
       events: selectedEvents,
       knowledge,
     });
@@ -249,7 +225,7 @@ export async function generateMapDraft(input: GenerateMapInput) {
       mapId,
       mapName: input.mapName,
       city: input.city,
-      styleLabel: demoConfig.styleLabel,
+      styleKey: input.style,
       events: selectedEvents,
       knowledge,
     });
@@ -259,7 +235,7 @@ export async function generateMapDraft(input: GenerateMapInput) {
     const svg = createFallbackPosterSvg({
       mapName: input.mapName,
       city: input.city,
-      styleLabel: demoConfig.styleLabel,
+      styleLabel: stylePreset.label,
       events: selectedEvents,
     });
     await writeTextFile(posterOutputPath(mapId, "svg"), svg);
@@ -300,6 +276,8 @@ export async function generateMapDraft(input: GenerateMapInput) {
     mapId,
     status: "completed",
     stage: "generate",
+    styleKey: input.style,
+    inputSummary,
     warnings,
     artifacts: {
       rawPath: "/mock/raw/guangzhou.raw.json",
@@ -334,24 +312,30 @@ export async function regenerateMapDraft(params: {
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
   const knowledge = fallbackKnowledge(params.mapRecord.city);
+  const stylePreset = getStylePreset(params.mapRecord.style);
+  const inputSummary = buildRunInputSummary({
+    mapName: params.mapRecord.mapName,
+    city: params.mapRecord.city,
+    selectedCommentCount: params.events.length,
+  });
 
   const routeMarkdown =
     (await getRouteMarkdown(params.mapRecord.mapId)) ??
     createDeterministicRouteMarkdown({
       mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
-      styleLabel: demoConfig.styleLabel,
+      styleLabel: stylePreset.label,
       events: params.events,
       knowledge,
     });
 
   let posterPath: string;
   try {
-    posterPath = await writePosterFile({
+    posterPath = await writeRegeneratedPosterFile({
       mapId: params.mapRecord.mapId,
       mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
-      styleLabel: demoConfig.styleLabel,
+      styleKey: params.mapRecord.style,
       events: params.events,
       knowledge,
       instruction: params.instruction,
@@ -363,7 +347,7 @@ export async function regenerateMapDraft(params: {
     const svg = createFallbackPosterSvg({
       mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
-      styleLabel: demoConfig.styleLabel,
+      styleLabel: stylePreset.label,
       events: params.events,
     });
     await writeTextFile(posterOutputPath(params.mapRecord.mapId, "svg"), svg);
@@ -398,6 +382,8 @@ export async function regenerateMapDraft(params: {
     stage: "regenerate",
     basedOnExistingImage: params.basedOnExistingImage,
     promptInstruction: params.instruction,
+    styleKey: params.mapRecord.style,
+    inputSummary,
     warnings,
     artifacts: {
       routePath: `/mock/routes/${params.mapRecord.mapId}.route.md`,

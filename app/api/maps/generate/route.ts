@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { supportedStyleKeys } from "@/src/engine/prompts";
 import { generateMapDraft } from "@/src/engine/pipelines/generate-map";
 
 export const dynamic = "force-dynamic";
 
 const requestSchema = z.object({
-  mapName: z.string().min(1, "地图名称不能为空"),
-  city: z.string().min(1),
-  style: z.string().min(1),
+  mapName: z.string().trim().min(1, "地图名称不能为空"),
+  city: z.string().trim().min(1, "目的地不能为空"),
+  style: z.enum(supportedStyleKeys),
   selectedCommentIds: z.array(z.string()).min(1, "至少选择 1 条评论"),
 });
 
