@@ -1,0 +1,17 @@
+{
+  "runId": "run_20260701201645_7cqo",
+  "mapId": "map_gz_1782908205342",
+  "status": "completed",
+  "stage": "generate",
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/guangzhou.raw.json",
+    "eventsPath": "/mock/events/guangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1782908205342.route.md",
+    "posterPath": "/mock/posters/map_gz_1782908205342.png",
+    "mapPath": "/mock/maps/map_gz_1782908205342.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-01T12:16:45.342Z",
+  "endedAt": "2026-07-01T12:18:13.321Z"
+}
