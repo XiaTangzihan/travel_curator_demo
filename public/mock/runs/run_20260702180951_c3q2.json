@@ -1,0 +1,23 @@
+{
+  "runId": "run_20260702180951_c3q2",
+  "mapId": "map_gz_1782986991794",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "storybook",
+  "inputSummary": {
+    "mapName": "广州两日行",
+    "city": "广州",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/guangzhou.raw.json",
+    "eventsPath": "/mock/events/guangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1782986991794.route.md",
+    "posterPath": "/mock/posters/map_gz_1782986991794.png",
+    "mapPath": "/mock/maps/map_gz_1782986991794.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-02T10:09:51.794Z",
+  "endedAt": "2026-07-02T10:12:56.470Z"
+}
