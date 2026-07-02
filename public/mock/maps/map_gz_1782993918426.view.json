@@ -1,0 +1,212 @@
+{
+  "mapId": "map_gz_1782993918426",
+  "mapName": "phase4-storybook-utf8",
+  "city": "广州",
+  "style": "storybook",
+  "posterPath": "/mock/posters/map_gz_1782993918426.png",
+  "routeMarkdown": "---\nmap_name: phase4-storybook-utf8\ncity: 广州\nstyle: 治愈绘本插画风\ndays: 1\nevent_count: 4\nknowledge_count: 10\n---\n\n# Day 1 (2024:06:01)\n\n## Event 1 · 粒上皇\n- sequence: 1\n- poi: 粒上皇(叠景路店)\n- short_name: 粒上皇\n- 类目: 购物 / 食品/滋补品 / 零食\n- 文案: 口味一般，不太好剥，最后超了几毛钱还让我补🌚\n- 配图: /mock/files/comments/recvo6qYsKDxqV_1.jpg\n- event标志生图提示: 粒上皇 / 零食 / 食品/滋补品 / \n\n## Event 2 · 财记炭炉鸡锅\n- sequence: 2\n- poi: 财记炭炉鸡锅(龙洞店)\n- short_name: 财记炭炉鸡锅\n- 类目: 美食 / 火锅 / 特色火锅\n- 文案: 味道还不错，尤其是方便面煮下去很入味!两个人吃不完，服务员会主动加汤，这家生意还不错，人很多……整体性价比很高🙊\n- 配图: /mock/files/comments/recvo6qYsKSGnI_1.jpeg\n- event标志生图提示: 财记炭炉鸡锅 / 特色火锅 / 火锅 /\n\n## Event 3 · 幻境空间\n- sequence: 3\n- poi: 幻境空间·超级元宇宙(广州旗舰店)\n- short_name: 幻境空间\n- 类目: 休闲娱乐 / 新奇体验 / 新奇体验\n- 文案: 重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性价比一般吧\n- 配图: /mock/files/comments/recvo6qYsKNAme_1.jpeg\n- event标志生图提示: 幻境空间 / 新奇体验 / 新奇体验 /\n\n## Event 4 · 华记煲仔华\n- sequence: 4\n- poi: 华记煲仔华·煲仔饭(万胜围店)\n- short_name: 华记煲仔华\n- 类目: 美食 / 快餐小吃 / 快餐\n- 文案: 路边上位置很好找，整个店很大，宽敞明亮。选的是鲜沙姜鸡拼盐焗鸡肾煲仔饭+椰子汤，下雨天吃的感觉很不错，整体味道可以自己通过专用酱油加减调节\n- 配图: /mock/files/comments/recvo6qYsLYCir_1.jpeg\n- event标志生图提示: 华记煲仔华 / 快餐 / 快餐小吃 / \n",
+  "selectedEventId": "evt_001",
+  "generatedAt": "2026-07-02T12:05:59.249Z",
+  "knowledge": [
+    {
+      "name": "广州塔",
+      "visual": "整体呈纤细收腰的流线型镂空钢结构，夜间变换七彩灯光，临江矗立是广州天际线最醒目的制高点，俗称“小蛮腰”"
+    },
+    {
+      "name": "白云山风景名胜区",
+      "visual": "层峦叠翠的南粤名山，山间林木葱郁，摩星岭观景台可俯瞰整座广州城，常有云雾缠绕山腰"
+    },
+    {
+      "name": "陈家祠（陈氏书院）",
+      "visual": "典型岭南传统宗祠建筑，镬耳式灰瓦大屋顶遍布陶塑、灰塑、砖雕、石雕装饰，三进院落满是精巧传统纹样"
+    },
+    {
+      "name": "沙面岛",
+      "visual": "珠江边的欧陆风情历史街区，遍布百年前的哥特式、新古典主义洋楼，沿街种植大榕树，保留近代历史风貌"
+    },
+    {
+      "name": "南越王博物院（王墓展区）",
+      "visual": "依托西汉南越王赵眜墓修建的遗址类博物馆，场馆以青灰色石材打造，展出丝缕玉衣等珍贵出土文物"
+    },
+    {
+      "name": "长隆旅游度假区",
+      "visual": "集主题乐园、野生动物园区为一体的大型文旅集群，园区色彩鲜亮活泼，拥有全球规模领先的野生动物自驾观赏区"
+    },
+    {
+      "name": "北京路文化旅游区",
+      "visual": "广州千年商街，路面保留有唐宋至明清的古遗址层，沿街是骑楼商铺与现代商业结合的风貌，常年人流密集"
+    },
+    {
+      "name": "五羊石像",
+      "visual": "坐落于越秀公园内的巨型花岗岩雕塑，五只姿态各异的神羊衔穗而立，是广州“羊城”别称的标志性符号"
+    },
+    {
+      "name": "花城广场",
+      "visual": "珠江新城核心城市中轴广场，周围环绕广州大剧院、广东省博物馆等现代公建，正对广州塔，是城市核心景观带"
+    },
+    {
+      "name": "光孝寺",
+      "visual": "广州历史最悠久的佛教寺院，保留东晋至明清的古建遗存，大雄宝殿隐于百年古榕之间，是岭南佛教文化的核心地标"
+    }
+  ],
+  "nodes": [
+    {
+      "eventId": "evt_001",
+      "day": "2024:06:01",
+      "time": "10:20:00",
+      "title": "粒上皇(叠景路店)",
+      "excerpt": "口味一般，不太好剥，最后超了几毛钱还让我补🌚",
+      "thumbnail": "/mock/files/comments/recvo6qYsKDxqV_1.jpg"
+    },
+    {
+      "eventId": "evt_002",
+      "day": "2024:06:01",
+      "time": "11:48:00",
+      "title": "财记炭炉鸡锅(龙洞店)",
+      "excerpt": "味道还不错，尤其是方便面煮下去很入味!两个人吃不完，服务员会主动加汤，这家生意还不错，人很多……...",
+      "thumbnail": "/mock/files/comments/recvo6qYsKSGnI_1.jpeg"
+    },
+    {
+      "eventId": "evt_003",
+      "day": "2024:06:01",
+      "time": "12:50:00",
+      "title": "幻境空间·超级元宇宙(广州旗舰店)",
+      "excerpt": "重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性...",
+      "thumbnail": "/mock/files/comments/recvo6qYsKNAme_1.jpeg"
+    },
+    {
+      "eventId": "evt_004",
+      "day": "2024:06:01",
+      "time": "17:44:00",
+      "title": "华记煲仔华·煲仔饭(万胜围店)",
+      "excerpt": "路边上位置很好找，整个店很大，宽敞明亮。选的是鲜沙姜鸡拼盐焗鸡肾煲仔饭+椰子汤，下雨天吃的感觉很...",
+      "thumbnail": "/mock/files/comments/recvo6qYsLYCir_1.jpeg"
+    }
+  ],
+  "events": [
+    {
+      "eventId": "evt_001",
+      "commentId": "recvo6qYsKDxqV",
+      "day": "2024:06:01",
+      "time": "10:20:00",
+      "commentText": "口味一般，不太好剥，最后超了几毛钱还让我补🌚",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/recvo6qYsKDxqV_1.jpg",
+          "name": "gz_01_1.jpg"
+        }
+      ],
+      "poiName": "粒上皇(叠景路店)",
+      "poiLocation": "叠景路193号101铺之一",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "海珠区",
+      "categoryL1": "购物",
+      "categoryL2": "食品/滋补品",
+      "categoryL3": "零食",
+      "authorName": "旅行者小夏",
+      "sequence": 1,
+      "canonicalName": "粒上皇(叠景路店)",
+      "shortName": "粒上皇"
+    },
+    {
+      "eventId": "evt_002",
+      "commentId": "recvo6qYsKSGnI",
+      "day": "2024:06:01",
+      "time": "11:48:00",
+      "commentText": "味道还不错，尤其是方便面煮下去很入味!两个人吃不完，服务员会主动加汤，这家生意还不错，人很多……整体性价比很高🙊",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/recvo6qYsKSGnI_1.jpeg",
+          "name": "20240601_1148_2_369d76388c7e61120ce49c1ba31f4743.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/recvo6qYsKSGnI_2.jpeg",
+          "name": "20240601_1148_1_1fed2f94ace9f029c726c2f6408ba108.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/recvo6qYsKSGnI_3.jpg",
+          "name": "gz_02_3.jpg"
+        }
+      ],
+      "poiName": "财记炭炉鸡锅(龙洞店)",
+      "poiLocation": "迎龙路163号B5-4181号",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "天河区",
+      "categoryL1": "美食",
+      "categoryL2": "火锅",
+      "categoryL3": "特色火锅",
+      "authorName": "旅行者小夏",
+      "sequence": 2,
+      "canonicalName": "财记炭炉鸡锅(龙洞店)",
+      "shortName": "财记炭炉鸡锅"
+    },
+    {
+      "eventId": "evt_003",
+      "commentId": "recvo6qYsKNAme",
+      "day": "2024:06:01",
+      "time": "12:50:00",
+      "commentText": "重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性价比一般吧",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/recvo6qYsKNAme_1.jpeg",
+          "name": "20240601_1250_1_8ac2e71dfa051bce9d4f1a15b8b4d725.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/recvo6qYsKNAme_2.jpeg",
+          "name": "20240601_1250_2_dbed12025ea7429a477c957161da0af8.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/recvo6qYsKNAme_3.jpg",
+          "name": "gz_03_3.jpg"
+        }
+      ],
+      "poiName": "幻境空间·超级元宇宙(广州旗舰店)",
+      "poiLocation": "体育西路54号北段星之光潮领地1A005铺(体育西路地铁站E出口北300米)",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "天河区",
+      "categoryL1": "休闲娱乐",
+      "categoryL2": "新奇体验",
+      "categoryL3": "新奇体验",
+      "authorName": "旅行者小夏",
+      "sequence": 3,
+      "canonicalName": "幻境空间·超级元宇宙(广州旗舰店)",
+      "shortName": "幻境空间"
+    },
+    {
+      "eventId": "evt_004",
+      "commentId": "recvo6qYsLYCir",
+      "day": "2024:06:01",
+      "time": "17:44:00",
+      "commentText": "路边上位置很好找，整个店很大，宽敞明亮。选的是鲜沙姜鸡拼盐焗鸡肾煲仔饭+椰子汤，下雨天吃的感觉很不错，整体味道可以自己通过专用酱油加减调节",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/recvo6qYsLYCir_1.jpeg",
+          "name": "20240601_1744_2_da12f536803825de9ae3326e7dccac46.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/recvo6qYsLYCir_2.jpeg",
+          "name": "20240601_1744_1_b9fdc3d985c168a466842c6a0c259a98.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/recvo6qYsLYCir_3.jpg",
+          "name": "gz_04_3.jpg"
+        }
+      ],
+      "poiName": "华记煲仔华·煲仔饭(万胜围店)",
+      "poiLocation": "暄悦西街8号1012铺1013铺1014铺",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "海珠区",
+      "categoryL1": "美食",
+      "categoryL2": "快餐小吃",
+      "categoryL3": "快餐",
+      "authorName": "旅行者小夏",
+      "sequence": 4,
+      "canonicalName": "华记煲仔华·煲仔饭(万胜围店)",
+      "shortName": "华记煲仔华"
+    }
+  ]
+}
