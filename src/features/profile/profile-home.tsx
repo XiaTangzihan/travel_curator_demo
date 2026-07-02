@@ -1,6 +1,10 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, CheckSquare, LoaderCircle, Trash2, X } from "lucide-react";
 import type { MapRecord } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { StatusPill } from "@/src/components/status-pill";
@@ -11,7 +15,60 @@ type ProfileHomeProps = {
 };
 
 export function ProfileHome(props: ProfileHomeProps) {
-  const totalFootprints = props.maps.reduce((sum, map) => sum + map.eventCount, 0);
+  const router = useRouter();
+  const totalFootprints = useMemo(
+    () => props.maps.reduce((sum, map) => sum + map.eventCount, 0),
+    [props.maps],
+  );
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedMapIds, setSelectedMapIds] = useState<string[]>([]);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
+
+  function toggleMapSelection(mapId: string) {
+    setSelectedMapIds((current) =>
+      current.includes(mapId) ? current.filter((id) => id !== mapId) : [...current, mapId],
+    );
+  }
+
+  function exitSelectionMode() {
+    setSelectionMode(false);
+    setSelectedMapIds([]);
+    setError("");
+  }
+
+  async function handleDeleteSelected() {
+    if (!selectedMapIds.length) {
+      return;
+    }
+
+    const confirmed = window.confirm(`确认删除选中的 ${selectedMapIds.length} 张地图吗？删除后无法恢复。`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+      const response = await fetch("/api/maps", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mapIds: selectedMapIds }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "批量删除失败");
+      }
+
+      exitSelectionMode();
+      router.refresh();
+    } catch (requestError) {
+      setError((requestError as Error).message);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <SiteShell
@@ -20,15 +77,53 @@ export function ProfileHome(props: ProfileHomeProps) {
       description="把一次次出发整理成可以回看的路线、地图和画面。"
       activeHref="/"
       actions={
-        <Link
-          href="/workspace"
-          className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
-        >
-          进入工作台
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <>
+          {selectionMode ? (
+            <>
+              <button
+                type="button"
+                onClick={exitSelectionMode}
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
+              >
+                <X className="h-4 w-4" />
+                取消选择
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                disabled={deleting || !selectedMapIds.length}
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
+              >
+                {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                删除选中 ({selectedMapIds.length})
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSelectionMode(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
+            >
+              <CheckSquare className="h-4 w-4" />
+              批量删除
+            </button>
+          )}
+          <Link
+            href="/workspace"
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
+          >
+            进入工作台
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </>
       }
     >
+      {error ? (
+        <div className="mb-6 rounded-[24px] bg-[var(--danger-tint)] px-5 py-4 text-sm text-[var(--danger-ink)]">
+          {error}
+        </div>
+      ) : null}
+
       <section className="mb-8 rounded-[32px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)] sm:p-8">
         <div className="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -69,41 +164,93 @@ export function ProfileHome(props: ProfileHomeProps) {
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {props.maps.length ? (
           props.maps.map((map) => (
-            <Link
-              key={map.mapId}
-              href={`/maps/${map.mapId}`}
-              className="group overflow-hidden rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-soft)] transition hover:-translate-y-1"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
-                {map.posterPath ? (
-                  <Image
-                    src={map.posterPath}
-                    alt={map.mapName}
-                    fill
-                    unoptimized
-                    className="object-cover transition duration-500 group-hover:scale-[1.04]"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-end bg-[linear-gradient(135deg,#f4e7d8,#e6d6c3)] p-6">
-                    <p className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
-                      {map.city}
-                    </p>
+            selectionMode ? (
+              <button
+                type="button"
+                key={map.mapId}
+                onClick={() => toggleMapSelection(map.mapId)}
+                className={`group overflow-hidden rounded-[28px] border bg-[var(--bg-surface)] text-left shadow-[var(--shadow-soft)] transition hover:-translate-y-1 ${
+                  selectedMapIds.includes(map.mapId)
+                    ? "border-[var(--accent-primary)]"
+                    : "border-[color:var(--line-subtle)]"
+                }`}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
+                  {map.posterPath ? (
+                    <Image
+                      src={map.posterPath}
+                      alt={map.mapName}
+                      fill
+                      unoptimized
+                      className="object-cover transition duration-500 group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-end bg-[linear-gradient(135deg,#f4e7d8,#e6d6c3)] p-6">
+                      <p className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                        {map.city}
+                      </p>
+                    </div>
+                  )}
+                  <span
+                    className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-medium ${
+                      selectedMapIds.includes(map.mapId)
+                        ? "bg-[var(--accent-primary)] text-white"
+                        : "bg-white/92 text-[var(--text-strong)]"
+                    }`}
+                  >
+                    {selectedMapIds.includes(map.mapId) ? "已选中" : "点击选择"}
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgba(32,27,23,0.58))] p-5 text-white">
+                    <p className="text-xs tracking-[0.16em] text-white/76">{map.city}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-[-0.04em]">{map.mapName}</p>
                   </div>
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgba(32,27,23,0.58))] p-5 text-white">
-                  <p className="text-xs tracking-[0.16em] text-white/76">{map.city}</p>
-                  <p className="mt-2 text-2xl font-semibold tracking-[-0.04em]">{map.mapName}</p>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between gap-3 p-5">
-                <div>
-                  <p className="text-base font-semibold text-[var(--text-strong)]">{map.mapName}</p>
-                  <p className="mt-1 text-sm text-[var(--text-muted)]">{map.eventCount} 个足迹</p>
+                <div className="flex items-center justify-between gap-3 p-5">
+                  <div>
+                    <p className="text-base font-semibold text-[var(--text-strong)]">{map.mapName}</p>
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">{map.eventCount} 个足迹</p>
+                  </div>
+                  <StatusPill status={map.status} />
                 </div>
-                <StatusPill status={map.status} />
-              </div>
-            </Link>
+              </button>
+            ) : (
+              <Link
+                key={map.mapId}
+                href={`/maps/${map.mapId}`}
+                className="group overflow-hidden rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-soft)] transition hover:-translate-y-1"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
+                  {map.posterPath ? (
+                    <Image
+                      src={map.posterPath}
+                      alt={map.mapName}
+                      fill
+                      unoptimized
+                      className="object-cover transition duration-500 group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-end bg-[linear-gradient(135deg,#f4e7d8,#e6d6c3)] p-6">
+                      <p className="text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                        {map.city}
+                      </p>
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,transparent,rgba(32,27,23,0.58))] p-5 text-white">
+                    <p className="text-xs tracking-[0.16em] text-white/76">{map.city}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-[-0.04em]">{map.mapName}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 p-5">
+                  <div>
+                    <p className="text-base font-semibold text-[var(--text-strong)]">{map.mapName}</p>
+                    <p className="mt-1 text-sm text-[var(--text-muted)]">{map.eventCount} 个足迹</p>
+                  </div>
+                  <StatusPill status={map.status} />
+                </div>
+              </Link>
+            )
           ))
         ) : (
           <article className="col-span-full rounded-[28px] border border-dashed border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-6 py-10 text-center">
