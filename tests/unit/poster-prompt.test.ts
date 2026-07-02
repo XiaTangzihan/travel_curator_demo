@@ -38,10 +38,13 @@ describe("buildPosterPrompt", () => {
     });
 
     expect(prompt).toContain("1. 金元泰");
-    expect(prompt).toContain("原名「金元泰·泰式按摩·SPA(丽影广场客村店)」");
+    expect(prompt).toContain("1号点固定展示名「金元泰」");
+    expect(prompt).toContain("style_ref_young_cartoon_20260702");
     expect(prompt).toContain("修长塔身与夜景灯光");
     expect(prompt).not.toContain("10:20:00");
     expect(prompt).not.toContain("广州塔（");
+    expect(prompt).not.toContain("SPA(丽影广场客村店)");
     expect(prompt).toContain("不要输出这些地标的名字文字");
+    expect(prompt).toContain("不能保留杭州字样");
   });
 });

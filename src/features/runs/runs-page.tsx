@@ -87,6 +87,9 @@ export function RunsPage(props: RunsPageProps) {
                     <p className="text-sm leading-7 text-[var(--text-muted)]">
                       风格键：{selectedRun.styleKey ?? "未记录"}
                     </p>
+                    <p className="text-sm leading-7 text-[var(--text-muted)]">
+                      Prompt 版本：{selectedRun.promptVersion ?? "未记录"}
+                    </p>
                   </div>
                   <StatusPill status={selectedRun.status} />
                 </div>
@@ -131,6 +134,12 @@ export function RunsPage(props: RunsPageProps) {
                       当前 run 还没有输入摘要。
                     </p>
                   )}
+                </article>
+                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
+                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">风格参考图</p>
+                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+                    {selectedRun.referenceIds?.length ? selectedRun.referenceIds.join("；") : "当前 run 还没有参考图留痕。"}
+                  </p>
                 </article>
               </div>
 

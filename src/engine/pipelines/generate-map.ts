@@ -31,7 +31,7 @@ import {
   saveRouteMarkdown,
   saveRunTrace,
 } from "@/src/server/repositories/demo-repository";
-import { writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
+import { fromPublicPath, writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
 
 type GenerateMapInput = {
   mapName: string;
@@ -139,13 +139,17 @@ async function writePosterFile(params: {
   mapName: string;
   city: string;
   styleKey: string;
+  referenceImagePaths: string[];
   events: EventRecord[];
   knowledge: Landmark[];
   instruction?: string;
   basedOnExistingImage?: boolean;
 }) {
   const prompt = buildPosterPrompt(params);
-  const image = await runSeedreamImage(prompt);
+  const image = await runSeedreamImage({
+    prompt,
+    images: params.referenceImagePaths,
+  });
   const outputPath = posterOutputPath(params.mapId, "png");
   await writeBinaryFile(outputPath, image);
   return posterPublicPath(params.mapId, "png");
@@ -156,13 +160,17 @@ async function writeRegeneratedPosterFile(params: {
   mapName: string;
   city: string;
   styleKey: string;
+  referenceImagePaths: string[];
   events: EventRecord[];
   knowledge: Landmark[];
   instruction: string;
   basedOnExistingImage: boolean;
 }) {
   const prompt = buildRegeneratePosterPrompt(params);
-  const image = await runSeedreamImage(prompt);
+  const image = await runSeedreamImage({
+    prompt,
+    images: params.referenceImagePaths,
+  });
   const outputPath = posterOutputPath(params.mapId, "png");
   await writeBinaryFile(outputPath, image);
   return posterPublicPath(params.mapId, "png");
@@ -189,6 +197,7 @@ export async function generateMapDraft(input: GenerateMapInput) {
   }
 
   const stylePreset = getStylePreset(input.style);
+  const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
   const inputSummary = buildRunInputSummary({
     mapName: input.mapName,
     city: input.city,
@@ -222,6 +231,7 @@ export async function generateMapDraft(input: GenerateMapInput) {
       mapName: input.mapName,
       city: input.city,
       styleKey: input.style,
+      referenceImagePaths,
       events: selectedEvents,
       knowledge,
     });
@@ -273,6 +283,8 @@ export async function generateMapDraft(input: GenerateMapInput) {
     status: "completed",
     stage: "generate",
     styleKey: input.style,
+    promptVersion: stylePreset.promptVersion,
+    referenceIds: [stylePreset.referenceId],
     inputSummary,
     warnings,
     artifacts: {
@@ -310,6 +322,7 @@ export async function regenerateMapDraft(params: {
   const knowledge = fallbackKnowledge(params.mapRecord.city);
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
+  const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
   const inputSummary = buildRunInputSummary({
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
@@ -332,6 +345,7 @@ export async function regenerateMapDraft(params: {
       mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
       styleKey: params.mapRecord.style,
+      referenceImagePaths,
       events,
       knowledge,
       instruction: params.instruction,
@@ -379,6 +393,8 @@ export async function regenerateMapDraft(params: {
     basedOnExistingImage: params.basedOnExistingImage,
     promptInstruction: params.instruction,
     styleKey: params.mapRecord.style,
+    promptVersion: stylePreset.promptVersion,
+    referenceIds: [stylePreset.referenceId],
     inputSummary,
     warnings,
     artifacts: {

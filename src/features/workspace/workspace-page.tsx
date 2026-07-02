@@ -6,28 +6,11 @@ import { useRouter } from "next/navigation";
 import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
+import { stylePromptLibrary } from "@/src/engine/prompts";
 import { useWorkspaceStore } from "@/src/store/workspace-store";
 
 type WorkspacePageProps = {
   rawDataset: RawDatasetSnapshot;
-};
-
-const stylePreviewMap: Record<string, { label: string; description: string; image: string }> = {
-  "young-cartoon": {
-    label: "年轻卡通风",
-    description: "明亮轻快，适合把旅行内容整理成活泼、易读、适合分享的画面。",
-    image: "/ui-static/styles/young-cartoon.jpg",
-  },
-  watercolor: {
-    label: "清新水彩风",
-    description: "淡雅柔和，适合强调空气感、留白和更轻的叙事氛围。",
-    image: "/ui-static/styles/watercolor.jpg",
-  },
-  storybook: {
-    label: "治愈绘本插画风",
-    description: "温暖安静，适合更有故事感和收藏感的旅行作品。",
-    image: "/ui-static/styles/storybook.jpg",
-  },
 };
 
 export function WorkspacePage(props: WorkspacePageProps) {
@@ -60,7 +43,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
     [props.rawDataset.reviews],
   );
   const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
-  const stylePreview = stylePreviewMap[currentStyle] ?? stylePreviewMap["young-cartoon"];
+  const stylePreview = stylePromptLibrary[currentStyle as keyof typeof stylePromptLibrary] ?? stylePromptLibrary["young-cartoon"];
 
   async function handleGenerate() {
     try {
@@ -146,7 +129,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
                 onChange={(event) => setStyle(event.target.value)}
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               >
-                {Object.entries(stylePreviewMap).map(([styleKey, option]) => (
+                {Object.entries(stylePromptLibrary).map(([styleKey, option]) => (
                   <option key={styleKey} value={styleKey}>
                     {option.label}
                   </option>
@@ -190,7 +173,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
 
           <div className="overflow-hidden rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)]">
             <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-soft)]">
-              <Image src={stylePreview.image} alt={stylePreview.label} fill unoptimized className="object-cover" />
+              <Image src={stylePreview.previewImage} alt={stylePreview.label} fill unoptimized className="object-cover" />
             </div>
             <div className="p-4">
               <p className="text-sm font-medium text-[var(--text-strong)]">{stylePreview.label}</p>

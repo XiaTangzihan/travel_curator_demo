@@ -157,6 +157,8 @@ export const runTraceSchema = z.object({
   basedOnExistingImage: z.boolean().optional(),
   promptInstruction: z.string().optional(),
   styleKey: z.string().optional(),
+  promptVersion: z.string().optional(),
+  referenceIds: z.array(z.string()).optional(),
   inputSummary: runInputSummarySchema.optional(),
   warnings: z.array(z.string()),
   artifacts: runArtifactPathsSchema,

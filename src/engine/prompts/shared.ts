@@ -1,7 +1,12 @@
 export type StylePromptPreset = {
   key: string;
   label: string;
+  description: string;
+  promptVersion: string;
   prompt: string;
+  previewImage: string;
+  referenceId: string;
+  referencePublicPath: string;
 };
 
 export const commonPosterPrompt = [
