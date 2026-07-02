@@ -7,6 +7,17 @@ function excerpt(text: string) {
   return `${text.slice(0, 48)}...`;
 }
 
+function compareEventOrder(left: EventRecord, right: EventRecord) {
+  const sequenceDiff = (left.sequence ?? Number.MAX_SAFE_INTEGER) - (right.sequence ?? Number.MAX_SAFE_INTEGER);
+  if (sequenceDiff !== 0) {
+    return sequenceDiff;
+  }
+
+  const leftKey = `${left.day} ${left.time}`;
+  const rightKey = `${right.day} ${right.time}`;
+  return leftKey.localeCompare(rightKey);
+}
+
 export function buildMapViewModel(params: {
   mapId: string;
   mapName: string;
@@ -17,11 +28,7 @@ export function buildMapViewModel(params: {
   events: EventRecord[];
   knowledge: Landmark[];
 }) {
-  const events = [...params.events].sort((left, right) => {
-    const leftKey = `${left.day} ${left.time}`;
-    const rightKey = `${right.day} ${right.time}`;
-    return leftKey.localeCompare(rightKey);
-  });
+  const events = [...params.events].sort(compareEventOrder);
 
   const selectedEventId = events[0]?.eventId ?? "";
 

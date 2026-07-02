@@ -1,5 +1,5 @@
 import type { EventRecord, Landmark } from "@/src/contracts/domain";
-import { commonPosterPrompt } from "@/src/engine/prompts/shared";
+import { buildMechanicalShortName, commonPosterPrompt } from "@/src/engine/prompts/shared";
 import { getStylePreset } from "@/src/engine/prompts/styles";
 
 export type PosterPromptInput = {
@@ -12,40 +12,40 @@ export type PosterPromptInput = {
   basedOnExistingImage?: boolean;
 };
 
-function safePointLabel(event: EventRecord) {
-  const name = event.poiName.replace(/\(.*?\)/g, "").trim();
+function canonicalName(event: EventRecord) {
+  return event.canonicalName?.trim() || event.poiName.trim();
+}
 
-  if (/(按摩|spa|足疗)/i.test(event.poiName)) {
-    return "舒缓放松站";
-  }
-
-  if (/(酒吧|啤酒)/i.test(event.poiName) || /(酒吧|清吧)/.test(event.categoryL2 + event.categoryL3)) {
-    return "夜间氛围站";
-  }
-
-  if (/(酒店|宾馆|万豪)/i.test(event.poiName)) {
-    return "住宿休整站";
-  }
-
-  return name.slice(0, 18);
+function displayName(event: EventRecord) {
+  return event.shortName?.trim() || buildMechanicalShortName(canonicalName(event));
 }
 
 export function buildPosterPrompt(params: PosterPromptInput) {
   const stylePreset = getStylePreset(params.styleKey);
+  const pointOrder = params.events
+    .map((event, index) => `${event.sequence ?? index + 1}. ${displayName(event)}`)
+    .join("；");
+  const pointNameRules = params.events
+    .map(
+      (event, index) =>
+        `${event.sequence ?? index + 1}号点展示名「${displayName(event)}」对应原名「${canonicalName(event)}」`,
+    )
+    .join("；");
   const base = [
     commonPosterPrompt,
     `风格：${stylePreset.label}`,
     stylePreset.prompt,
     `城市：${params.city}`,
     `地图名称：${params.mapName}`,
-    `路线点位：${params.events
-      .map((event, index) => `${index + 1}. ${safePointLabel(event)} / ${event.time}`)
-      .join("；")}`,
-    `城市地标参考：${params.knowledge
+    `路线点位顺序：${pointOrder}`,
+    `名称约束：${pointNameRules}；画面只能使用给定展示名或其等价字符截断版，禁止改写为新的概念名称。`,
+    `背景地标视觉参考：${params.knowledge
       .slice(0, 6)
-      .map((item) => `${item.name}（${item.visual}）`)
+      .map((item) => item.visual)
       .join("；")}`,
-    "不要在画面中输出可能触发内容审核的成人或酒精字样；若存在此类点位，请用中性旅行标签表达。",
+    "路线节点必须按给定顺序连续编号，禁止重排、跳号、合并或交换顺序。",
+    "画面中不要出现任何时间信息、日期、时分秒或时间戳。",
+    "AI 补充地标只作为背景图形参考，不要输出这些地标的名字文字。",
   ];
 
   if (params.instruction) {

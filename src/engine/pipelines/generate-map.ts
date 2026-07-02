@@ -10,9 +10,9 @@ import {
   buildLandmarkPrompt,
   buildPosterPrompt,
   buildRegeneratePosterPrompt,
-  buildRouteMarkdownPrompt,
   getStylePreset,
 } from "@/src/engine/prompts";
+import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { preprocessDataset } from "@/src/engine/preprocess/part1";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
@@ -22,7 +22,6 @@ import { createMapId, createRunId } from "@/src/lib/ids";
 import {
   getEventsDataset,
   getRawDataset,
-  getRouteMarkdown,
   posterOutputPath,
   posterPublicPath,
   saveEventsDataset,
@@ -51,6 +50,26 @@ function buildRunInputSummary(params: {
     city: params.city,
     selectedCommentCount: params.selectedCommentCount,
   };
+}
+
+function compareEventOrder(left: EventRecord, right: EventRecord) {
+  const leftKey = `${left.day} ${left.time}`;
+  const rightKey = `${right.day} ${right.time}`;
+  return leftKey.localeCompare(rightKey);
+}
+
+function normalizeMapEvents(events: EventRecord[]) {
+  return [...events].sort(compareEventOrder).map((event, index) => {
+    const canonicalName = event.canonicalName?.trim() || event.poiName.trim();
+    const shortName = event.shortName?.trim() || buildMechanicalShortName(canonicalName);
+
+    return {
+      ...event,
+      sequence: index + 1,
+      canonicalName,
+      shortName,
+    };
+  });
 }
 
 function extractJsonArray(text: string) {
@@ -115,22 +134,6 @@ async function generateKnowledge(city: string) {
   return extractJsonArray(content);
 }
 
-async function generateRouteMarkdown(params: {
-  events: EventRecord[];
-}) {
-  const prompt = buildRouteMarkdownPrompt({
-    events: params.events,
-  });
-
-  return runDoubaoChat(
-    [
-      { role: "system", content: prompt.system },
-      { role: "user", content: prompt.user },
-    ],
-    0.2,
-  );
-}
-
 async function writePosterFile(params: {
   mapId: string;
   mapName: string;
@@ -173,10 +176,12 @@ export async function generateMapDraft(input: GenerateMapInput) {
   let providerMode: RunTrace["providerMode"] = "live";
 
   const eventsSnapshot = await ensureEvents();
-  const selectedEvents = eventsSnapshot.events.filter((event) =>
-    input.selectedCommentIds?.length
-      ? input.selectedCommentIds.includes(event.commentId)
-      : true,
+  const selectedEvents = normalizeMapEvents(
+    eventsSnapshot.events.filter((event) =>
+      input.selectedCommentIds?.length
+        ? input.selectedCommentIds.includes(event.commentId)
+        : true,
+    ),
   );
 
   if (!selectedEvents.length) {
@@ -199,22 +204,13 @@ export async function generateMapDraft(input: GenerateMapInput) {
     knowledge = fallbackKnowledge(input.city);
   }
 
-  let routeMarkdown: string;
-  try {
-    routeMarkdown = await generateRouteMarkdown({
-      events: selectedEvents,
-    });
-  } catch (error) {
-    providerMode = "fallback";
-    warnings.push(`P2 已回退：${(error as Error).message}`);
-    routeMarkdown = createDeterministicRouteMarkdown({
-      mapName: input.mapName,
-      city: input.city,
-      styleLabel: stylePreset.label,
-      events: selectedEvents,
-      knowledge,
-    });
-  }
+  const routeMarkdown = createDeterministicRouteMarkdown({
+    mapName: input.mapName,
+    city: input.city,
+    styleLabel: stylePreset.label,
+    events: selectedEvents,
+    knowledge,
+  });
 
   const routePath = await saveRouteMarkdown(mapId, routeMarkdown);
   const knowledgePath = await saveKnowledge(mapId, knowledge);
@@ -312,22 +308,22 @@ export async function regenerateMapDraft(params: {
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
   const knowledge = fallbackKnowledge(params.mapRecord.city);
+  const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
   const inputSummary = buildRunInputSummary({
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
-    selectedCommentCount: params.events.length,
+    selectedCommentCount: events.length,
   });
 
-  const routeMarkdown =
-    (await getRouteMarkdown(params.mapRecord.mapId)) ??
-    createDeterministicRouteMarkdown({
-      mapName: params.mapRecord.mapName,
-      city: params.mapRecord.city,
-      styleLabel: stylePreset.label,
-      events: params.events,
-      knowledge,
-    });
+  const routeMarkdown = createDeterministicRouteMarkdown({
+    mapName: params.mapRecord.mapName,
+    city: params.mapRecord.city,
+    styleLabel: stylePreset.label,
+    events,
+    knowledge,
+  });
+  await saveRouteMarkdown(params.mapRecord.mapId, routeMarkdown);
 
   let posterPath: string;
   try {
@@ -336,7 +332,7 @@ export async function regenerateMapDraft(params: {
       mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
       styleKey: params.mapRecord.style,
-      events: params.events,
+      events,
       knowledge,
       instruction: params.instruction,
       basedOnExistingImage: params.basedOnExistingImage,
@@ -348,7 +344,7 @@ export async function regenerateMapDraft(params: {
       mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
       styleLabel: stylePreset.label,
-      events: params.events,
+      events,
     });
     await writeTextFile(posterOutputPath(params.mapRecord.mapId, "svg"), svg);
     posterPath = posterPublicPath(params.mapRecord.mapId, "svg");
@@ -361,7 +357,7 @@ export async function regenerateMapDraft(params: {
     style: params.mapRecord.style,
     posterPath,
     routeMarkdown,
-    events: params.events,
+    events,
     knowledge,
   });
   await saveRenderedMap(params.mapRecord.mapId, mapViewModel);

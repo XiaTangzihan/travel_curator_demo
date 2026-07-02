@@ -53,10 +53,13 @@ export const eventPictureSchema = z.object({
 export const eventRecordSchema = z.object({
   eventId: z.string(),
   commentId: z.string(),
+  sequence: z.number().int().positive().optional(),
   day: z.string(),
   time: z.string(),
   commentText: z.string(),
   commentPictures: z.array(eventPictureSchema),
+  canonicalName: z.string().optional(),
+  shortName: z.string().optional(),
   poiName: z.string(),
   poiLocation: z.string(),
   poiProvince: z.string(),

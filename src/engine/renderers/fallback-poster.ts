@@ -33,10 +33,9 @@ export function createFallbackPosterSvg(params: {
       ({ x, y, event, index }) => `
       <g transform="translate(${x}, ${y})">
         <circle cx="24" cy="24" r="24" fill="#ff7a45" />
-        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">${index + 1}</text>
+        <text x="24" y="31" text-anchor="middle" font-size="22" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#fffdf8">${event.sequence ?? index + 1}</text>
         <rect x="60" y="-6" width="208" height="64" rx="20" fill="rgba(255,253,248,0.94)" stroke="#173F7A" stroke-width="2" />
-        <text x="76" y="20" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">${esc(event.poiName.slice(0, 18))}</text>
-        <text x="76" y="42" font-size="14" font-family="ui-monospace, Menlo, Monaco, Consolas" fill="#173F7A">${esc(`${event.day} ${event.time}`)}</text>
+        <text x="76" y="30" font-size="18" font-weight="700" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">${esc((event.shortName ?? event.poiName).slice(0, 18))}</text>
       </g>`,
     )
     .join("");
