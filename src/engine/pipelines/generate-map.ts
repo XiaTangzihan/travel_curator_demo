@@ -13,6 +13,7 @@ import {
   getStylePreset,
 } from "@/src/engine/prompts";
 import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
+import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { preprocessDataset } from "@/src/engine/preprocess/part1";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
@@ -21,6 +22,7 @@ import { createDeterministicRouteMarkdown } from "@/src/engine/renderers/route-m
 import { createMapId, createRunId } from "@/src/lib/ids";
 import {
   getEventsDataset,
+  getKnowledge,
   getRawDataset,
   posterOutputPath,
   posterPublicPath,
@@ -319,10 +321,32 @@ export async function regenerateMapDraft(params: {
   const runId = createRunId();
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
-  const knowledge = fallbackKnowledge(params.mapRecord.city);
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
-  const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
+  const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
+  let knowledge = cachedKnowledge;
+  if (!knowledge.length) {
+    providerMode = "fallback";
+    warnings.push("P1 已回退：当前地图缺少已缓存的城市地标，已使用本地兜底数据。");
+    knowledge = fallbackKnowledge(params.mapRecord.city);
+    await saveKnowledge(params.mapRecord.mapId, knowledge);
+  }
+
+  const referenceImagePublicPaths = buildRegenerateImagePublicPaths({
+    styleReferencePublicPath: stylePreset.referencePublicPath,
+    existingPosterPublicPath: params.mapRecord.posterPath,
+    basedOnExistingImage: params.basedOnExistingImage,
+  });
+  if (
+    params.basedOnExistingImage &&
+    !referenceImagePublicPaths.includes(params.mapRecord.posterPath)
+  ) {
+    warnings.push("P4 提示：当前旧底片不是 PNG/JPG/WebP，已仅使用风格参考图重绘。");
+  }
+
+  const referenceImagePaths = referenceImagePublicPaths.map((publicPath) =>
+    fromPublicPath(publicPath),
+  );
   const inputSummary = buildRunInputSummary({
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
