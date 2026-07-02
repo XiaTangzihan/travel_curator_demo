@@ -1,0 +1,15 @@
+{
+  "runId": "run_20260702145327_ke4c",
+  "mapId": "map_gz_1782974039961",
+  "status": "completed",
+  "stage": "confirm",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1782974039961.route.md",
+    "posterPath": "/mock/posters/map_gz_1782974039961.png",
+    "mapPath": "/mock/maps/map_gz_1782974039961.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-02T06:53:27.848Z",
+  "endedAt": "2026-07-02T06:53:27.848Z"
+}

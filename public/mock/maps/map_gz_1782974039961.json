@@ -3,12 +3,12 @@
   "mapName": "广州两日行",
   "city": "广州",
   "style": "young-cartoon",
-  "status": "draft",
+  "status": "confirmed",
   "eventCount": 11,
   "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1782974039961.route.md",
   "posterPath": "/mock/posters/map_gz_1782974039961.png",
   "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1782974039961.knowledge.json",
-  "currentRunId": "run_20260702143359_gjmr",
+  "currentRunId": "run_20260702145327_ke4c",
   "selectedCommentIds": [
     "recvo6qYsKDxqV",
     "recvo6qYsKSGnI",
@@ -23,5 +23,5 @@
     "recvo6qYsL0xvq"
   ],
   "createdAt": "2026-07-02T06:33:59.961Z",
-  "updatedAt": "2026-07-02T06:37:00.836Z"
+  "updatedAt": "2026-07-02T06:53:27.838Z"
 }
