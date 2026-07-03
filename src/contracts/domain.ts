@@ -53,10 +53,13 @@ export const eventPictureSchema = z.object({
 export const eventRecordSchema = z.object({
   eventId: z.string(),
   commentId: z.string(),
+  sequence: z.number().int().positive().optional(),
   day: z.string(),
   time: z.string(),
   commentText: z.string(),
   commentPictures: z.array(eventPictureSchema),
+  canonicalName: z.string().optional(),
+  shortName: z.string().optional(),
   poiName: z.string(),
   poiLocation: z.string(),
   poiProvince: z.string(),
@@ -140,6 +143,25 @@ export const runArtifactPathsSchema = z.object({
   mapPath: z.string().optional(),
 });
 
+export const runProgressStepSchema = z.enum([
+  "preparing",
+  "rendering",
+  "finalizing",
+]);
+
+export const generateRunInputSchema = z.object({
+  mapName: z.string(),
+  city: z.string(),
+  style: z.string(),
+  selectedCommentIds: z.array(z.string()).min(1),
+});
+
+export const runInputSummarySchema = z.object({
+  mapName: z.string(),
+  city: z.string(),
+  selectedCommentCount: z.number(),
+});
+
 export const runTraceSchema = z.object({
   runId: z.string(),
   mapId: z.string(),
@@ -147,6 +169,14 @@ export const runTraceSchema = z.object({
   stage: z.enum(["preprocess", "generate", "regenerate", "confirm"]),
   basedOnExistingImage: z.boolean().optional(),
   promptInstruction: z.string().optional(),
+  styleKey: z.string().optional(),
+  promptVersion: z.string().optional(),
+  referenceIds: z.array(z.string()).optional(),
+  progressStep: runProgressStepSchema.optional(),
+  updatedAt: z.string().optional(),
+  previewImagePaths: z.array(z.string()).optional(),
+  generateInput: generateRunInputSchema.optional(),
+  inputSummary: runInputSummarySchema.optional(),
   warnings: z.array(z.string()),
   artifacts: runArtifactPathsSchema,
   providerMode: z.enum(["live", "fallback"]).default("live"),
@@ -166,4 +196,7 @@ export type RouteArtifact = z.infer<typeof routeArtifactSchema>;
 export type MapRecord = z.infer<typeof mapRecordSchema>;
 export type MapNode = z.infer<typeof mapNodeSchema>;
 export type MapViewModel = z.infer<typeof mapViewModelSchema>;
+export type RunProgressStep = z.infer<typeof runProgressStepSchema>;
+export type GenerateRunInput = z.infer<typeof generateRunInputSchema>;
+export type RunInputSummary = z.infer<typeof runInputSummarySchema>;
 export type RunTrace = z.infer<typeof runTraceSchema>;

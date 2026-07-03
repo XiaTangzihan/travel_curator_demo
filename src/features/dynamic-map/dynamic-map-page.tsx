@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { LoaderCircle, Trash2 } from "lucide-react";
 import type { MapViewModel } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 
@@ -10,8 +12,11 @@ type DynamicMapPageProps = {
 };
 
 export function DynamicMapPage(props: DynamicMapPageProps) {
+  const router = useRouter();
   const [selectedEventId, setSelectedEventId] = useState(props.map.selectedEventId);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
 
   const selectedEvent = useMemo(
     () =>
@@ -20,6 +25,33 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
   );
   const primaryPicture = selectedEvent.commentPictures[0];
   const galleryPictures = selectedEvent.commentPictures.slice(1);
+
+  async function handleDeleteMap() {
+    const confirmed = window.confirm(`确认删除《${props.map.mapName}》吗？删除后无法恢复。`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+      const response = await fetch(`/api/maps/${props.map.mapId}`, {
+        method: "DELETE",
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "删除地图失败");
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch (requestError) {
+      setError((requestError as Error).message);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <SiteShell
@@ -35,11 +67,25 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
           <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
             {props.map.nodes.length} 站
           </span>
+          <button
+            type="button"
+            onClick={handleDeleteMap}
+            disabled={deleting}
+            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
+          >
+            {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            删除路线
+          </button>
         </>
       }
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-5">
+          {error ? (
+            <div className="mb-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
+              {error}
+            </div>
+          ) : null}
           <div className="overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
             <Image
               src={props.map.posterPath}

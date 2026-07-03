@@ -84,6 +84,12 @@ export function RunsPage(props: RunsPageProps) {
                     <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
                       当前阶段：{stageLabels[selectedRun.stage]}
                     </p>
+                    <p className="text-sm leading-7 text-[var(--text-muted)]">
+                      风格键：{selectedRun.styleKey ?? "未记录"}
+                    </p>
+                    <p className="text-sm leading-7 text-[var(--text-muted)]">
+                      Prompt 版本：{selectedRun.promptVersion ?? "未记录"}
+                    </p>
                   </div>
                   <StatusPill status={selectedRun.status} />
                 </div>
@@ -113,6 +119,26 @@ export function RunsPage(props: RunsPageProps) {
                     {selectedRun.warnings.length
                       ? selectedRun.warnings.join("；")
                       : "当前 run 没有额外警告。"}
+                  </p>
+                </article>
+                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
+                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">输入摘要</p>
+                  {selectedRun.inputSummary ? (
+                    <div className="mt-3 space-y-2 text-sm leading-6 text-[var(--text-muted)]">
+                      <p>地图名称：{selectedRun.inputSummary.mapName}</p>
+                      <p>目的地：{selectedRun.inputSummary.city}</p>
+                      <p>选中评论数：{selectedRun.inputSummary.selectedCommentCount}</p>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+                      当前 run 还没有输入摘要。
+                    </p>
+                  )}
+                </article>
+                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
+                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">风格参考图</p>
+                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+                    {selectedRun.referenceIds?.length ? selectedRun.referenceIds.join("；") : "当前 run 还没有参考图留痕。"}
                   </p>
                 </article>
               </div>

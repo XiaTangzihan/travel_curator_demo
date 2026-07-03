@@ -10,9 +10,30 @@ function pickImage(event: EventRecord) {
   return event.commentPictures[0]?.url ?? "无";
 }
 
+function sortEvents(events: EventRecord[]) {
+  return [...events].sort((left, right) => {
+    const sequenceDiff = (left.sequence ?? Number.MAX_SAFE_INTEGER) - (right.sequence ?? Number.MAX_SAFE_INTEGER);
+    if (sequenceDiff !== 0) {
+      return sequenceDiff;
+    }
+
+    const leftKey = `${left.day} ${left.time}`;
+    const rightKey = `${right.day} ${right.time}`;
+    return leftKey.localeCompare(rightKey);
+  });
+}
+
+function canonicalName(event: EventRecord) {
+  return event.canonicalName?.trim() || event.poiName;
+}
+
+function shortName(event: EventRecord) {
+  return event.shortName?.trim() || canonicalName(event);
+}
+
 function buildIconHint(event: EventRecord) {
   const seeds = [
-    event.poiName,
+    shortName(event),
     event.categoryL3,
     event.categoryL2,
     event.commentText.slice(0, 18),
@@ -32,7 +53,7 @@ export function createDeterministicRouteMarkdown(params: {
 }) {
   const grouped = new Map<string, EventRecord[]>();
 
-  for (const event of params.events) {
+  for (const event of sortEvents(params.events)) {
     const list = grouped.get(event.day) ?? [];
     list.push(event);
     grouped.set(event.day, list);
@@ -57,8 +78,11 @@ export function createDeterministicRouteMarkdown(params: {
     body.push(`# Day ${index + 1} (${day})`, "");
 
     events.forEach((event, eventIndex) => {
-      body.push(`## Event ${eventIndex + 1} · ${event.time} · ${event.poiName}`);
-      body.push(`- poi: ${event.poiName}`);
+      const sequence = event.sequence ?? eventIndex + 1;
+      body.push(`## Event ${sequence} · ${shortName(event)}`);
+      body.push(`- sequence: ${sequence}`);
+      body.push(`- poi: ${canonicalName(event)}`);
+      body.push(`- short_name: ${shortName(event)}`);
       body.push(`- 类目: ${cleanCategory(event)}`);
       body.push(`- 文案: ${event.commentText || "无文字评论"}`);
       body.push(`- 配图: ${pickImage(event)}`);

@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import { ConfirmPage } from "@/src/features/confirm/confirm-page";
+import { formatRunDurationLabel } from "@/src/lib/run-trace";
 import {
   getMapRecord,
   getRenderedMap,
+  getRunTrace,
 } from "@/src/server/repositories/demo-repository";
 
 type ConfirmRouteProps = {
@@ -20,5 +22,19 @@ export default async function ConfirmRoute(props: ConfirmRouteProps) {
     notFound();
   }
 
-  return <ConfirmPage mapRecord={mapRecord} mapViewModel={mapViewModel} />;
+  const currentRun = mapRecord.currentRunId ? await getRunTrace(mapRecord.currentRunId) : null;
+  const runDurationLabel = currentRun
+    ? formatRunDurationLabel({
+        startedAt: currentRun.startedAt,
+        endedAt: currentRun.endedAt,
+      })
+    : null;
+
+  return (
+    <ConfirmPage
+      mapRecord={mapRecord}
+      mapViewModel={mapViewModel}
+      runDurationLabel={runDurationLabel}
+    />
+  );
 }

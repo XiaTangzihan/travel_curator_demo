@@ -13,8 +13,11 @@ import {
   type RunTrace,
 } from "@/src/contracts/domain";
 import {
+  deleteFilePaths,
   ensureStorageDirectories,
+  fromPublicPath,
   listJsonFiles,
+  pathExists,
   readJsonFile,
   readTextFile,
   storagePaths,
@@ -24,6 +27,7 @@ import {
 
 const rawDatasetFile = path.join(storagePaths.raw, "guangzhou.raw.json");
 const eventDatasetFile = path.join(storagePaths.events, "guangzhou.events.json");
+const runStaleAfterMs = 5 * 60 * 1000;
 
 function mapRecordFile(mapId: string) {
   return path.join(storagePaths.maps, `${mapId}.json`);
@@ -35,6 +39,10 @@ function routeFile(mapId: string) {
 
 function knowledgeFile(mapId: string) {
   return path.join(storagePaths.routes, `${mapId}.knowledge.json`);
+}
+
+function renderedMapFile(mapId: string) {
+  return path.join(storagePaths.maps, `${mapId}.view.json`);
 }
 
 function runFile(runId: string) {
@@ -150,11 +158,11 @@ export async function writeMapViewModel(mapId: string, map: MapViewModel) {
 
 export async function saveRenderedMap(mapId: string, map: MapViewModel) {
   await ensureStorageDirectories();
-  await writeJsonFile(path.join(storagePaths.maps, `${mapId}.view.json`), map);
+  await writeJsonFile(renderedMapFile(mapId), map);
 }
 
 export async function getRenderedMap(mapId: string) {
-  const map = await readJsonFile<MapViewModel>(path.join(storagePaths.maps, `${mapId}.view.json`));
+  const map = await readJsonFile<MapViewModel>(renderedMapFile(mapId));
   return map ? mapViewModelSchema.parse(map) : null;
 }
 
@@ -166,6 +174,47 @@ export async function saveRunTrace(trace: RunTrace) {
 export async function getRunTrace(runId: string) {
   const trace = await readJsonFile<RunTrace>(runFile(runId));
   return trace ? runTraceSchema.parse(trace) : null;
+}
+
+export async function updateRunTrace(runId: string, patch: Partial<RunTrace>) {
+  const current = await getRunTrace(runId);
+  if (!current) {
+    throw new Error(`run ${runId} 不存在`);
+  }
+
+  const nextTrace = runTraceSchema.parse({
+    ...current,
+    ...patch,
+    artifacts: {
+      ...current.artifacts,
+      ...(patch.artifacts ?? {}),
+    },
+    updatedAt: patch.updatedAt ?? new Date().toISOString(),
+  });
+  await saveRunTrace(nextTrace);
+  return nextTrace;
+}
+
+export async function getRunTraceWithRecovery(runId: string) {
+  const trace = await getRunTrace(runId);
+  if (!trace) {
+    return null;
+  }
+
+  const lastTick = trace.updatedAt ?? trace.startedAt;
+  const isRunningTooLong =
+    trace.status === "running" &&
+    Date.now() - Date.parse(lastTick) > runStaleAfterMs;
+
+  if (!isRunningTooLong) {
+    return trace;
+  }
+
+  return updateRunTrace(runId, {
+    status: "incomplete",
+    errorMessage: trace.errorMessage ?? "本次生成未正常完成，请重试。",
+    endedAt: trace.endedAt ?? new Date().toISOString(),
+  });
 }
 
 export async function listRunTraces() {
@@ -180,6 +229,83 @@ export async function listRunTraces() {
   return traces
     .filter((trace): trace is RunTrace => Boolean(trace))
     .sort((left, right) => right.startedAt.localeCompare(left.startedAt));
+}
+
+export async function deleteMapArtifacts(mapId: string) {
+  await ensureStorageDirectories();
+  const defaultArtifactPaths = [
+    mapRecordFile(mapId),
+    renderedMapFile(mapId),
+    routeFile(mapId),
+    knowledgeFile(mapId),
+    posterOutputPath(mapId, "png"),
+    posterOutputPath(mapId, "svg"),
+  ];
+
+  const [mapRecord, renderedMap, runTraces] = await Promise.all([
+    getMapRecord(mapId),
+    getRenderedMap(mapId),
+    listRunTraces(),
+  ]);
+  const relatedRunTraces = runTraces.filter((trace) => trace.mapId === mapId);
+  const existingDefaultArtifactPaths = (
+    await Promise.all(
+      defaultArtifactPaths.map(async (artifactPath) => ((await pathExists(artifactPath)) ? artifactPath : null)),
+    )
+  ).filter((artifactPath): artifactPath is string => Boolean(artifactPath));
+
+  if (!mapRecord && !renderedMap && !relatedRunTraces.length && !existingDefaultArtifactPaths.length) {
+    return null;
+  }
+
+  const artifactPathSet = new Set<string>(defaultArtifactPaths);
+
+  if (mapRecord?.routePath) {
+    artifactPathSet.add(mapRecord.routePath);
+  }
+
+  if (mapRecord?.knowledgePath) {
+    artifactPathSet.add(mapRecord.knowledgePath);
+  }
+
+  if (mapRecord?.posterPath) {
+    artifactPathSet.add(fromPublicPath(mapRecord.posterPath));
+  }
+
+  if (renderedMap?.posterPath) {
+    artifactPathSet.add(fromPublicPath(renderedMap.posterPath));
+  }
+
+  relatedRunTraces.forEach((trace) => {
+    artifactPathSet.add(runFile(trace.runId));
+  });
+
+  const deletedArtifactPaths = [...artifactPathSet];
+  await deleteFilePaths(deletedArtifactPaths);
+
+  const remainingArtifactPaths = (
+    await Promise.all(
+      deletedArtifactPaths.map(async (artifactPath) => ((await pathExists(artifactPath)) ? artifactPath : null)),
+    )
+  ).filter((artifactPath): artifactPath is string => Boolean(artifactPath));
+
+  const [nextMapRecord, nextRenderedMap, nextRunTraces] = await Promise.all([
+    getMapRecord(mapId),
+    getRenderedMap(mapId),
+    listRunTraces(),
+  ]);
+
+  return {
+    mapId,
+    deletedRunIds: relatedRunTraces.map((trace) => trace.runId),
+    deletedArtifactPaths,
+    remainingArtifactPaths,
+    verified:
+      !nextMapRecord &&
+      !nextRenderedMap &&
+      !nextRunTraces.some((trace) => trace.mapId === mapId) &&
+      !remainingArtifactPaths.length,
+  };
 }
 
 export function posterOutputPath(mapId: string, extension: "png" | "svg" = "png") {

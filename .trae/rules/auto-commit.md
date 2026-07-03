@@ -16,7 +16,7 @@
    - **impact**: 变更影响程度 (low | medium | high)
 3. 生成 commit message，格式遵循：
    ```
-   <type>(<scope>): <简短描述>
+   <type>(<scope>): <简短描述>（简短描述用中文）
 
    - 详细说明变更内容
    - 说明变更理由/动机

@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -9,6 +12,12 @@ type ChatOptions = {
   model: string;
   messages: ChatMessage[];
   temperature?: number;
+};
+
+type SeedreamImageOptions = {
+  prompt: string;
+  images?: string[];
+  size?: string;
 };
 
 function requireEnv(name: string) {
@@ -69,7 +78,32 @@ export async function runDoubaoChat(messages: ChatMessage[], temperature?: numbe
   });
 }
 
-export async function runSeedreamImage(prompt: string) {
+function imageMimeType(filePath: string) {
+  const extension = path.extname(filePath).toLowerCase();
+  if (extension === ".png") {
+    return "image/png";
+  }
+  if (extension === ".webp") {
+    return "image/webp";
+  }
+  return "image/jpeg";
+}
+
+async function imageFileToDataUri(filePath: string) {
+  const buffer = await readFile(filePath);
+  return `data:${imageMimeType(filePath)};base64,${buffer.toString("base64")}`;
+}
+
+export async function runSeedreamImage(input: string | SeedreamImageOptions) {
+  const options = typeof input === "string" ? { prompt: input } : input;
+  const images = options.images?.length
+    ? await Promise.all(
+        options.images.map(async (image) =>
+          image.startsWith("data:image/") || image.startsWith("http") ? image : imageFileToDataUri(image),
+        ),
+      )
+    : undefined;
+
   const response = await fetch(
     `${process.env.SEEDREAM_BASE_URL ?? requireEnv("SEEDREAM_BASE_URL")}/images/generations`,
     {
@@ -80,9 +114,10 @@ export async function runSeedreamImage(prompt: string) {
       },
       body: JSON.stringify({
         model: requireEnv("SEEDREAM_MODEL_ID"),
-        prompt,
+        prompt: options.prompt,
+        ...(images?.length ? { images } : {}),
         response_format: "b64_json",
-        size: "2048x2048",
+        size: options.size ?? "2560x1440",
       }),
     },
   );

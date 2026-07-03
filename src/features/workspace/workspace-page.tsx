@@ -1,53 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
+import { stylePromptLibrary, type SupportedStyleKey } from "@/src/engine/prompts";
 import { useWorkspaceStore } from "@/src/store/workspace-store";
 
 type WorkspacePageProps = {
   rawDataset: RawDatasetSnapshot;
 };
 
-const stylePreviewMap: Record<string, { label: string; description: string; image: string }> = {
-  "young-cartoon": {
-    label: "年轻卡通风",
-    description: "明亮轻快，适合把旅行内容整理成活泼、易读、适合分享的画面。",
-    image: "/ui-static/styles/young-cartoon.jpg",
-  },
-  watercolor: {
-    label: "清新水彩风",
-    description: "淡雅柔和，适合强调空气感、留白和更轻的叙事氛围。",
-    image: "/ui-static/styles/watercolor.jpg",
-  },
-  storybook: {
-    label: "治愈绘本插画风",
-    description: "温暖安静，适合更有故事感和收藏感的旅行作品。",
-    image: "/ui-static/styles/storybook.jpg",
-  },
-};
-
 export function WorkspacePage(props: WorkspacePageProps) {
   const router = useRouter();
+  const actionLockRef = useRef<"generate" | "preprocess" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
   const mapName = useWorkspaceStore((state) => state.mapName);
+  const currentCity = useWorkspaceStore((state) => state.city);
   const currentStyle = useWorkspaceStore((state) => state.style);
   const selectedCommentIds = useWorkspaceStore((state) => state.selectedCommentIds);
   const initialize = useWorkspaceStore((state) => state.initialize);
   const setMapName = useWorkspaceStore((state) => state.setMapName);
+  const setCity = useWorkspaceStore((state) => state.setCity);
+  const setStyle = useWorkspaceStore((state) => state.setStyle);
   const toggleComment = useWorkspaceStore((state) => state.toggleComment);
   const selectAll = useWorkspaceStore((state) => state.selectAll);
 
   useEffect(() => {
     initialize({
-      mapName: "广州两日行",
-      city: "广州",
-      style: "young-cartoon",
+      mapName: "",
+      city: "",
+      style: "",
       selectedCommentIds: props.rawDataset.reviews.map((review) => review.recordId),
     });
   }, [initialize, props.rawDataset.reviews]);
@@ -56,19 +43,38 @@ export function WorkspacePage(props: WorkspacePageProps) {
     () => props.rawDataset.reviews.reduce((sum, review) => sum + review.attachments.length, 0),
     [props.rawDataset.reviews],
   );
-  const stylePreview = stylePreviewMap[currentStyle] ?? stylePreviewMap["young-cartoon"];
+  const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
+  const hasSelectedStyle = currentStyle.trim().length > 0;
+  const actionsLocked = submitting || syncing;
+  const stylePreview = hasSelectedStyle
+    ? stylePromptLibrary[currentStyle as SupportedStyleKey]
+    : null;
 
   async function handleGenerate() {
+    if (actionLockRef.current) {
+      return;
+    }
+
+    const trimmedMapName = mapName.trim();
+    const trimmedCity = currentCity.trim();
+    const trimmedStyle = currentStyle.trim();
+
+    if (!trimmedMapName || !trimmedCity || !trimmedStyle || !selectedCommentIds.length) {
+      setError("请先填写地图名称、目的地、选择风格，并至少选择 1 条评论。");
+      return;
+    }
+
     try {
+      actionLockRef.current = "generate";
       setSubmitting(true);
       setError("");
       const response = await fetch("/api/maps/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mapName,
-          city: "广州",
-          style: "young-cartoon",
+          mapName: trimmedMapName,
+          city: trimmedCity,
+          style: trimmedStyle,
           selectedCommentIds,
         }),
       });
@@ -77,17 +83,22 @@ export function WorkspacePage(props: WorkspacePageProps) {
       if (!response.ok) {
         throw new Error(payload.error ?? "生成失败");
       }
-
-      router.push(`/confirm/${payload.mapId}`);
+      router.push(payload.waitPath ?? `/workspace/generating/${payload.runId}`);
     } catch (requestError) {
       setError((requestError as Error).message);
     } finally {
+      actionLockRef.current = null;
       setSubmitting(false);
     }
   }
 
   async function handlePreprocess() {
+    if (actionLockRef.current) {
+      return;
+    }
+
     try {
+      actionLockRef.current = "preprocess";
       setSyncing(true);
       setError("");
       const response = await fetch("/api/preprocess/guangzhou", { method: "POST" });
@@ -98,6 +109,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
     } catch (requestError) {
       setError((requestError as Error).message);
     } finally {
+      actionLockRef.current = null;
       setSyncing(false);
     }
   }
@@ -118,16 +130,46 @@ export function WorkspacePage(props: WorkspacePageProps) {
               <input
                 value={mapName}
                 onChange={(event) => setMapName(event.target.value)}
+                placeholder="例如：广州两日行"
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               />
             </label>
+            <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
+              目的地
+              <input
+                value={currentCity}
+                onChange={(event) => setCity(event.target.value)}
+                placeholder="例如：广州"
+                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
+              />
+            </label>
+            <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">
+              当前 demo 仍基于广州素材源，修改目的地会影响生成文案与地图元数据，不会切换底层评论数据。
+            </p>
+            <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
+              风格
+              <select
+                value={currentStyle}
+                onChange={(event) => setStyle(event.target.value as SupportedStyleKey | "")}
+                className={`mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition ${
+                  hasSelectedStyle ? "text-[var(--text-strong)]" : "text-[var(--text-muted)]"
+                }`}
+              >
+                <option value="" disabled>
+                  请选择风格
+                </option>
+                {Object.entries(stylePromptLibrary).map(([styleKey, option]) => (
+                  <option key={styleKey} value={styleKey}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {[
-              { label: "目的地", value: "广州" },
-              { label: "风格", value: stylePreview.label },
-              { label: "样本评论", value: `${props.rawDataset.reviews.length} 条` },
+              { label: "选中评论数", value: selectedSummary },
               { label: "本地图片", value: `${totalPictures} 张` },
             ].map((item) => (
               <div
@@ -152,7 +194,8 @@ export function WorkspacePage(props: WorkspacePageProps) {
           <button
             type="button"
             onClick={handlePreprocess}
-            className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft-strong)]"
+            disabled={actionsLocked}
+            className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft-strong)] disabled:opacity-60"
           >
             {syncing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             更新素材列表
@@ -160,11 +203,23 @@ export function WorkspacePage(props: WorkspacePageProps) {
 
           <div className="overflow-hidden rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)]">
             <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-soft)]">
-              <Image src={stylePreview.image} alt={stylePreview.label} fill unoptimized className="object-cover" />
+              {stylePreview ? (
+                <Image src={stylePreview.previewImage} alt={stylePreview.label} fill unoptimized className="object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-7 text-[var(--text-muted)]">
+                  选择风格后，这里会显示对应的参考图预览。
+                </div>
+              )}
             </div>
             <div className="p-4">
-              <p className="text-sm font-medium text-[var(--text-strong)]">{stylePreview.label}</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{stylePreview.description}</p>
+              <p className="text-sm font-medium text-[var(--text-strong)]">
+                {stylePreview ? stylePreview.label : "未选择风格"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
+                {stylePreview
+                  ? stylePreview.description
+                  : "先选择风格，再查看对应的画风说明和参考图。"}
+              </p>
             </div>
           </div>
 
@@ -187,8 +242,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
               </p>
             </div>
             <p className="text-sm text-[var(--text-muted)]">
-              已选 <span className="font-semibold text-[var(--text-strong)]">{selectedCommentIds.length}</span> /{" "}
-              {props.rawDataset.reviews.length}
+              已选 <span className="font-semibold text-[var(--text-strong)]">{selectedSummary}</span>
             </p>
           </div>
 
@@ -262,7 +316,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={submitting || !selectedCommentIds.length}
+              disabled={actionsLocked || !selectedCommentIds.length || !mapName.trim() || !currentCity.trim() || !hasSelectedStyle}
               className="inline-flex items-center justify-center gap-2 self-end rounded-full bg-[var(--accent-primary)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
             >
               {submitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}

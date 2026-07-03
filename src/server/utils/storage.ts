@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const publicDir = path.join(/* turbopackIgnore: true */ process.cwd(), "public");
@@ -20,6 +20,11 @@ export const storagePaths = {
 export function toPublicPath(filePath: string) {
   const relative = path.relative(publicDir, filePath).split(path.sep).join("/");
   return `/${relative}`;
+}
+
+export function fromPublicPath(publicPath: string) {
+  const relative = publicPath.replace(/^\/+/, "");
+  return path.join(publicDir, relative);
 }
 
 export async function ensureStorageDirectories() {
@@ -66,6 +71,22 @@ export async function readTextFile(filePath: string): Promise<string | null> {
 export async function writeBinaryFile(filePath: string, value: Buffer) {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, value);
+}
+
+export async function pathExists(filePath: string) {
+  try {
+    await access(filePath);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
+}
+
+export async function deleteFilePaths(filePaths: string[]) {
+  await Promise.all(filePaths.map((filePath) => rm(filePath, { force: true })));
 }
 
 export async function listJsonFiles(directory: string) {

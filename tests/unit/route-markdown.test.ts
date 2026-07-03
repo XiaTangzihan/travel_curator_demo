@@ -6,10 +6,13 @@ const events: EventRecord[] = [
   {
     eventId: "evt_001",
     commentId: "rec_001",
+    sequence: 1,
     day: "2024:06:01",
     time: "10:20:00",
     commentText: "广州塔附近的一次早餐记录",
     commentPictures: [{ url: "/mock/a.jpg", name: "a.jpg" }],
+    canonicalName: "广州塔店",
+    shortName: "广州塔店",
     poiName: "广州塔店",
     poiLocation: "海珠区某地",
     poiProvince: "广东省",
@@ -25,7 +28,7 @@ const events: EventRecord[] = [
 const knowledge: Landmark[] = [{ name: "广州塔", visual: "塔身与夜景" }];
 
 describe("createDeterministicRouteMarkdown", () => {
-  it("会输出 front matter 和 Day/Event 分层", () => {
+  it("会输出 front matter 和按 sequence 排序的 Day/Event 分层", () => {
     const markdown = createDeterministicRouteMarkdown({
       mapName: "广州两日行",
       city: "广州",
@@ -36,6 +39,8 @@ describe("createDeterministicRouteMarkdown", () => {
 
     expect(markdown).toContain("map_name: 广州两日行");
     expect(markdown).toContain("# Day 1 (2024:06:01)");
-    expect(markdown).toContain("## Event 1 · 10:20:00 · 广州塔店");
+    expect(markdown).toContain("## Event 1 · 广州塔店");
+    expect(markdown).toContain("- sequence: 1");
+    expect(markdown).not.toContain("10:20:00");
   });
 });

@@ -1,12 +1,21 @@
 import {
+  type GenerateRunInput,
   mapRecordSchema,
   runTraceSchema,
   type EventRecord,
   type Landmark,
   type MapRecord,
+  type RawDatasetSnapshot,
   type RunTrace,
 } from "@/src/contracts/domain";
-import { demoConfig, promptLibrary } from "@/src/config/demo";
+import {
+  buildLandmarkPrompt,
+  buildPosterPrompt,
+  buildRegeneratePosterPrompt,
+  getStylePreset,
+} from "@/src/engine/prompts";
+import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
+import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { preprocessDataset } from "@/src/engine/preprocess/part1";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
@@ -15,8 +24,9 @@ import { createDeterministicRouteMarkdown } from "@/src/engine/renderers/route-m
 import { createMapId, createRunId } from "@/src/lib/ids";
 import {
   getEventsDataset,
+  getKnowledge,
   getRawDataset,
-  getRouteMarkdown,
+  getRunTrace,
   posterOutputPath,
   posterPublicPath,
   saveEventsDataset,
@@ -25,15 +35,67 @@ import {
   saveRenderedMap,
   saveRouteMarkdown,
   saveRunTrace,
+  updateRunTrace,
 } from "@/src/server/repositories/demo-repository";
-import { writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
+import { fromPublicPath, writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
 
-type GenerateMapInput = {
+type GenerateMapInput = GenerateRunInput;
+
+type GenerateMapExecutionContext = {
+  runId: string;
+  mapId: string;
+  startedAt: string;
+  onProgress?: (patch: Partial<RunTrace>) => Promise<unknown> | unknown;
+};
+
+function buildRunInputSummary(params: {
   mapName: string;
   city: string;
-  style: string;
-  selectedCommentIds?: string[];
-};
+  selectedCommentCount: number;
+}) {
+  return {
+    mapName: params.mapName,
+    city: params.city,
+    selectedCommentCount: params.selectedCommentCount,
+  };
+}
+
+function buildWaitPath(runId: string) {
+  return `/workspace/generating/${runId}`;
+}
+
+function buildPreviewImagePaths(params: {
+  rawDataset: RawDatasetSnapshot;
+  selectedCommentIds: string[];
+}) {
+  const selectedCommentIdSet = new Set(params.selectedCommentIds);
+  const previewImagePaths = params.rawDataset.reviews
+    .filter((review) => selectedCommentIdSet.has(review.recordId))
+    .flatMap((review) => review.attachments.map((attachment) => attachment.publicPath.trim()))
+    .filter(Boolean);
+
+  return [...new Set(previewImagePaths)].slice(0, 12);
+}
+
+function compareEventOrder(left: EventRecord, right: EventRecord) {
+  const leftKey = `${left.day} ${left.time}`;
+  const rightKey = `${right.day} ${right.time}`;
+  return leftKey.localeCompare(rightKey);
+}
+
+function normalizeMapEvents(events: EventRecord[]) {
+  return [...events].sort(compareEventOrder).map((event, index) => {
+    const canonicalName = event.canonicalName?.trim() || event.poiName.trim();
+    const shortName = event.shortName?.trim() || buildMechanicalShortName(canonicalName);
+
+    return {
+      ...event,
+      sequence: index + 1,
+      canonicalName,
+      shortName,
+    };
+  });
+}
 
 function extractJsonArray(text: string) {
   const start = text.indexOf("[");
@@ -84,17 +146,12 @@ async function ensureEvents() {
 }
 
 async function generateKnowledge(city: string) {
-  const system = promptLibrary.p1System;
-  const user = [
-    `请基于公开、非敏感信息，列出 ${city} 最具代表性的地标与景点。`,
-    "按知名度排序，输出 8 到 12 个。",
-    '每个对象包含 name 和 visual 两个字段，严格输出 JSON 数组。',
-  ].join("\n");
+  const prompt = buildLandmarkPrompt(city);
 
   const content = await runDoubaoChat(
     [
-      { role: "system", content: system },
-      { role: "user", content: user },
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user },
     ],
     0.2,
   );
@@ -102,114 +159,71 @@ async function generateKnowledge(city: string) {
   return extractJsonArray(content);
 }
 
-async function generateRouteMarkdown(params: {
-  mapName: string;
-  city: string;
-  styleLabel: string;
-  events: EventRecord[];
-}) {
-  const prompt = [
-    "请把下面事件列表整理成 route.md。",
-    "要求：先按 day 升序，再按 time 升序；输出 YAML front matter 与 Day/Event 分层；每个 event 都要有 event标志生图提示。",
-    JSON.stringify(params.events, null, 2),
-  ].join("\n\n");
-
-  return runDoubaoChat(
-    [
-      { role: "system", content: promptLibrary.p2System },
-      { role: "user", content: prompt },
-    ],
-    0.2,
-  );
-}
-
-function buildPosterPrompt(params: {
-  mapName: string;
-  city: string;
-  styleLabel: string;
-  events: EventRecord[];
-  knowledge: Landmark[];
-  instruction?: string;
-  basedOnExistingImage?: boolean;
-}) {
-  const safePointLabel = (event: EventRecord) => {
-    const name = event.poiName.replace(/\(.*?\)/g, "").trim();
-
-    if (/(按摩|spa|足疗)/i.test(event.poiName)) {
-      return "舒缓放松站";
-    }
-
-    if (/(酒吧|啤酒)/i.test(event.poiName) || /(酒吧|清吧)/.test(event.categoryL2 + event.categoryL3)) {
-      return "夜间氛围站";
-    }
-
-    if (/(酒店|宾馆|万豪)/i.test(event.poiName)) {
-      return "住宿休整站";
-    }
-
-    return name.slice(0, 18);
-  };
-
-  const base = [
-    promptLibrary.common,
-    promptLibrary.youngCartoon,
-    `城市：${params.city}`,
-    `地图名称：${params.mapName}`,
-    `路线点位：${params.events
-      .map((event, index) => `${index + 1}. ${safePointLabel(event)} / ${event.time}`)
-      .join("；")}`,
-    `城市地标参考：${params.knowledge
-      .slice(0, 6)
-      .map((item) => `${item.name}（${item.visual}）`)
-      .join("；")}`,
-    "不要在画面中输出可能触发内容审核的成人或酒精字样；若存在此类点位，请用中性旅行标签表达。",
-  ];
-
-  if (params.instruction) {
-    base.push(
-      params.basedOnExistingImage
-        ? `请尽量保留原有整体构图，只按这条意见调整：${params.instruction}`
-        : `请按这条意见重新组织画面：${params.instruction}`,
-    );
-  }
-
-  return base.join("\n");
-}
-
 async function writePosterFile(params: {
   mapId: string;
-  mapName: string;
   city: string;
-  styleLabel: string;
+  styleKey: string;
+  referenceImagePaths: string[];
   events: EventRecord[];
   knowledge: Landmark[];
   instruction?: string;
   basedOnExistingImage?: boolean;
 }) {
   const prompt = buildPosterPrompt(params);
-  const image = await runSeedreamImage(prompt);
+  const image = await runSeedreamImage({
+    prompt,
+    images: params.referenceImagePaths,
+  });
   const outputPath = posterOutputPath(params.mapId, "png");
   await writeBinaryFile(outputPath, image);
   return posterPublicPath(params.mapId, "png");
 }
 
-export async function generateMapDraft(input: GenerateMapInput) {
-  const startedAt = new Date().toISOString();
-  const runId = createRunId();
-  const mapId = createMapId();
+async function writeRegeneratedPosterFile(params: {
+  mapId: string;
+  city: string;
+  styleKey: string;
+  referenceImagePaths: string[];
+  events: EventRecord[];
+  knowledge: Landmark[];
+  instruction: string;
+  basedOnExistingImage: boolean;
+}) {
+  const prompt = buildRegeneratePosterPrompt(params);
+  const image = await runSeedreamImage({
+    prompt,
+    images: params.referenceImagePaths,
+  });
+  const outputPath = posterOutputPath(params.mapId, "png");
+  await writeBinaryFile(outputPath, image);
+  return posterPublicPath(params.mapId, "png");
+}
+
+async function generateMapDraftCore(
+  input: GenerateMapInput,
+  context: GenerateMapExecutionContext,
+) {
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
 
   const eventsSnapshot = await ensureEvents();
-  const selectedEvents = eventsSnapshot.events.filter((event) =>
-    input.selectedCommentIds?.length
-      ? input.selectedCommentIds.includes(event.commentId)
-      : true,
+  const selectedEvents = normalizeMapEvents(
+    eventsSnapshot.events.filter((event) =>
+      input.selectedCommentIds.includes(event.commentId),
+    ),
   );
 
   if (!selectedEvents.length) {
     throw new Error("没有可用于生成地图的事件");
   }
+
+  const stylePreset = getStylePreset(input.style);
+  const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
+  const inputSummary = buildRunInputSummary({
+    mapName: input.mapName,
+    city: input.city,
+    selectedCommentCount: selectedEvents.length,
+  });
 
   let knowledge: Landmark[];
   try {
@@ -220,36 +234,28 @@ export async function generateMapDraft(input: GenerateMapInput) {
     knowledge = fallbackKnowledge(input.city);
   }
 
-  let routeMarkdown: string;
-  try {
-    routeMarkdown = await generateRouteMarkdown({
-      mapName: input.mapName,
-      city: input.city,
-      styleLabel: demoConfig.styleLabel,
-      events: selectedEvents,
-    });
-  } catch (error) {
-    providerMode = "fallback";
-    warnings.push(`P2 已回退：${(error as Error).message}`);
-    routeMarkdown = createDeterministicRouteMarkdown({
-      mapName: input.mapName,
-      city: input.city,
-      styleLabel: demoConfig.styleLabel,
-      events: selectedEvents,
-      knowledge,
-    });
-  }
+  const routeMarkdown = createDeterministicRouteMarkdown({
+    mapName: input.mapName,
+    city: input.city,
+    styleLabel: stylePreset.label,
+    events: selectedEvents,
+    knowledge,
+  });
 
-  const routePath = await saveRouteMarkdown(mapId, routeMarkdown);
-  const knowledgePath = await saveKnowledge(mapId, knowledge);
+  const routePath = await saveRouteMarkdown(context.mapId, routeMarkdown);
+  const knowledgePath = await saveKnowledge(context.mapId, knowledge);
+
+  await context.onProgress?.({
+    progressStep: "rendering",
+  });
 
   let posterPath: string;
   try {
     posterPath = await writePosterFile({
-      mapId,
-      mapName: input.mapName,
+      mapId: context.mapId,
       city: input.city,
-      styleLabel: demoConfig.styleLabel,
+      styleKey: input.style,
+      referenceImagePaths,
       events: selectedEvents,
       knowledge,
     });
@@ -257,17 +263,20 @@ export async function generateMapDraft(input: GenerateMapInput) {
     providerMode = "fallback";
     warnings.push(`P3 已回退：${(error as Error).message}`);
     const svg = createFallbackPosterSvg({
-      mapName: input.mapName,
       city: input.city,
-      styleLabel: demoConfig.styleLabel,
+      styleLabel: stylePreset.label,
       events: selectedEvents,
     });
-    await writeTextFile(posterOutputPath(mapId, "svg"), svg);
-    posterPath = posterPublicPath(mapId, "svg");
+    await writeTextFile(posterOutputPath(context.mapId, "svg"), svg);
+    posterPath = posterPublicPath(context.mapId, "svg");
   }
 
+  await context.onProgress?.({
+    progressStep: "finalizing",
+  });
+
   const mapViewModel = buildMapViewModel({
-    mapId,
+    mapId: context.mapId,
     mapName: input.mapName,
     city: input.city,
     style: input.style,
@@ -276,10 +285,10 @@ export async function generateMapDraft(input: GenerateMapInput) {
     events: selectedEvents,
     knowledge,
   });
-  await saveRenderedMap(mapId, mapViewModel);
+  await saveRenderedMap(context.mapId, mapViewModel);
 
   const mapRecord: MapRecord = mapRecordSchema.parse({
-    mapId,
+    mapId: context.mapId,
     mapName: input.mapName,
     city: input.city,
     style: input.style,
@@ -288,39 +297,171 @@ export async function generateMapDraft(input: GenerateMapInput) {
     routePath,
     posterPath,
     knowledgePath,
-    currentRunId: runId,
+    currentRunId: context.runId,
     selectedCommentIds: selectedEvents.map((event) => event.commentId),
-    createdAt: startedAt,
+    createdAt: context.startedAt,
     updatedAt: new Date().toISOString(),
   });
   await saveMapRecord(mapRecord);
 
+  const finishedAt = new Date().toISOString();
   const runTrace = runTraceSchema.parse({
-    runId,
-    mapId,
+    runId: context.runId,
+    mapId: context.mapId,
     status: "completed",
     stage: "generate",
+    progressStep: "finalizing",
+    styleKey: input.style,
+    promptVersion: stylePreset.promptVersion,
+    referenceIds: [stylePreset.referenceId],
+    inputSummary,
     warnings,
     artifacts: {
       rawPath: "/mock/raw/guangzhou.raw.json",
       eventsPath: "/mock/events/guangzhou.events.json",
-      routePath: `/mock/routes/${mapId}.route.md`,
+      routePath: `/mock/routes/${context.mapId}.route.md`,
       posterPath,
-      mapPath: `/mock/maps/${mapId}.view.json`,
+      mapPath: `/mock/maps/${context.mapId}.view.json`,
     },
     providerMode,
-    startedAt,
-    endedAt: new Date().toISOString(),
+    startedAt: context.startedAt,
+    updatedAt: finishedAt,
+    endedAt: finishedAt,
   });
-  await saveRunTrace(runTrace);
 
   return {
-    mapId,
-    runId,
+    mapId: context.mapId,
+    runId: context.runId,
     mapRecord,
     mapViewModel,
     runTrace,
   };
+}
+
+async function createInitialGenerateRunTrace(params: {
+  input: GenerateMapInput;
+  runId: string;
+  mapId: string;
+  startedAt: string;
+}) {
+  const rawDataset = await getRawDataset();
+  const previewImagePaths = rawDataset
+    ? buildPreviewImagePaths({
+        rawDataset,
+        selectedCommentIds: params.input.selectedCommentIds,
+      })
+    : [];
+  const inputSummary = buildRunInputSummary({
+    mapName: params.input.mapName,
+    city: params.input.city,
+    selectedCommentCount: params.input.selectedCommentIds.length,
+  });
+
+  const runTrace = runTraceSchema.parse({
+    runId: params.runId,
+    mapId: params.mapId,
+    status: "running",
+    stage: "generate",
+    progressStep: "preparing",
+    styleKey: params.input.style,
+    previewImagePaths,
+    generateInput: params.input,
+    inputSummary,
+    warnings: [],
+    artifacts: {
+      rawPath: "/mock/raw/guangzhou.raw.json",
+      eventsPath: "/mock/events/guangzhou.events.json",
+    },
+    providerMode: "live",
+    startedAt: params.startedAt,
+    updatedAt: params.startedAt,
+  });
+  await saveRunTrace(runTrace);
+  return runTrace;
+}
+
+async function executeGenerateMapRun(params: {
+  input: GenerateMapInput;
+  runId: string;
+  mapId: string;
+}) {
+  const initialRunTrace = await getRunTrace(params.runId);
+  if (!initialRunTrace) {
+    return;
+  }
+
+  try {
+    const result = await generateMapDraftCore(params.input, {
+      runId: params.runId,
+      mapId: params.mapId,
+      startedAt: initialRunTrace.startedAt,
+      onProgress: (patch) => updateRunTrace(params.runId, patch),
+    });
+
+    const completedRunTrace = runTraceSchema.parse({
+      ...initialRunTrace,
+      ...result.runTrace,
+      artifacts: {
+        ...initialRunTrace.artifacts,
+        ...result.runTrace.artifacts,
+      },
+    });
+    await saveRunTrace(completedRunTrace);
+  } catch (error) {
+    const currentRunTrace = await getRunTrace(params.runId);
+    if (!currentRunTrace) {
+      return;
+    }
+
+    const failedAt = new Date().toISOString();
+    await saveRunTrace(
+      runTraceSchema.parse({
+        ...currentRunTrace,
+        status: "failed",
+        errorMessage: (error as Error).message || "生成失败",
+        updatedAt: failedAt,
+        endedAt: failedAt,
+      }),
+    );
+  }
+}
+
+export async function startGenerateMapRun(input: GenerateMapInput) {
+  const startedAt = new Date().toISOString();
+  const runId = createRunId();
+  const mapId = createMapId();
+  await createInitialGenerateRunTrace({
+    input,
+    runId,
+    mapId,
+    startedAt,
+  });
+
+  setTimeout(() => {
+    void executeGenerateMapRun({
+      input,
+      runId,
+      mapId,
+    });
+  }, 0);
+
+  return {
+    runId,
+    mapId,
+    waitPath: buildWaitPath(runId),
+  };
+}
+
+export async function generateMapDraft(input: GenerateMapInput) {
+  const startedAt = new Date().toISOString();
+  const result = await generateMapDraftCore(input, {
+    runId: createRunId(),
+    mapId: createMapId(),
+    startedAt,
+  });
+  await saveRunTrace(result.runTrace);
+
+  return result;
 }
 
 export async function regenerateMapDraft(params: {
@@ -333,26 +474,55 @@ export async function regenerateMapDraft(params: {
   const runId = createRunId();
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
-  const knowledge = fallbackKnowledge(params.mapRecord.city);
+  const events = normalizeMapEvents(params.events);
+  const stylePreset = getStylePreset(params.mapRecord.style);
+  const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
+  let knowledge = cachedKnowledge;
+  if (!knowledge.length) {
+    providerMode = "fallback";
+    warnings.push("P1 已回退：当前地图缺少已缓存的城市地标，已使用本地兜底数据。");
+    knowledge = fallbackKnowledge(params.mapRecord.city);
+    await saveKnowledge(params.mapRecord.mapId, knowledge);
+  }
 
-  const routeMarkdown =
-    (await getRouteMarkdown(params.mapRecord.mapId)) ??
-    createDeterministicRouteMarkdown({
-      mapName: params.mapRecord.mapName,
-      city: params.mapRecord.city,
-      styleLabel: demoConfig.styleLabel,
-      events: params.events,
-      knowledge,
-    });
+  const referenceImagePublicPaths = buildRegenerateImagePublicPaths({
+    styleReferencePublicPath: stylePreset.referencePublicPath,
+    existingPosterPublicPath: params.mapRecord.posterPath,
+    basedOnExistingImage: params.basedOnExistingImage,
+  });
+  if (
+    params.basedOnExistingImage &&
+    !referenceImagePublicPaths.includes(params.mapRecord.posterPath)
+  ) {
+    warnings.push("P4 提示：当前旧底片不是 PNG/JPG/WebP，已仅使用风格参考图重绘。");
+  }
+
+  const referenceImagePaths = referenceImagePublicPaths.map((publicPath) =>
+    fromPublicPath(publicPath),
+  );
+  const inputSummary = buildRunInputSummary({
+    mapName: params.mapRecord.mapName,
+    city: params.mapRecord.city,
+    selectedCommentCount: events.length,
+  });
+
+  const routeMarkdown = createDeterministicRouteMarkdown({
+    mapName: params.mapRecord.mapName,
+    city: params.mapRecord.city,
+    styleLabel: stylePreset.label,
+    events,
+    knowledge,
+  });
+  await saveRouteMarkdown(params.mapRecord.mapId, routeMarkdown);
 
   let posterPath: string;
   try {
-    posterPath = await writePosterFile({
+    posterPath = await writeRegeneratedPosterFile({
       mapId: params.mapRecord.mapId,
-      mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
-      styleLabel: demoConfig.styleLabel,
-      events: params.events,
+      styleKey: params.mapRecord.style,
+      referenceImagePaths,
+      events,
       knowledge,
       instruction: params.instruction,
       basedOnExistingImage: params.basedOnExistingImage,
@@ -361,10 +531,9 @@ export async function regenerateMapDraft(params: {
     providerMode = "fallback";
     warnings.push(`P4 已回退：${(error as Error).message}`);
     const svg = createFallbackPosterSvg({
-      mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
-      styleLabel: demoConfig.styleLabel,
-      events: params.events,
+      styleLabel: stylePreset.label,
+      events,
     });
     await writeTextFile(posterOutputPath(params.mapRecord.mapId, "svg"), svg);
     posterPath = posterPublicPath(params.mapRecord.mapId, "svg");
@@ -377,7 +546,7 @@ export async function regenerateMapDraft(params: {
     style: params.mapRecord.style,
     posterPath,
     routeMarkdown,
-    events: params.events,
+    events,
     knowledge,
   });
   await saveRenderedMap(params.mapRecord.mapId, mapViewModel);
@@ -398,6 +567,10 @@ export async function regenerateMapDraft(params: {
     stage: "regenerate",
     basedOnExistingImage: params.basedOnExistingImage,
     promptInstruction: params.instruction,
+    styleKey: params.mapRecord.style,
+    promptVersion: stylePreset.promptVersion,
+    referenceIds: [stylePreset.referenceId],
+    inputSummary,
     warnings,
     artifacts: {
       routePath: `/mock/routes/${params.mapRecord.mapId}.route.md`,
@@ -406,6 +579,7 @@ export async function regenerateMapDraft(params: {
     },
     providerMode,
     startedAt,
+    updatedAt: new Date().toISOString(),
     endedAt: new Date().toISOString(),
   });
   await saveRunTrace(runTrace);

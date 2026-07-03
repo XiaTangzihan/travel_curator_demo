@@ -1,0 +1,10 @@
+- [ ] `MapRecord / MapViewModel / RunTrace` 已能独立表达 `currentVideoRunId`、`videoPath`、`videoDurationSeconds` 与 `video_generate`，且没有污染现有图片主链路字段语义
+- [ ] 本地视频产物采用方案 A 落盘到 `public/mock/videos/{mapId}.mp4`，删除地图时会纳入删除聚合
+- [ ] 动态地图页只在 `视频` tab 暴露 P6 入口，`动态地图` tab 的原有浏览交互未被破坏
+- [ ] `视频` tab 提供 `5s / 7s / 9s` 三档时长，且不额外暴露独立视频风格选择器
+- [ ] P6 请求默认带 `generate_audio = true`
+- [ ] 当当前地图底片为 `svg` 时，P6 生成被禁用并给出明确说明
+- [ ] 发起视频生成后会跳转独立等待页，等待页能轮询 run 并在成功后回到 `/maps/[mapId]?tab=video`
+- [ ] 成功视频可以在 `视频` tab 中播放并下载，且播放源是本地 MP4 而不是远端临时 URL
+- [ ] run trace 与测试追踪页能够看到 P6 视频阶段、时长和 `videoPath`
+- [ ] 后续海报变化不会自动使已生成视频失效；再次生成成功时只覆盖同一地图的最新视频产物
