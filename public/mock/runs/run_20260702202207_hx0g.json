@@ -1,0 +1,27 @@
+{
+  "runId": "run_20260702202207_hx0g",
+  "mapId": "map_gz_1782994927117",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "young-cartoon",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_young_cartoon_20260702"
+  ],
+  "inputSummary": {
+    "mapName": "广州04",
+    "city": "广州",
+    "selectedCommentCount": 7
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/guangzhou.raw.json",
+    "eventsPath": "/mock/events/guangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1782994927117.route.md",
+    "posterPath": "/mock/posters/map_gz_1782994927117.png",
+    "mapPath": "/mock/maps/map_gz_1782994927117.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-02T12:22:07.117Z",
+  "endedAt": "2026-07-02T12:22:49.618Z"
+}
