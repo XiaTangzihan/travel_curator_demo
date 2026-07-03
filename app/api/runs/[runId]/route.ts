@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { getRunTrace } from "@/src/server/repositories/demo-repository";
+import { getRunTraceWithRecovery } from "@/src/server/repositories/demo-repository";
 
 export const dynamic = "force-dynamic";
 
-type RunContext = {
+type RunRouteContext = {
   params: Promise<{ runId: string }>;
 };
 
-export async function GET(_request: Request, context: RunContext) {
+export async function GET(_request: Request, context: RunRouteContext) {
   try {
     const { runId } = await context.params;
-    const run = await getRunTrace(runId);
+    const run = await getRunTraceWithRecovery(runId);
 
     if (!run) {
       return NextResponse.json({ error: "run 不存在" }, { status: 404 });

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supportedStyleKeys } from "@/src/engine/prompts";
-import { generateMapDraft } from "@/src/engine/pipelines/generate-map";
+import { startGenerateMapRun } from "@/src/engine/pipelines/generate-map";
 
 export const dynamic = "force-dynamic";
 
@@ -15,13 +15,12 @@ const requestSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = requestSchema.parse(await request.json());
-    const result = await generateMapDraft(body);
+    const result = await startGenerateMapRun(body);
 
     return NextResponse.json({
       mapId: result.mapId,
       runId: result.runId,
-      warnings: result.runTrace.warnings,
-      providerMode: result.runTrace.providerMode,
+      waitPath: result.waitPath,
     });
   } catch (error) {
     return NextResponse.json(

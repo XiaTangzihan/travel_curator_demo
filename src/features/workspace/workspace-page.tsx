@@ -7,10 +7,6 @@ import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { stylePromptLibrary, type SupportedStyleKey } from "@/src/engine/prompts";
-import {
-  persistAiNotice,
-  resolveAiNoticeFromWarnings,
-} from "@/src/lib/ai-notice";
 import { useWorkspaceStore } from "@/src/store/workspace-store";
 
 type WorkspacePageProps = {
@@ -87,16 +83,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
       if (!response.ok) {
         throw new Error(payload.error ?? "生成失败");
       }
-
-      const notice = resolveAiNoticeFromWarnings({
-        warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
-        city: trimmedCity,
-      });
-      if (notice) {
-        persistAiNotice(notice);
-      }
-
-      router.push(`/confirm/${payload.mapId}`);
+      router.push(payload.waitPath ?? `/workspace/generating/${payload.runId}`);
     } catch (requestError) {
       setError((requestError as Error).message);
     } finally {

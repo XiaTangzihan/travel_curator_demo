@@ -27,6 +27,7 @@ import {
 
 const rawDatasetFile = path.join(storagePaths.raw, "guangzhou.raw.json");
 const eventDatasetFile = path.join(storagePaths.events, "guangzhou.events.json");
+const runStaleAfterMs = 5 * 60 * 1000;
 
 function mapRecordFile(mapId: string) {
   return path.join(storagePaths.maps, `${mapId}.json`);
@@ -173,6 +174,47 @@ export async function saveRunTrace(trace: RunTrace) {
 export async function getRunTrace(runId: string) {
   const trace = await readJsonFile<RunTrace>(runFile(runId));
   return trace ? runTraceSchema.parse(trace) : null;
+}
+
+export async function updateRunTrace(runId: string, patch: Partial<RunTrace>) {
+  const current = await getRunTrace(runId);
+  if (!current) {
+    throw new Error(`run ${runId} 不存在`);
+  }
+
+  const nextTrace = runTraceSchema.parse({
+    ...current,
+    ...patch,
+    artifacts: {
+      ...current.artifacts,
+      ...(patch.artifacts ?? {}),
+    },
+    updatedAt: patch.updatedAt ?? new Date().toISOString(),
+  });
+  await saveRunTrace(nextTrace);
+  return nextTrace;
+}
+
+export async function getRunTraceWithRecovery(runId: string) {
+  const trace = await getRunTrace(runId);
+  if (!trace) {
+    return null;
+  }
+
+  const lastTick = trace.updatedAt ?? trace.startedAt;
+  const isRunningTooLong =
+    trace.status === "running" &&
+    Date.now() - Date.parse(lastTick) > runStaleAfterMs;
+
+  if (!isRunningTooLong) {
+    return trace;
+  }
+
+  return updateRunTrace(runId, {
+    status: "incomplete",
+    errorMessage: trace.errorMessage ?? "本次生成未正常完成，请重试。",
+    endedAt: trace.endedAt ?? new Date().toISOString(),
+  });
 }
 
 export async function listRunTraces() {

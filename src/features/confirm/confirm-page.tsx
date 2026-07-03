@@ -18,6 +18,7 @@ import {
 type ConfirmPageProps = {
   mapRecord: MapRecord;
   mapViewModel: MapViewModel;
+  runDurationLabel: string | null;
 };
 
 export function ConfirmPage(props: ConfirmPageProps) {
@@ -27,6 +28,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
   const [pending, setPending] = useState<"regenerate" | "confirm" | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState<AiNotice | null>(null);
+  const actionsLocked = pending !== null;
 
   useEffect(() => {
     const nextNotice = consumeAiNotice();
@@ -103,7 +105,16 @@ export function ConfirmPage(props: ConfirmPageProps) {
         eyebrow="静态图确认"
         description="检查这张地图的画面和细节，确认后保存为正式作品。"
         activeHref="/workspace"
-        actions={<StatusPill status={props.mapRecord.status} />}
+        actions={
+          <>
+            {props.runDurationLabel ? (
+              <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
+                本次生图耗时 {props.runDurationLabel}
+              </span>
+            ) : null}
+            <StatusPill status={props.mapRecord.status} />
+          </>
+        }
       >
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <section className="overflow-hidden rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-5">
@@ -165,7 +176,8 @@ export function ConfirmPage(props: ConfirmPageProps) {
               <button
                 type="button"
                 onClick={handleRegenerate}
-                className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
+                disabled={actionsLocked}
+                className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
               >
                 {pending === "regenerate" ? (
                   <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -177,7 +189,8 @@ export function ConfirmPage(props: ConfirmPageProps) {
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="inline-flex items-center justify-center gap-2 rounded-[20px] bg-[var(--accent-primary)] px-4 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
+                disabled={actionsLocked}
+                className="inline-flex items-center justify-center gap-2 rounded-[20px] bg-[var(--accent-primary)] px-4 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
               >
                 {pending === "confirm" ? (
                   <LoaderCircle className="h-4 w-4 animate-spin" />

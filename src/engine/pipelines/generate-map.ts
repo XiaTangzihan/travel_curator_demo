@@ -1,9 +1,11 @@
 import {
+  type GenerateRunInput,
   mapRecordSchema,
   runTraceSchema,
   type EventRecord,
   type Landmark,
   type MapRecord,
+  type RawDatasetSnapshot,
   type RunTrace,
 } from "@/src/contracts/domain";
 import {
@@ -24,6 +26,7 @@ import {
   getEventsDataset,
   getKnowledge,
   getRawDataset,
+  getRunTrace,
   posterOutputPath,
   posterPublicPath,
   saveEventsDataset,
@@ -32,14 +35,17 @@ import {
   saveRenderedMap,
   saveRouteMarkdown,
   saveRunTrace,
+  updateRunTrace,
 } from "@/src/server/repositories/demo-repository";
 import { fromPublicPath, writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
 
-type GenerateMapInput = {
-  mapName: string;
-  city: string;
-  style: string;
-  selectedCommentIds?: string[];
+type GenerateMapInput = GenerateRunInput;
+
+type GenerateMapExecutionContext = {
+  runId: string;
+  mapId: string;
+  startedAt: string;
+  onProgress?: (patch: Partial<RunTrace>) => Promise<unknown> | unknown;
 };
 
 function buildRunInputSummary(params: {
@@ -52,6 +58,23 @@ function buildRunInputSummary(params: {
     city: params.city,
     selectedCommentCount: params.selectedCommentCount,
   };
+}
+
+function buildWaitPath(runId: string) {
+  return `/workspace/generating/${runId}`;
+}
+
+function buildPreviewImagePaths(params: {
+  rawDataset: RawDatasetSnapshot;
+  selectedCommentIds: string[];
+}) {
+  const selectedCommentIdSet = new Set(params.selectedCommentIds);
+  const previewImagePaths = params.rawDataset.reviews
+    .filter((review) => selectedCommentIdSet.has(review.recordId))
+    .flatMap((review) => review.attachments.map((attachment) => attachment.publicPath.trim()))
+    .filter(Boolean);
+
+  return [...new Set(previewImagePaths)].slice(0, 12);
 }
 
 function compareEventOrder(left: EventRecord, right: EventRecord) {
@@ -178,19 +201,17 @@ async function writeRegeneratedPosterFile(params: {
   return posterPublicPath(params.mapId, "png");
 }
 
-export async function generateMapDraft(input: GenerateMapInput) {
-  const startedAt = new Date().toISOString();
-  const runId = createRunId();
-  const mapId = createMapId();
+async function generateMapDraftCore(
+  input: GenerateMapInput,
+  context: GenerateMapExecutionContext,
+) {
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
 
   const eventsSnapshot = await ensureEvents();
   const selectedEvents = normalizeMapEvents(
     eventsSnapshot.events.filter((event) =>
-      input.selectedCommentIds?.length
-        ? input.selectedCommentIds.includes(event.commentId)
-        : true,
+      input.selectedCommentIds.includes(event.commentId),
     ),
   );
 
@@ -223,13 +244,17 @@ export async function generateMapDraft(input: GenerateMapInput) {
     knowledge,
   });
 
-  const routePath = await saveRouteMarkdown(mapId, routeMarkdown);
-  const knowledgePath = await saveKnowledge(mapId, knowledge);
+  const routePath = await saveRouteMarkdown(context.mapId, routeMarkdown);
+  const knowledgePath = await saveKnowledge(context.mapId, knowledge);
+
+  await context.onProgress?.({
+    progressStep: "rendering",
+  });
 
   let posterPath: string;
   try {
     posterPath = await writePosterFile({
-      mapId,
+      mapId: context.mapId,
       mapName: input.mapName,
       city: input.city,
       styleKey: input.style,
@@ -246,12 +271,16 @@ export async function generateMapDraft(input: GenerateMapInput) {
       styleLabel: stylePreset.label,
       events: selectedEvents,
     });
-    await writeTextFile(posterOutputPath(mapId, "svg"), svg);
-    posterPath = posterPublicPath(mapId, "svg");
+    await writeTextFile(posterOutputPath(context.mapId, "svg"), svg);
+    posterPath = posterPublicPath(context.mapId, "svg");
   }
 
+  await context.onProgress?.({
+    progressStep: "finalizing",
+  });
+
   const mapViewModel = buildMapViewModel({
-    mapId,
+    mapId: context.mapId,
     mapName: input.mapName,
     city: input.city,
     style: input.style,
@@ -260,10 +289,10 @@ export async function generateMapDraft(input: GenerateMapInput) {
     events: selectedEvents,
     knowledge,
   });
-  await saveRenderedMap(mapId, mapViewModel);
+  await saveRenderedMap(context.mapId, mapViewModel);
 
   const mapRecord: MapRecord = mapRecordSchema.parse({
-    mapId,
+    mapId: context.mapId,
     mapName: input.mapName,
     city: input.city,
     style: input.style,
@@ -272,18 +301,20 @@ export async function generateMapDraft(input: GenerateMapInput) {
     routePath,
     posterPath,
     knowledgePath,
-    currentRunId: runId,
+    currentRunId: context.runId,
     selectedCommentIds: selectedEvents.map((event) => event.commentId),
-    createdAt: startedAt,
+    createdAt: context.startedAt,
     updatedAt: new Date().toISOString(),
   });
   await saveMapRecord(mapRecord);
 
+  const finishedAt = new Date().toISOString();
   const runTrace = runTraceSchema.parse({
-    runId,
-    mapId,
+    runId: context.runId,
+    mapId: context.mapId,
     status: "completed",
     stage: "generate",
+    progressStep: "finalizing",
     styleKey: input.style,
     promptVersion: stylePreset.promptVersion,
     referenceIds: [stylePreset.referenceId],
@@ -292,23 +323,149 @@ export async function generateMapDraft(input: GenerateMapInput) {
     artifacts: {
       rawPath: "/mock/raw/guangzhou.raw.json",
       eventsPath: "/mock/events/guangzhou.events.json",
-      routePath: `/mock/routes/${mapId}.route.md`,
+      routePath: `/mock/routes/${context.mapId}.route.md`,
       posterPath,
-      mapPath: `/mock/maps/${mapId}.view.json`,
+      mapPath: `/mock/maps/${context.mapId}.view.json`,
     },
     providerMode,
-    startedAt,
-    endedAt: new Date().toISOString(),
+    startedAt: context.startedAt,
+    updatedAt: finishedAt,
+    endedAt: finishedAt,
   });
-  await saveRunTrace(runTrace);
 
   return {
-    mapId,
-    runId,
+    mapId: context.mapId,
+    runId: context.runId,
     mapRecord,
     mapViewModel,
     runTrace,
   };
+}
+
+async function createInitialGenerateRunTrace(params: {
+  input: GenerateMapInput;
+  runId: string;
+  mapId: string;
+  startedAt: string;
+}) {
+  const rawDataset = await getRawDataset();
+  const previewImagePaths = rawDataset
+    ? buildPreviewImagePaths({
+        rawDataset,
+        selectedCommentIds: params.input.selectedCommentIds,
+      })
+    : [];
+  const inputSummary = buildRunInputSummary({
+    mapName: params.input.mapName,
+    city: params.input.city,
+    selectedCommentCount: params.input.selectedCommentIds.length,
+  });
+
+  const runTrace = runTraceSchema.parse({
+    runId: params.runId,
+    mapId: params.mapId,
+    status: "running",
+    stage: "generate",
+    progressStep: "preparing",
+    styleKey: params.input.style,
+    previewImagePaths,
+    generateInput: params.input,
+    inputSummary,
+    warnings: [],
+    artifacts: {
+      rawPath: "/mock/raw/guangzhou.raw.json",
+      eventsPath: "/mock/events/guangzhou.events.json",
+    },
+    providerMode: "live",
+    startedAt: params.startedAt,
+    updatedAt: params.startedAt,
+  });
+  await saveRunTrace(runTrace);
+  return runTrace;
+}
+
+async function executeGenerateMapRun(params: {
+  input: GenerateMapInput;
+  runId: string;
+  mapId: string;
+}) {
+  const initialRunTrace = await getRunTrace(params.runId);
+  if (!initialRunTrace) {
+    return;
+  }
+
+  try {
+    const result = await generateMapDraftCore(params.input, {
+      runId: params.runId,
+      mapId: params.mapId,
+      startedAt: initialRunTrace.startedAt,
+      onProgress: (patch) => updateRunTrace(params.runId, patch),
+    });
+
+    const completedRunTrace = runTraceSchema.parse({
+      ...initialRunTrace,
+      ...result.runTrace,
+      artifacts: {
+        ...initialRunTrace.artifacts,
+        ...result.runTrace.artifacts,
+      },
+    });
+    await saveRunTrace(completedRunTrace);
+  } catch (error) {
+    const currentRunTrace = await getRunTrace(params.runId);
+    if (!currentRunTrace) {
+      return;
+    }
+
+    const failedAt = new Date().toISOString();
+    await saveRunTrace(
+      runTraceSchema.parse({
+        ...currentRunTrace,
+        status: "failed",
+        errorMessage: (error as Error).message || "生成失败",
+        updatedAt: failedAt,
+        endedAt: failedAt,
+      }),
+    );
+  }
+}
+
+export async function startGenerateMapRun(input: GenerateMapInput) {
+  const startedAt = new Date().toISOString();
+  const runId = createRunId();
+  const mapId = createMapId();
+  await createInitialGenerateRunTrace({
+    input,
+    runId,
+    mapId,
+    startedAt,
+  });
+
+  setTimeout(() => {
+    void executeGenerateMapRun({
+      input,
+      runId,
+      mapId,
+    });
+  }, 0);
+
+  return {
+    runId,
+    mapId,
+    waitPath: buildWaitPath(runId),
+  };
+}
+
+export async function generateMapDraft(input: GenerateMapInput) {
+  const startedAt = new Date().toISOString();
+  const result = await generateMapDraftCore(input, {
+    runId: createRunId(),
+    mapId: createMapId(),
+    startedAt,
+  });
+  await saveRunTrace(result.runTrace);
+
+  return result;
 }
 
 export async function regenerateMapDraft(params: {
@@ -428,6 +585,7 @@ export async function regenerateMapDraft(params: {
     },
     providerMode,
     startedAt,
+    updatedAt: new Date().toISOString(),
     endedAt: new Date().toISOString(),
   });
   await saveRunTrace(runTrace);
