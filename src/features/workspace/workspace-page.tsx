@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
-import { stylePromptLibrary } from "@/src/engine/prompts";
+import { stylePromptLibrary, type SupportedStyleKey } from "@/src/engine/prompts";
 import {
   persistAiNotice,
   resolveAiNoticeFromWarnings,
@@ -19,6 +19,7 @@ type WorkspacePageProps = {
 
 export function WorkspacePage(props: WorkspacePageProps) {
   const router = useRouter();
+  const actionLockRef = useRef<"generate" | "preprocess" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
@@ -35,9 +36,9 @@ export function WorkspacePage(props: WorkspacePageProps) {
 
   useEffect(() => {
     initialize({
-      mapName: "广州两日行",
-      city: "广州",
-      style: "young-cartoon",
+      mapName: "",
+      city: "",
+      style: "",
       selectedCommentIds: props.rawDataset.reviews.map((review) => review.recordId),
     });
   }, [initialize, props.rawDataset.reviews]);
@@ -47,13 +48,28 @@ export function WorkspacePage(props: WorkspacePageProps) {
     [props.rawDataset.reviews],
   );
   const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
-  const stylePreview = stylePromptLibrary[currentStyle as keyof typeof stylePromptLibrary] ?? stylePromptLibrary["young-cartoon"];
+  const hasSelectedStyle = currentStyle.trim().length > 0;
+  const actionsLocked = submitting || syncing;
+  const stylePreview = hasSelectedStyle
+    ? stylePromptLibrary[currentStyle as SupportedStyleKey]
+    : null;
 
   async function handleGenerate() {
-    try {
-      const trimmedMapName = mapName.trim();
-      const trimmedCity = currentCity.trim();
+    if (actionLockRef.current) {
+      return;
+    }
 
+    const trimmedMapName = mapName.trim();
+    const trimmedCity = currentCity.trim();
+    const trimmedStyle = currentStyle.trim();
+
+    if (!trimmedMapName || !trimmedCity || !trimmedStyle || !selectedCommentIds.length) {
+      setError("请先填写地图名称、目的地、选择风格，并至少选择 1 条评论。");
+      return;
+    }
+
+    try {
+      actionLockRef.current = "generate";
       setSubmitting(true);
       setError("");
       const response = await fetch("/api/maps/generate", {
@@ -62,7 +78,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
         body: JSON.stringify({
           mapName: trimmedMapName,
           city: trimmedCity,
-          style: currentStyle,
+          style: trimmedStyle,
           selectedCommentIds,
         }),
       });
@@ -84,12 +100,18 @@ export function WorkspacePage(props: WorkspacePageProps) {
     } catch (requestError) {
       setError((requestError as Error).message);
     } finally {
+      actionLockRef.current = null;
       setSubmitting(false);
     }
   }
 
   async function handlePreprocess() {
+    if (actionLockRef.current) {
+      return;
+    }
+
     try {
+      actionLockRef.current = "preprocess";
       setSyncing(true);
       setError("");
       const response = await fetch("/api/preprocess/guangzhou", { method: "POST" });
@@ -100,6 +122,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
     } catch (requestError) {
       setError((requestError as Error).message);
     } finally {
+      actionLockRef.current = null;
       setSyncing(false);
     }
   }
@@ -120,6 +143,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
               <input
                 value={mapName}
                 onChange={(event) => setMapName(event.target.value)}
+                placeholder="例如：广州两日行"
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               />
             </label>
@@ -128,6 +152,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
               <input
                 value={currentCity}
                 onChange={(event) => setCity(event.target.value)}
+                placeholder="例如：广州"
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               />
             </label>
@@ -138,9 +163,14 @@ export function WorkspacePage(props: WorkspacePageProps) {
               风格
               <select
                 value={currentStyle}
-                onChange={(event) => setStyle(event.target.value)}
-                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
+                onChange={(event) => setStyle(event.target.value as SupportedStyleKey | "")}
+                className={`mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition ${
+                  hasSelectedStyle ? "text-[var(--text-strong)]" : "text-[var(--text-muted)]"
+                }`}
               >
+                <option value="" disabled>
+                  请选择风格
+                </option>
                 {Object.entries(stylePromptLibrary).map(([styleKey, option]) => (
                   <option key={styleKey} value={styleKey}>
                     {option.label}
@@ -177,7 +207,8 @@ export function WorkspacePage(props: WorkspacePageProps) {
           <button
             type="button"
             onClick={handlePreprocess}
-            className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft-strong)]"
+            disabled={actionsLocked}
+            className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft-strong)] disabled:opacity-60"
           >
             {syncing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             更新素材列表
@@ -185,11 +216,23 @@ export function WorkspacePage(props: WorkspacePageProps) {
 
           <div className="overflow-hidden rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)]">
             <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-soft)]">
-              <Image src={stylePreview.previewImage} alt={stylePreview.label} fill unoptimized className="object-cover" />
+              {stylePreview ? (
+                <Image src={stylePreview.previewImage} alt={stylePreview.label} fill unoptimized className="object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-7 text-[var(--text-muted)]">
+                  选择风格后，这里会显示对应的参考图预览。
+                </div>
+              )}
             </div>
             <div className="p-4">
-              <p className="text-sm font-medium text-[var(--text-strong)]">{stylePreview.label}</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{stylePreview.description}</p>
+              <p className="text-sm font-medium text-[var(--text-strong)]">
+                {stylePreview ? stylePreview.label : "未选择风格"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
+                {stylePreview
+                  ? stylePreview.description
+                  : "先选择风格，再查看对应的画风说明和参考图。"}
+              </p>
             </div>
           </div>
 
@@ -286,7 +329,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={submitting || !selectedCommentIds.length || !mapName.trim() || !currentCity.trim()}
+              disabled={actionsLocked || !selectedCommentIds.length || !mapName.trim() || !currentCity.trim() || !hasSelectedStyle}
               className="inline-flex items-center justify-center gap-2 self-end rounded-full bg-[var(--accent-primary)] px-6 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
             >
               {submitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
