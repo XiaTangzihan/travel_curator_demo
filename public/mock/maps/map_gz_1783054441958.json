@@ -1,0 +1,28 @@
+{
+  "mapId": "map_gz_1783054441958",
+  "mapName": "测试05",
+  "city": "广州",
+  "style": "watercolor",
+  "status": "confirmed",
+  "eventCount": 11,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783054441958.route.md",
+  "posterPath": "/mock/posters/map_gz_1783054441958.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783054441958.knowledge.json",
+  "currentRunId": "run_20260703130158_o3bd",
+  "selectedCommentIds": [
+    "recvo6qYsKDxqV",
+    "recvo6qYsKSGnI",
+    "recvo6qYsKNAme",
+    "recvo6qYsLYCir",
+    "recvo6qYsLaggU",
+    "recvo6qYsLa712",
+    "recvo6qYsLl36L",
+    "recvo6qYsLUJkS",
+    "recvo6qYsLtGqp",
+    "recvo6qYsL5PlF",
+    "recvo6qYsL0xvq"
+  ],
+  "createdAt": "2026-07-03T04:54:01.958Z",
+  "updatedAt": "2026-07-03T05:01:58.079Z",
+  "lastInstruction": "左上角的海报标题从“测试05”改为“广州”。海报整体的水彩风格不变"
+}

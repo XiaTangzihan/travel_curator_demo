@@ -1,6 +1,6 @@
 {
   "datasetId": "guangzhou-golden",
-  "generatedAt": "2026-07-01T12:16:29.417Z",
+  "generatedAt": "2026-07-03T05:19:45.006Z",
   "report": {
     "totalInput": 11,
     "totalOutput": 11,
@@ -17,7 +17,7 @@
       "记录 recvo6qYsL5PlF：拆分 day(2024:06:02) 与源字段(2) 不一致",
       "记录 recvo6qYsL0xvq：拆分 day(2024:06:02) 与源字段(2) 不一致"
     ],
-    "generatedAt": "2026-07-01T12:16:29.417Z"
+    "generatedAt": "2026-07-03T05:19:45.006Z"
   },
   "events": [
     {
