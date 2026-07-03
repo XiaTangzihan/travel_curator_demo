@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { EventRecord, Landmark } from "@/src/contracts/domain";
-import { buildPosterPrompt } from "@/src/engine/prompts";
+import {
+  buildPosterPrompt,
+  buildRegeneratePosterPrompt,
+} from "@/src/engine/prompts";
 
 const events: EventRecord[] = [
   {
@@ -28,9 +31,8 @@ const events: EventRecord[] = [
 const knowledge: Landmark[] = [{ name: "广州塔", visual: "修长塔身与夜景灯光" }];
 
 describe("buildPosterPrompt", () => {
-  it("会去除时间信息，并只把地标 visual 暴露给生图提示", () => {
+  it("会去除时间信息，并收紧海报标题语义到目的地", () => {
     const prompt = buildPosterPrompt({
-      mapName: "广州两日行",
       city: "广州",
       styleKey: "young-cartoon",
       events,
@@ -44,7 +46,27 @@ describe("buildPosterPrompt", () => {
     expect(prompt).not.toContain("10:20:00");
     expect(prompt).not.toContain("广州塔（");
     expect(prompt).not.toContain("SPA(丽影广场客村店)");
+    expect(prompt).not.toContain("地图名称：");
+    expect(prompt).not.toContain("广州两日行");
+    expect(prompt).not.toContain("当前地图名称");
     expect(prompt).toContain("不要输出这些地标的名字文字");
     expect(prompt).toContain("不能保留杭州字样");
+    expect(prompt).toContain("左上角艺术字只能写当前目的地名称「广州」");
+  });
+
+  it("重生成提示词也只能使用目的地艺术字", () => {
+    const prompt = buildRegeneratePosterPrompt({
+      city: "杭州",
+      styleKey: "storybook",
+      events,
+      knowledge,
+      instruction: "让右侧路线更清晰",
+      basedOnExistingImage: true,
+    });
+
+    expect(prompt).toContain("左上角艺术字只能写当前目的地名称「杭州」");
+    expect(prompt).not.toContain("地图名称：");
+    expect(prompt).not.toContain("当前地图名称");
+    expect(prompt).toContain("请尽量保留原有整体构图，只按这条意见调整：让右侧路线更清晰");
   });
 });

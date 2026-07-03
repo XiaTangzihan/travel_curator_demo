@@ -161,7 +161,6 @@ async function generateKnowledge(city: string) {
 
 async function writePosterFile(params: {
   mapId: string;
-  mapName: string;
   city: string;
   styleKey: string;
   referenceImagePaths: string[];
@@ -182,7 +181,6 @@ async function writePosterFile(params: {
 
 async function writeRegeneratedPosterFile(params: {
   mapId: string;
-  mapName: string;
   city: string;
   styleKey: string;
   referenceImagePaths: string[];
@@ -255,7 +253,6 @@ async function generateMapDraftCore(
   try {
     posterPath = await writePosterFile({
       mapId: context.mapId,
-      mapName: input.mapName,
       city: input.city,
       styleKey: input.style,
       referenceImagePaths,
@@ -266,7 +263,6 @@ async function generateMapDraftCore(
     providerMode = "fallback";
     warnings.push(`P3 已回退：${(error as Error).message}`);
     const svg = createFallbackPosterSvg({
-      mapName: input.mapName,
       city: input.city,
       styleLabel: stylePreset.label,
       events: selectedEvents,
@@ -523,7 +519,6 @@ export async function regenerateMapDraft(params: {
   try {
     posterPath = await writeRegeneratedPosterFile({
       mapId: params.mapRecord.mapId,
-      mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
       styleKey: params.mapRecord.style,
       referenceImagePaths,
@@ -536,7 +531,6 @@ export async function regenerateMapDraft(params: {
     providerMode = "fallback";
     warnings.push(`P4 已回退：${(error as Error).message}`);
     const svg = createFallbackPosterSvg({
-      mapName: params.mapRecord.mapName,
       city: params.mapRecord.city,
       styleLabel: stylePreset.label,
       events,

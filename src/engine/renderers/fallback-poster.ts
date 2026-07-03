@@ -9,7 +9,6 @@ function esc(value: string) {
 }
 
 export function createFallbackPosterSvg(params: {
-  mapName: string;
   city: string;
   styleLabel: string;
   events: EventRecord[];
@@ -50,8 +49,8 @@ export function createFallbackPosterSvg(params: {
     <rect width="${width}" height="${height}" fill="url(#paper)" />
     <circle cx="1220" cy="160" r="120" fill="rgba(116,215,247,0.22)" />
     <circle cx="220" cy="140" r="90" fill="rgba(255,122,69,0.18)" />
-    <text x="88" y="110" font-size="58" font-weight="900" font-family="'Microsoft YaHei', sans-serif" fill="#173F7A">${esc(params.mapName)}</text>
-    <text x="88" y="156" font-size="24" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">${esc(params.city)} · ${esc(params.styleLabel)} · 本地稳态底片</text>
+    <text x="88" y="110" font-size="58" font-weight="900" font-family="'Microsoft YaHei', sans-serif" fill="#173F7A">${esc(params.city)}</text>
+    <text x="88" y="156" font-size="24" font-family="'Microsoft YaHei', sans-serif" fill="#16202A">旅行地图 · ${esc(params.styleLabel)} · 本地稳态底片</text>
     <path d="${path}" fill="none" stroke="#74D7F7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
     ${nodeSvg}
   </svg>`;
