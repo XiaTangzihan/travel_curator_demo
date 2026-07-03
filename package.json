@@ -10,8 +10,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npm run test",
+    "sync:dataset": "node scripts/sync-dataset.mjs",
+    "preprocess:dataset": "node scripts/preprocess-dataset.mjs",
     "sync:guangzhou": "node scripts/sync-guangzhou-dataset.mjs",
-    "preprocess:guangzhou": "node scripts/preprocess-guangzhou.mjs"
+    "preprocess:guangzhou": "node scripts/preprocess-guangzhou.mjs",
+    "sync:hangzhou": "node scripts/sync-dataset.mjs hangzhou",
+    "preprocess:hangzhou": "node scripts/preprocess-dataset.mjs hangzhou"
   },
   "dependencies": {
     "lucide-react": "^0.554.0",

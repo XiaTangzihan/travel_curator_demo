@@ -8,6 +8,7 @@ import {
   type RawDatasetSnapshot,
   type RunTrace,
 } from "@/src/contracts/domain";
+import { getDemoDataset } from "@/src/config/demo";
 import {
   buildLandmarkPrompt,
   buildPosterPrompt,
@@ -49,11 +50,13 @@ type GenerateMapExecutionContext = {
 };
 
 function buildRunInputSummary(params: {
+  datasetKey: string;
   mapName: string;
   city: string;
   selectedCommentCount: number;
 }) {
   return {
+    datasetKey: params.datasetKey,
     mapName: params.mapName,
     city: params.city,
     selectedCommentCount: params.selectedCommentCount,
@@ -62,6 +65,15 @@ function buildRunInputSummary(params: {
 
 function buildWaitPath(runId: string) {
   return `/workspace/generating/${runId}`;
+}
+
+function buildDatasetArtifactPaths(datasetKey: string) {
+  const dataset = getDemoDataset(datasetKey);
+
+  return {
+    rawPath: `/mock/raw/${dataset.rawFileName}`,
+    eventsPath: `/mock/events/${dataset.eventsFileName}`,
+  };
 }
 
 function buildPreviewImagePaths(params: {
@@ -123,25 +135,27 @@ function fallbackKnowledge(city: string): Landmark[] {
   ];
 }
 
-async function ensureEvents() {
-  let eventsSnapshot = await getEventsDataset();
+async function ensureEvents(datasetKey: string) {
+  let eventsSnapshot = await getEventsDataset(datasetKey);
   if (eventsSnapshot) {
     return eventsSnapshot;
   }
 
-  const rawDataset = await getRawDataset();
+  const rawDataset = await getRawDataset(datasetKey);
   if (!rawDataset) {
-    throw new Error("本地原始广州数据不存在，请先执行 sync:guangzhou");
+    const dataset = getDemoDataset(datasetKey);
+    throw new Error(`本地原始${dataset.city}数据不存在，请先执行对应同步脚本`);
   }
 
   const generated = preprocessDataset(rawDataset);
   eventsSnapshot = {
+    datasetKey: rawDataset.datasetKey,
     datasetId: rawDataset.datasetId,
     generatedAt: generated.report.generatedAt,
     report: generated.report,
     events: generated.events,
   };
-  await saveEventsDataset(eventsSnapshot);
+  await saveEventsDataset(eventsSnapshot, datasetKey);
   return eventsSnapshot;
 }
 
@@ -206,7 +220,7 @@ async function generateMapDraftCore(
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
 
-  const eventsSnapshot = await ensureEvents();
+  const eventsSnapshot = await ensureEvents(input.datasetKey);
   const selectedEvents = normalizeMapEvents(
     eventsSnapshot.events.filter((event) =>
       input.selectedCommentIds.includes(event.commentId),
@@ -220,6 +234,7 @@ async function generateMapDraftCore(
   const stylePreset = getStylePreset(input.style);
   const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
   const inputSummary = buildRunInputSummary({
+    datasetKey: input.datasetKey,
     mapName: input.mapName,
     city: input.city,
     selectedCommentCount: selectedEvents.length,
@@ -277,6 +292,7 @@ async function generateMapDraftCore(
 
   const mapViewModel = buildMapViewModel({
     mapId: context.mapId,
+    datasetKey: input.datasetKey,
     mapName: input.mapName,
     city: input.city,
     style: input.style,
@@ -289,6 +305,7 @@ async function generateMapDraftCore(
 
   const mapRecord: MapRecord = mapRecordSchema.parse({
     mapId: context.mapId,
+    datasetKey: input.datasetKey,
     mapName: input.mapName,
     city: input.city,
     style: input.style,
@@ -305,9 +322,11 @@ async function generateMapDraftCore(
   await saveMapRecord(mapRecord);
 
   const finishedAt = new Date().toISOString();
+  const datasetArtifacts = buildDatasetArtifactPaths(input.datasetKey);
   const runTrace = runTraceSchema.parse({
     runId: context.runId,
     mapId: context.mapId,
+    datasetKey: input.datasetKey,
     status: "completed",
     stage: "generate",
     progressStep: "finalizing",
@@ -317,8 +336,8 @@ async function generateMapDraftCore(
     inputSummary,
     warnings,
     artifacts: {
-      rawPath: "/mock/raw/guangzhou.raw.json",
-      eventsPath: "/mock/events/guangzhou.events.json",
+      rawPath: datasetArtifacts.rawPath,
+      eventsPath: datasetArtifacts.eventsPath,
       routePath: `/mock/routes/${context.mapId}.route.md`,
       posterPath,
       mapPath: `/mock/maps/${context.mapId}.view.json`,
@@ -344,7 +363,7 @@ async function createInitialGenerateRunTrace(params: {
   mapId: string;
   startedAt: string;
 }) {
-  const rawDataset = await getRawDataset();
+  const rawDataset = await getRawDataset(params.input.datasetKey);
   const previewImagePaths = rawDataset
     ? buildPreviewImagePaths({
         rawDataset,
@@ -352,14 +371,17 @@ async function createInitialGenerateRunTrace(params: {
       })
     : [];
   const inputSummary = buildRunInputSummary({
+    datasetKey: params.input.datasetKey,
     mapName: params.input.mapName,
     city: params.input.city,
     selectedCommentCount: params.input.selectedCommentIds.length,
   });
+  const datasetArtifacts = buildDatasetArtifactPaths(params.input.datasetKey);
 
   const runTrace = runTraceSchema.parse({
     runId: params.runId,
     mapId: params.mapId,
+    datasetKey: params.input.datasetKey,
     status: "running",
     stage: "generate",
     progressStep: "preparing",
@@ -369,8 +391,8 @@ async function createInitialGenerateRunTrace(params: {
     inputSummary,
     warnings: [],
     artifacts: {
-      rawPath: "/mock/raw/guangzhou.raw.json",
-      eventsPath: "/mock/events/guangzhou.events.json",
+      rawPath: datasetArtifacts.rawPath,
+      eventsPath: datasetArtifacts.eventsPath,
     },
     providerMode: "live",
     startedAt: params.startedAt,
@@ -501,6 +523,7 @@ export async function regenerateMapDraft(params: {
     fromPublicPath(publicPath),
   );
   const inputSummary = buildRunInputSummary({
+    datasetKey: params.mapRecord.datasetKey,
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
     selectedCommentCount: events.length,
@@ -541,6 +564,7 @@ export async function regenerateMapDraft(params: {
 
   const mapViewModel = buildMapViewModel({
     mapId: params.mapRecord.mapId,
+    datasetKey: params.mapRecord.datasetKey,
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
     style: params.mapRecord.style,
@@ -563,6 +587,7 @@ export async function regenerateMapDraft(params: {
   const runTrace = runTraceSchema.parse({
     runId,
     mapId: params.mapRecord.mapId,
+    datasetKey: params.mapRecord.datasetKey,
     status: "completed",
     stage: "regenerate",
     basedOnExistingImage: params.basedOnExistingImage,

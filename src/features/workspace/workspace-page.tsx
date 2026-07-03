@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
@@ -11,6 +12,12 @@ import { useWorkspaceStore } from "@/src/store/workspace-store";
 
 type WorkspacePageProps = {
   rawDataset: RawDatasetSnapshot;
+  activeDatasetKey: string;
+  datasetOptions: Array<{
+    key: string;
+    city: string;
+    defaultMapName: string;
+  }>;
 };
 
 export function WorkspacePage(props: WorkspacePageProps) {
@@ -43,6 +50,12 @@ export function WorkspacePage(props: WorkspacePageProps) {
     () => props.rawDataset.reviews.reduce((sum, review) => sum + review.attachments.length, 0),
     [props.rawDataset.reviews],
   );
+  const activeDataset = useMemo(
+    () =>
+      props.datasetOptions.find((dataset) => dataset.key === props.activeDatasetKey) ??
+      props.datasetOptions[0],
+    [props.activeDatasetKey, props.datasetOptions],
+  );
   const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
   const hasSelectedStyle = currentStyle.trim().length > 0;
   const actionsLocked = submitting || syncing;
@@ -72,6 +85,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          datasetKey: props.activeDatasetKey,
           mapName: trimmedMapName,
           city: trimmedCity,
           style: trimmedStyle,
@@ -101,7 +115,13 @@ export function WorkspacePage(props: WorkspacePageProps) {
       actionLockRef.current = "preprocess";
       setSyncing(true);
       setError("");
-      const response = await fetch("/api/preprocess/guangzhou", { method: "POST" });
+      const response = await fetch("/api/preprocess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          datasetKey: props.activeDatasetKey,
+        }),
+      });
       const payload = await response.json();
       if (!response.ok) {
         throw new Error(payload.error ?? "预处理失败");
@@ -120,17 +140,36 @@ export function WorkspacePage(props: WorkspacePageProps) {
       eyebrow="旅行地图制作"
       description="确认这张地图的名称、风格和评论素材，再生成新的旅行作品。"
       activeHref="/workspace"
+      datasetKey={props.activeDatasetKey}
     >
       <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="flex h-fit flex-col gap-5 rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
           <div>
             <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">当前配置</p>
+            <div className="mt-5">
+              <p className="text-sm font-medium text-[var(--text-strong)]">素材城市</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {props.datasetOptions.map((dataset) => (
+                  <Link
+                    key={dataset.key}
+                    href={`/workspace?dataset=${dataset.key}`}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      dataset.key === props.activeDatasetKey
+                        ? "bg-[var(--accent-primary)] text-white"
+                        : "border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-soft)] hover:text-[var(--text-strong)]"
+                    }`}
+                  >
+                    {dataset.city}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <label className="mt-5 block text-sm font-medium text-[var(--text-strong)]">
               地图名称
               <input
                 value={mapName}
                 onChange={(event) => setMapName(event.target.value)}
-                placeholder="例如：广州两日行"
+                placeholder={`例如：${activeDataset?.defaultMapName ?? "杭州一日漫游"}`}
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               />
             </label>
@@ -139,12 +178,12 @@ export function WorkspacePage(props: WorkspacePageProps) {
               <input
                 value={currentCity}
                 onChange={(event) => setCity(event.target.value)}
-                placeholder="例如：广州"
+                placeholder={`例如：${activeDataset?.city ?? "杭州"}`}
                 className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] outline-none transition"
               />
             </label>
             <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">
-              当前 demo 仍基于广州素材源，修改目的地会影响生成文案与地图元数据，不会切换底层评论数据。
+              当前正在使用 {activeDataset?.city ?? "当前"} 素材。切换上方城市标签会重载评论源；这里只影响地图名称与目的地文案。
             </p>
             <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
               风格

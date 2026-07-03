@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST() {
   try {
-    const rawDataset = await getRawDataset();
+    const rawDataset = await getRawDataset("guangzhou");
 
     if (!rawDataset) {
       return NextResponse.json(
@@ -20,12 +20,13 @@ export async function POST() {
 
     const result = preprocessDataset(rawDataset);
     const snapshot = {
+      datasetKey: rawDataset.datasetKey,
       datasetId: rawDataset.datasetId,
       generatedAt: result.report.generatedAt,
       report: result.report,
       events: result.events,
     };
-    await saveEventsDataset(snapshot);
+    await saveEventsDataset(snapshot, "guangzhou");
 
     return NextResponse.json(snapshot);
   } catch (error) {

@@ -35,6 +35,7 @@ export async function POST(_request: Request, context: ConfirmContext) {
       runTraceSchema.parse({
         runId,
         mapId,
+        datasetKey: confirmedRecord.datasetKey,
         status: "completed",
         stage: "confirm",
         warnings: [],

@@ -1,4 +1,5 @@
 import path from "node:path";
+import { resolveDatasetKey, getDemoDataset } from "@/src/config/demo";
 import {
   eventsSnapshotSchema,
   mapRecordSchema,
@@ -25,9 +26,17 @@ import {
   writeTextFile,
 } from "@/src/server/utils/storage";
 
-const rawDatasetFile = path.join(storagePaths.raw, "guangzhou.raw.json");
-const eventDatasetFile = path.join(storagePaths.events, "guangzhou.events.json");
 const runStaleAfterMs = 5 * 60 * 1000;
+
+function rawDatasetFile(datasetKey?: string) {
+  const dataset = getDemoDataset(datasetKey);
+  return path.join(storagePaths.raw, dataset.rawFileName);
+}
+
+function eventDatasetFile(datasetKey?: string) {
+  const dataset = getDemoDataset(datasetKey);
+  return path.join(storagePaths.events, dataset.eventsFileName);
+}
 
 function mapRecordFile(mapId: string) {
   return path.join(storagePaths.maps, `${mapId}.json`);
@@ -49,26 +58,52 @@ function runFile(runId: string) {
   return path.join(storagePaths.runs, `${runId}.json`);
 }
 
-export async function getRawDataset() {
+export async function getRawDataset(datasetKey?: string) {
   await ensureStorageDirectories();
-  const snapshot = await readJsonFile<RawDatasetSnapshot>(rawDatasetFile);
-  return snapshot ? rawDatasetSnapshotSchema.parse(snapshot) : null;
+  const resolvedDatasetKey = resolveDatasetKey(datasetKey);
+  const snapshot = await readJsonFile<RawDatasetSnapshot>(rawDatasetFile(resolvedDatasetKey));
+  return snapshot
+    ? rawDatasetSnapshotSchema.parse({
+        ...snapshot,
+        datasetKey: snapshot.datasetKey ?? resolvedDatasetKey,
+      })
+    : null;
 }
 
-export async function saveRawDataset(snapshot: RawDatasetSnapshot) {
+export async function saveRawDataset(snapshot: RawDatasetSnapshot, datasetKey?: string) {
   await ensureStorageDirectories();
-  await writeJsonFile(rawDatasetFile, snapshot);
+  const resolvedDatasetKey = snapshot.datasetKey ?? resolveDatasetKey(datasetKey);
+  await writeJsonFile(
+    rawDatasetFile(resolvedDatasetKey),
+    rawDatasetSnapshotSchema.parse({
+      ...snapshot,
+      datasetKey: resolvedDatasetKey,
+    }),
+  );
 }
 
-export async function getEventsDataset() {
+export async function getEventsDataset(datasetKey?: string) {
   await ensureStorageDirectories();
-  const snapshot = await readJsonFile<EventsSnapshot>(eventDatasetFile);
-  return snapshot ? eventsSnapshotSchema.parse(snapshot) : null;
+  const resolvedDatasetKey = resolveDatasetKey(datasetKey);
+  const snapshot = await readJsonFile<EventsSnapshot>(eventDatasetFile(resolvedDatasetKey));
+  return snapshot
+    ? eventsSnapshotSchema.parse({
+        ...snapshot,
+        datasetKey: snapshot.datasetKey ?? resolvedDatasetKey,
+      })
+    : null;
 }
 
-export async function saveEventsDataset(snapshot: EventsSnapshot) {
+export async function saveEventsDataset(snapshot: EventsSnapshot, datasetKey?: string) {
   await ensureStorageDirectories();
-  await writeJsonFile(eventDatasetFile, snapshot);
+  const resolvedDatasetKey = snapshot.datasetKey ?? resolveDatasetKey(datasetKey);
+  await writeJsonFile(
+    eventDatasetFile(resolvedDatasetKey),
+    eventsSnapshotSchema.parse({
+      ...snapshot,
+      datasetKey: resolvedDatasetKey,
+    }),
+  );
 }
 
 export async function saveMapRecord(record: MapRecord) {
@@ -122,6 +157,7 @@ export async function saveMapViewModel(mapId: string, map: MapViewModel) {
   await ensureStorageDirectories();
   await writeJsonFile(mapRecordFile(mapId), mapRecordSchema.parse({
     mapId: map.mapId,
+    datasetKey: map.datasetKey,
     mapName: map.mapName,
     city: map.city,
     style: map.style,
@@ -141,6 +177,7 @@ export async function writeMapViewModel(mapId: string, map: MapViewModel) {
   await ensureStorageDirectories();
   await writeJsonFile(mapRecordFile(mapId), mapRecordSchema.parse({
     mapId: map.mapId,
+    datasetKey: map.datasetKey,
     mapName: map.mapName,
     city: map.city,
     style: map.style,
