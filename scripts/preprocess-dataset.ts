@@ -1,10 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { getDemoDataset } from "@/src/config/demo";
 import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
-import { getDatasetConfig } from "./dataset-registry.mjs";
 
 const datasetKey = process.argv[2] ?? "hangzhou";
-const dataset = getDatasetConfig(datasetKey);
+const dataset = getDemoDataset(datasetKey);
 const rootDir = process.cwd();
 const rawInput = path.join(rootDir, "public", "mock", "raw", dataset.rawFileName);
 const eventsOutput = path.join(rootDir, "public", "mock", "events", dataset.eventsFileName);
@@ -15,7 +15,7 @@ const rawDataset = JSON.parse(readFileSync(rawInput, "utf8"));
 const result = preprocessDataset(rawDataset);
 
 const snapshot = {
-  datasetKey: rawDataset.datasetKey ?? dataset.datasetKey,
+  datasetKey: rawDataset.datasetKey ?? dataset.key,
   datasetId: rawDataset.datasetId,
   generatedAt: result.report.generatedAt,
   report: result.report,

@@ -10,11 +10,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npm run test",
-    "sync:dataset": "node scripts/sync-dataset.mjs",
+    "sync:dataset": "tsx scripts/sync-dataset.ts",
     "preprocess:dataset": "tsx scripts/preprocess-dataset.ts",
     "sync:guangzhou": "node scripts/sync-guangzhou-dataset.mjs",
     "preprocess:guangzhou": "tsx scripts/preprocess-dataset.ts guangzhou",
-    "sync:hangzhou": "node scripts/sync-dataset.mjs hangzhou",
+    "sync:hangzhou": "tsx scripts/sync-dataset.ts hangzhou",
     "preprocess:hangzhou": "tsx scripts/preprocess-dataset.ts hangzhou"
   },
   "dependencies": {
