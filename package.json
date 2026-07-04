@@ -12,7 +12,7 @@
     "check": "npm run lint && npm run test",
     "sync:dataset": "tsx scripts/sync-dataset.ts",
     "preprocess:dataset": "tsx scripts/preprocess-dataset.ts",
-    "sync:guangzhou": "node scripts/sync-guangzhou-dataset.mjs",
+    "sync:guangzhou": "tsx scripts/sync-dataset.ts guangzhou",
     "preprocess:guangzhou": "tsx scripts/preprocess-dataset.ts guangzhou",
     "sync:hangzhou": "tsx scripts/sync-dataset.ts hangzhou",
     "preprocess:hangzhou": "tsx scripts/preprocess-dataset.ts hangzhou"
