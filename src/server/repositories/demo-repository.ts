@@ -1,5 +1,6 @@
 import path from "node:path";
 import { resolveDatasetKey, getDemoDataset } from "@/src/config/demo";
+import { toCanonicalCreatedAt } from "@/src/lib/raw-created-at";
 import {
   eventsSnapshotSchema,
   mapRecordSchema,
@@ -27,6 +28,103 @@ import {
 } from "@/src/server/utils/storage";
 
 const runStaleAfterMs = 5 * 60 * 1000;
+
+function normalizeLegacyRawAttachment(attachment: Record<string, unknown>) {
+  return {
+    sourceUrl:
+      typeof attachment.sourceUrl === "string"
+        ? attachment.sourceUrl
+        : typeof attachment.fileToken === "string"
+          ? attachment.fileToken
+          : typeof attachment.publicPath === "string"
+            ? attachment.publicPath
+            : "",
+    name: typeof attachment.name === "string" ? attachment.name : "",
+    size: typeof attachment.size === "number" ? attachment.size : undefined,
+    localPath: typeof attachment.localPath === "string" ? attachment.localPath : "",
+    publicPath: typeof attachment.publicPath === "string" ? attachment.publicPath : "",
+  };
+}
+
+function normalizeLegacyRawSource(source: Record<string, unknown>) {
+  if (source.type === "sheet") {
+    return {
+      type: "sheet" as const,
+      spreadsheetToken:
+        typeof source.spreadsheetToken === "string" ? source.spreadsheetToken : "",
+      sheetId: typeof source.sheetId === "string" ? source.sheetId : "",
+      sheetName: typeof source.sheetName === "string" ? source.sheetName : "",
+      url: typeof source.url === "string" ? source.url : undefined,
+      adapterVersion:
+        typeof source.adapterVersion === "string" ? source.adapterVersion : "legacy-sheet-v1",
+    };
+  }
+
+  return {
+    type: "base" as const,
+    baseToken: typeof source.baseToken === "string" ? source.baseToken : "",
+    tableId: typeof source.tableId === "string" ? source.tableId : "",
+    viewId: typeof source.viewId === "string" ? source.viewId : "",
+  };
+}
+
+function normalizeLegacyRawSnapshot(
+  snapshot: Record<string, unknown>,
+  resolvedDatasetKey: string,
+) {
+  const reviews = Array.isArray(snapshot.reviews) ? snapshot.reviews : [];
+
+  return {
+    datasetKey: resolvedDatasetKey,
+    datasetId: typeof snapshot.datasetId === "string" ? snapshot.datasetId : "",
+    authorName: typeof snapshot.authorName === "string" ? snapshot.authorName : "",
+    source: normalizeLegacyRawSource(
+      snapshot.source && typeof snapshot.source === "object"
+        ? (snapshot.source as Record<string, unknown>)
+        : {},
+    ),
+    syncedAt: typeof snapshot.syncedAt === "string" ? snapshot.syncedAt : new Date().toISOString(),
+    reviews: reviews.map((review) => {
+      const nextReview =
+        review && typeof review === "object" ? (review as Record<string, unknown>) : {};
+      const attachments = Array.isArray(nextReview.attachments) ? nextReview.attachments : [];
+
+      return {
+        recordId: typeof nextReview.recordId === "string" ? nextReview.recordId : "",
+        sourceReviewId:
+          typeof nextReview.sourceReviewId === "string"
+            ? nextReview.sourceReviewId
+            : typeof nextReview.recordId === "string"
+              ? nextReview.recordId
+              : "",
+        sourceRowNumber:
+          typeof nextReview.sourceRowNumber === "number"
+            ? nextReview.sourceRowNumber
+            : undefined,
+        createdAt:
+          typeof nextReview.createdAt === "string"
+            ? toCanonicalCreatedAt(nextReview.createdAt)
+            : "",
+        commentText: typeof nextReview.commentText === "string" ? nextReview.commentText : "",
+        poiName: typeof nextReview.poiName === "string" ? nextReview.poiName : "",
+        poiLocation: typeof nextReview.poiLocation === "string" ? nextReview.poiLocation : "",
+        poiProvince: typeof nextReview.poiProvince === "string" ? nextReview.poiProvince : "",
+        poiCity: typeof nextReview.poiCity === "string" ? nextReview.poiCity : "",
+        poiDistrict: typeof nextReview.poiDistrict === "string" ? nextReview.poiDistrict : "",
+        categoryL1: typeof nextReview.categoryL1 === "string" ? nextReview.categoryL1 : "",
+        categoryL2: typeof nextReview.categoryL2 === "string" ? nextReview.categoryL2 : "",
+        categoryL3: typeof nextReview.categoryL3 === "string" ? nextReview.categoryL3 : "",
+        attachments: attachments.map((attachment) =>
+          normalizeLegacyRawAttachment(
+            attachment && typeof attachment === "object"
+              ? (attachment as Record<string, unknown>)
+              : {},
+          ),
+        ),
+      };
+    }),
+  };
+}
 
 function rawDatasetFile(datasetKey?: string) {
   const dataset = getDemoDataset(datasetKey);
@@ -63,10 +161,12 @@ export async function getRawDataset(datasetKey?: string) {
   const resolvedDatasetKey = resolveDatasetKey(datasetKey);
   const snapshot = await readJsonFile<RawDatasetSnapshot>(rawDatasetFile(resolvedDatasetKey));
   return snapshot
-    ? rawDatasetSnapshotSchema.parse({
-        ...snapshot,
-        datasetKey: snapshot.datasetKey ?? resolvedDatasetKey,
-      })
+    ? rawDatasetSnapshotSchema.parse(
+        normalizeLegacyRawSnapshot(
+          snapshot as unknown as Record<string, unknown>,
+          resolvedDatasetKey,
+        ),
+      )
     : null;
 }
 
@@ -89,7 +189,7 @@ export async function getEventsDataset(datasetKey?: string) {
   return snapshot
     ? eventsSnapshotSchema.parse({
         ...snapshot,
-        datasetKey: snapshot.datasetKey ?? resolvedDatasetKey,
+        datasetKey: resolvedDatasetKey,
       })
     : null;
 }

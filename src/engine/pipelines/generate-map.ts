@@ -17,8 +17,8 @@ import {
 } from "@/src/engine/prompts";
 import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
 import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
+import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
-import { preprocessDataset } from "@/src/engine/preprocess/part1";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
 import { createFallbackPosterSvg } from "@/src/engine/renderers/fallback-poster";
 import { createDeterministicRouteMarkdown } from "@/src/engine/renderers/route-markdown";

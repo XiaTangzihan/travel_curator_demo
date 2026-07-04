@@ -3,18 +3,11 @@ import {
   type PreprocessReport,
   type RawDatasetSnapshot,
 } from "@/src/contracts/domain";
-
-function pad(value: number) {
-  return `${value}`.padStart(2, "0");
-}
-
-function formatDay(date: Date) {
-  return `${date.getFullYear()}:${pad(date.getMonth() + 1)}:${pad(date.getDate())}`;
-}
-
-function formatTime(date: Date) {
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
+import {
+  formatCreatedAtDay,
+  formatCreatedAtTime,
+  parseRawCreatedAt,
+} from "@/src/lib/raw-created-at";
 
 function normalizeText(value: string | undefined) {
   return (value ?? "").trim();
@@ -24,20 +17,31 @@ function hasVisualContent(pictureCount: number, commentText: string) {
   return pictureCount > 0 || commentText.length > 0;
 }
 
+function compareCreatedAt(left: string, right: string) {
+  const leftDate = parseRawCreatedAt(left);
+  const rightDate = parseRawCreatedAt(right);
+
+  if (!leftDate || !rightDate) {
+    return left.localeCompare(right);
+  }
+
+  return leftDate.getTime() - rightDate.getTime();
+}
+
 export function preprocessDataset(
   snapshot: RawDatasetSnapshot,
 ): { events: EventRecord[]; report: PreprocessReport } {
   const warnings: string[] = [];
 
   const sortedReviews = [...snapshot.reviews].sort((left, right) =>
-    left.createdAt.localeCompare(right.createdAt),
+    compareCreatedAt(left.createdAt, right.createdAt),
   );
 
   const events: EventRecord[] = [];
 
   for (const [index, review] of sortedReviews.entries()) {
-    const createdAt = new Date(review.createdAt);
-    if (Number.isNaN(createdAt.getTime())) {
+    const createdAt = parseRawCreatedAt(review.createdAt);
+    if (!createdAt) {
       warnings.push(`跳过记录 ${review.recordId}：评价创建时间无法解析`);
       continue;
     }
@@ -53,22 +57,11 @@ export function preprocessDataset(
       continue;
     }
 
-    const day = formatDay(createdAt);
-    const time = formatTime(createdAt);
-
-    if (review.sourceDay && review.sourceDay !== day) {
-      warnings.push(`记录 ${review.recordId}：拆分 day(${day}) 与源字段(${review.sourceDay}) 不一致`);
-    }
-
-    if (review.sourceTime && !time.startsWith(review.sourceTime)) {
-      warnings.push(`记录 ${review.recordId}：拆分 time(${time}) 与源字段(${review.sourceTime}) 不一致`);
-    }
-
     events.push({
-      eventId: `evt_${pad(index + 1).padStart(3, "0")}`,
+      eventId: `evt_${`${index + 1}`.padStart(3, "0")}`,
       commentId: review.recordId,
-      day,
-      time,
+      day: formatCreatedAtDay(review.createdAt),
+      time: formatCreatedAtTime(review.createdAt, true),
       commentText,
       commentPictures: review.attachments.map((attachment) => ({
         url: attachment.publicPath,

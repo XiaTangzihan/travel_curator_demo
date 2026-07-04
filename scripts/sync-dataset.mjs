@@ -36,35 +36,29 @@ function normalizeCreatedAt(value) {
     return "";
   }
 
+  function formatIso(date) {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}+08:00`;
+  }
+
   if (/^\d{10}$/.test(trimmed)) {
     const date = new Date(Number(trimmed) * 1000);
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return formatIso(date);
   }
 
   if (/^\d{13}$/.test(trimmed)) {
     const date = new Date(Number(trimmed));
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return formatIso(date);
+  }
+
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(trimmed)) {
+    return trimmed.replace(" ", "T") + ":00+08:00";
+  }
+
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+    return trimmed.replace(" ", "T") + "+08:00";
   }
 
   return trimmed;
-}
-
-function splitCreatedAt(value) {
-  const normalized = normalizeCreatedAt(value);
-  const date = new Date(normalized);
-  if (Number.isNaN(date.getTime())) {
-    return {
-      createdAt: normalized,
-      sourceDay: "",
-      sourceTime: "",
-    };
-  }
-
-  return {
-    createdAt: normalized,
-    sourceDay: `${date.getFullYear()}:${pad(date.getMonth() + 1)}:${pad(date.getDate())}`,
-    sourceTime: `${pad(date.getHours())}:${pad(date.getMinutes())}`,
-  };
 }
 
 async function buildSheetAttachment(recordId, url, attachmentIndex) {
@@ -96,7 +90,7 @@ async function buildSheetAttachment(recordId, url, attachmentIndex) {
   }
 
   return {
-    fileToken: normalizedUrl,
+    sourceUrl: normalizedUrl,
     name: fileName,
     size,
     localPath: relativeOutput,
@@ -161,7 +155,7 @@ function syncFromBase() {
       }
 
       return {
-        fileToken: attachment.file_token,
+        sourceUrl: attachment.file_token,
         name: attachment.name,
         size: attachment.size,
         localPath: relativeOutput,
@@ -171,9 +165,8 @@ function syncFromBase() {
 
     return {
       recordId,
-      createdAt: byField["评价创建时间"],
-      sourceDay: byField["Day"] ?? "",
-      sourceTime: byField["时间"] ?? "",
+      sourceReviewId: byField["评价 id"] ?? recordId,
+      createdAt: normalizeCreatedAt(byField["评价创建时间"]),
       commentText: byField["评价文本"] ?? "",
       poiName: byField["POI名称"] ?? "",
       poiLocation: byField["POI地址"] ?? "",
@@ -209,7 +202,6 @@ async function syncFromSheet() {
   for (const [index, row] of dataRows.entries()) {
     const values = row.values;
     const recordId = `sheet_${datasetKey}_${values.B ?? row.row_number ?? index + 1}`;
-    const timeParts = splitCreatedAt(values.A);
     const attachments = [];
 
     for (const [attachmentIndex, column] of ["P", "Q", "R", "S", "T", "U", "V", "W", "X"].entries()) {
@@ -221,9 +213,9 @@ async function syncFromSheet() {
 
     reviews.push({
       recordId,
-      createdAt: timeParts.createdAt,
-      sourceDay: timeParts.sourceDay,
-      sourceTime: timeParts.sourceTime,
+      sourceReviewId: values.B ?? recordId,
+      sourceRowNumber: row.row_number,
+      createdAt: normalizeCreatedAt(values.A),
       commentText: values.C ?? "",
       poiName: values.F ?? "",
       poiLocation: values.G ?? "",
@@ -246,7 +238,13 @@ const snapshot = {
   datasetKey: dataset.datasetKey,
   datasetId: dataset.datasetId,
   authorName: dataset.authorName,
-  source: dataset.source,
+  source:
+    dataset.source.type === "sheet"
+      ? {
+          ...dataset.source,
+          adapterVersion: "canonical-raw-v2-preview",
+        }
+      : dataset.source,
   syncedAt: new Date().toISOString(),
   reviews,
 };

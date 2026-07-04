@@ -8,6 +8,7 @@ import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { stylePromptLibrary, type SupportedStyleKey } from "@/src/engine/prompts";
+import { formatCreatedAtDay, formatCreatedAtTime } from "@/src/lib/raw-created-at";
 import { useWorkspaceStore } from "@/src/store/workspace-store";
 
 type WorkspacePageProps = {
@@ -290,6 +291,8 @@ export function WorkspacePage(props: WorkspacePageProps) {
               {props.rawDataset.reviews.map((review) => {
                 const selected = selectedCommentIds.includes(review.recordId);
                 const cover = review.attachments[0];
+                const displayDay = formatCreatedAtDay(review.createdAt);
+                const displayTime = formatCreatedAtTime(review.createdAt);
 
                 return (
                   <button
@@ -331,7 +334,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
                       <div className="mb-3">
                         <p className="text-lg font-semibold text-[var(--text-strong)]">{review.poiName}</p>
                         <p className="mt-1 text-xs tracking-[0.12em] text-[var(--text-muted)]">
-                          {review.sourceDay || "未标注日期"} · {review.sourceTime || "未标注时间"}
+                          {displayDay || "未标注日期"} · {displayTime || "未标注时间"}
                         </p>
                       </div>
                       <p className="line-clamp-4 text-sm leading-6 text-[var(--text-muted)]">

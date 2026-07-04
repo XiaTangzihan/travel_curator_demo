@@ -11,7 +11,7 @@ export const runStatusSchema = z.enum([
 export const datasetKeySchema = z.enum(supportedDatasetKeys);
 
 export const rawAttachmentSchema = z.object({
-  fileToken: z.string(),
+  sourceUrl: z.string(),
   name: z.string(),
   size: z.number().optional(),
   localPath: z.string(),
@@ -20,9 +20,9 @@ export const rawAttachmentSchema = z.object({
 
 export const rawReviewSchema = z.object({
   recordId: z.string(),
+  sourceReviewId: z.string(),
+  sourceRowNumber: z.number().int().positive().optional(),
   createdAt: z.string(),
-  sourceDay: z.string().optional().default(""),
-  sourceTime: z.string().optional().default(""),
   commentText: z.string().default(""),
   poiName: z.string(),
   poiLocation: z.string(),
@@ -48,10 +48,11 @@ export const rawSheetSourceSchema = z.object({
   sheetId: z.string(),
   sheetName: z.string(),
   url: z.string().optional(),
+  adapterVersion: z.string(),
 });
 
 export const rawDatasetSnapshotSchema = z.object({
-  datasetKey: datasetKeySchema.optional().default("guangzhou"),
+  datasetKey: datasetKeySchema,
   datasetId: z.string(),
   authorName: z.string(),
   source: z.union([rawBaseSourceSchema, rawSheetSourceSchema]),
@@ -93,7 +94,7 @@ export const preprocessReportSchema = z.object({
 });
 
 export const eventsSnapshotSchema = z.object({
-  datasetKey: datasetKeySchema.optional().default("guangzhou"),
+  datasetKey: datasetKeySchema,
   datasetId: z.string(),
   generatedAt: z.string(),
   report: preprocessReportSchema,
