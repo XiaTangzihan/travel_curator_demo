@@ -29,7 +29,7 @@ export async function localizeAttachment(params: {
   const fileName = `${params.recordId}_${params.attachmentIndex + 1}${extension}`;
   const absolutePath = path.join(storagePaths.comments, fileName);
   const publicPath = `/mock/files/comments/${fileName}`;
-  const localPath = path.join("public", "mock", "files", "comments", fileName);
+  const localPath = ["public", "mock", "files", "comments", fileName].join("/");
 
   let size;
   if (!existsSync(absolutePath)) {

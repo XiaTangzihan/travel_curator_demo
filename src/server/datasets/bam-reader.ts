@@ -1,18 +1,18 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { getBamDatasetConfig, type BamDatasetConfig, type BamDatasetKey } from "@/src/server/datasets/registry";
 
 const larkCliPath =
   process.env.LARK_CLI_PATH ?? "C:/Users/Admin/AppData/Roaming/npm/lark-cli.cmd";
 
 function runLarkJson(args: string[]) {
-  const command = [larkCliPath, ...args]
-    .map((arg) => `"${String(arg).replaceAll('"', '\\"')}"`)
-    .join(" ");
-  const output = execSync(command, {
-    cwd: process.cwd(),
-    encoding: "utf8",
-    shell: "powershell.exe",
-  });
+  const output = execFileSync(
+    "powershell.exe",
+    ["-NoProfile", "-Command", "&", larkCliPath, ...args],
+    {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    },
+  );
   return JSON.parse(output) as Record<string, unknown>;
 }
 
