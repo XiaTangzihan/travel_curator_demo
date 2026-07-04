@@ -26,6 +26,7 @@
 * `route.md` 中新增 `## Important Rules` 区块，用于承载生图必须遵守的硬约束。
 * `## Important Rules` 中关于风格统一的固定措辞为：`所有 event 配图统一服从给定 style，不得自行发散风格。`
 * 每个 event 的语义补全由文本 LLM 生成，输入只使用 `poiName + categoryL1 + commentText`。
+* 新增的 event 级 `subject/avoid` 生成器必须使用 DOUBAO 文本模型，不得误用 Seedream 图像模型。
 * event 语义补全只产出两个字段：
   * `subject`：一句描述一幅图的完整句子
   * `avoid`：3-5 个要避免的意象词
@@ -96,7 +97,7 @@
 **范围**
 * 升级 `route.md` 输出结构，新增 `## Important Rules`
 * 删除旧 `event标志生图提示`
-* 新增 event 级 `subject/avoid` 生成器
+* 新增基于 DOUBAO 文本模型的 event 级 `subject/avoid` 生成器
 * 为 route 渲染和 `subject/avoid` 结构校验补单测
 
 **建议改动面**
@@ -378,6 +379,11 @@ knowledge_count: 10
 ### 10.2 `subject/avoid` 生成器
 
 生成器在 route 落盘前运行，其职责是把原始 event 补全成生图可消费的语义字段。
+
+模型约束：
+
+* `subject/avoid` 生成器固定使用 DOUBAO 文本模型。
+* 禁止使用 Seedream 图像模型生成或补写 `subject/avoid`。
 
 输入：
 

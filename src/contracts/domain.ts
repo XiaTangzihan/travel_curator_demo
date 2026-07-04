@@ -58,6 +58,11 @@ export const eventPictureSchema = z.object({
   name: z.string().optional(),
 });
 
+export const eventVisualBriefSchema = z.object({
+  subject: z.string().trim().min(1),
+  avoid: z.array(z.string().trim().min(1)).min(3).max(5),
+});
+
 export const eventRecordSchema = z.object({
   eventId: z.string(),
   commentId: z.string(),
@@ -76,6 +81,8 @@ export const eventRecordSchema = z.object({
   categoryL1: z.string(),
   categoryL2: z.string(),
   categoryL3: z.string(),
+  subject: z.string().trim().min(1).optional(),
+  avoid: z.array(z.string().trim().min(1)).min(3).max(5).optional(),
   authorName: z.string(),
 });
 
@@ -202,6 +209,7 @@ export const runTraceSchema = z.object({
 export type RawAttachment = z.infer<typeof rawAttachmentSchema>;
 export type RawReview = z.infer<typeof rawReviewSchema>;
 export type RawDatasetSnapshot = z.infer<typeof rawDatasetSnapshotSchema>;
+export type EventVisualBrief = z.infer<typeof eventVisualBriefSchema>;
 export type EventRecord = z.infer<typeof eventRecordSchema>;
 export type EventsSnapshot = z.infer<typeof eventsSnapshotSchema>;
 export type PreprocessReport = z.infer<typeof preprocessReportSchema>;

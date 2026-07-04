@@ -10,10 +10,12 @@ import {
 } from "@/src/contracts/domain";
 import { getDemoDataset } from "@/src/config/demo";
 import {
+  buildEventVisualBriefPrompt,
   buildLandmarkPrompt,
   buildPosterPrompt,
   buildRegeneratePosterPrompt,
   getStylePreset,
+  parseEventVisualBriefs,
 } from "@/src/engine/prompts";
 import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
 import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
@@ -157,6 +159,31 @@ async function generateKnowledge(city: string) {
   return extractJsonArray(content);
 }
 
+async function generateEventVisualBriefs(params: {
+  styleLabel: string;
+  events: EventRecord[];
+}) {
+  const prompt = buildEventVisualBriefPrompt(params);
+  const content = await runDoubaoChat(
+    [
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user },
+    ],
+    0.2,
+  );
+  const briefs = parseEventVisualBriefs(content);
+
+  if (briefs.length !== params.events.length) {
+    throw new Error("event visual brief 数量与输入事件数量不一致");
+  }
+
+  return params.events.map((event, index) => ({
+    ...event,
+    subject: briefs[index].subject,
+    avoid: briefs[index].avoid,
+  }));
+}
+
 async function writePosterFile(params: {
   mapId: string;
   city: string;
@@ -217,11 +244,15 @@ async function generateMapDraftCore(
 
   const stylePreset = getStylePreset(input.style);
   const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
+  const selectedEventsWithVisualBriefs = await generateEventVisualBriefs({
+    styleLabel: stylePreset.label,
+    events: selectedEvents,
+  });
   const inputSummary = buildRunInputSummary({
     datasetKey: input.datasetKey,
     mapName: input.mapName,
     city: input.city,
-    selectedCommentCount: selectedEvents.length,
+    selectedCommentCount: selectedEventsWithVisualBriefs.length,
   });
 
   let knowledge: Landmark[];
@@ -237,7 +268,7 @@ async function generateMapDraftCore(
     mapName: input.mapName,
     city: input.city,
     styleLabel: stylePreset.label,
-    events: selectedEvents,
+    events: selectedEventsWithVisualBriefs,
     knowledge,
   });
 
@@ -255,7 +286,7 @@ async function generateMapDraftCore(
       city: input.city,
       styleKey: input.style,
       referenceImagePaths,
-      events: selectedEvents,
+      events: selectedEventsWithVisualBriefs,
       knowledge,
     });
   } catch (error) {
@@ -264,7 +295,7 @@ async function generateMapDraftCore(
     const svg = createFallbackPosterSvg({
       city: input.city,
       styleLabel: stylePreset.label,
-      events: selectedEvents,
+      events: selectedEventsWithVisualBriefs,
     });
     await writeTextFile(posterOutputPath(context.mapId, "svg"), svg);
     posterPath = posterPublicPath(context.mapId, "svg");
@@ -282,7 +313,7 @@ async function generateMapDraftCore(
     style: input.style,
     posterPath,
     routeMarkdown,
-    events: selectedEvents,
+    events: selectedEventsWithVisualBriefs,
     knowledge,
   });
   await saveRenderedMap(context.mapId, mapViewModel);
@@ -299,7 +330,7 @@ async function generateMapDraftCore(
     posterPath,
     knowledgePath,
     currentRunId: context.runId,
-    selectedCommentIds: selectedEvents.map((event) => event.commentId),
+    selectedCommentIds: selectedEventsWithVisualBriefs.map((event) => event.commentId),
     createdAt: context.startedAt,
     updatedAt: new Date().toISOString(),
   });
@@ -482,6 +513,10 @@ export async function regenerateMapDraft(params: {
   let providerMode: RunTrace["providerMode"] = "live";
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
+  const eventsWithVisualBriefs = await generateEventVisualBriefs({
+    styleLabel: stylePreset.label,
+    events,
+  });
   const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
   let knowledge = cachedKnowledge;
   if (!knowledge.length) {
@@ -510,14 +545,14 @@ export async function regenerateMapDraft(params: {
     datasetKey: params.mapRecord.datasetKey,
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
-    selectedCommentCount: events.length,
+    selectedCommentCount: eventsWithVisualBriefs.length,
   });
 
   const routeMarkdown = createDeterministicRouteMarkdown({
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
     styleLabel: stylePreset.label,
-    events,
+    events: eventsWithVisualBriefs,
     knowledge,
   });
   await saveRouteMarkdown(params.mapRecord.mapId, routeMarkdown);
@@ -529,7 +564,7 @@ export async function regenerateMapDraft(params: {
       city: params.mapRecord.city,
       styleKey: params.mapRecord.style,
       referenceImagePaths,
-      events,
+      events: eventsWithVisualBriefs,
       knowledge,
       instruction: params.instruction,
       basedOnExistingImage: params.basedOnExistingImage,
@@ -540,7 +575,7 @@ export async function regenerateMapDraft(params: {
     const svg = createFallbackPosterSvg({
       city: params.mapRecord.city,
       styleLabel: stylePreset.label,
-      events,
+      events: eventsWithVisualBriefs,
     });
     await writeTextFile(posterOutputPath(params.mapRecord.mapId, "svg"), svg);
     posterPath = posterPublicPath(params.mapRecord.mapId, "svg");
@@ -554,7 +589,7 @@ export async function regenerateMapDraft(params: {
     style: params.mapRecord.style,
     posterPath,
     routeMarkdown,
-    events,
+    events: eventsWithVisualBriefs,
     knowledge,
   });
   await saveRenderedMap(params.mapRecord.mapId, mapViewModel);
