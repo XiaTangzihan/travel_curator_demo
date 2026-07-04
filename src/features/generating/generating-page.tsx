@@ -167,6 +167,7 @@ export function GeneratingPage(props: GeneratingPageProps) {
         eyebrow="生成中"
         description="生成完成后会自动跳转到二次确认页。保持当前页面即可。"
         activeHref="/workspace"
+        datasetKey={run.datasetKey}
         actions={<StatusPill status={run.status} />}
       >
         <div className="mx-auto grid max-w-[980px] gap-6">
@@ -307,7 +308,7 @@ export function GeneratingPage(props: GeneratingPageProps) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => router.push("/workspace")}
+                      onClick={() => router.push(`/workspace?dataset=${run.datasetKey}`)}
                       disabled={retrying}
                       className="inline-flex items-center justify-center rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-page)] disabled:opacity-60"
                     >

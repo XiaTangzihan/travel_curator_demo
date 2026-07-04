@@ -1,22 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { preprocessDataset } from "@/src/engine/preprocess/part1";
+import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 
 const dataset: RawDatasetSnapshot = {
+  datasetKey: "guangzhou",
   datasetId: "guangzhou-golden",
   authorName: "旅行者小夏",
   source: {
-    baseToken: "base",
-    tableId: "table",
-    viewId: "view",
+    type: "sheet",
+    spreadsheetToken: "spreadsheet",
+    sheetId: "sheet",
+    sheetName: "【BAM规范】广州市",
+    adapterVersion: "canonical-raw-v2",
   },
   syncedAt: new Date().toISOString(),
   reviews: [
     {
       recordId: "rec_2",
-      createdAt: "2024-06-02 10:20",
-      sourceDay: "2",
-      sourceTime: "10:20",
+      sourceReviewId: "src_2",
+      createdAt: "2024-06-02T10:20:00+08:00",
       commentText: "第二天评论",
       poiName: "B 点",
       poiLocation: "地址 B",
@@ -30,9 +32,8 @@ const dataset: RawDatasetSnapshot = {
     },
     {
       recordId: "rec_1",
-      createdAt: "2024-06-01 09:08",
-      sourceDay: "1",
-      sourceTime: "09:08",
+      sourceReviewId: "src_1",
+      createdAt: "2024-06-01T09:08:00+08:00",
       commentText: "第一天评论",
       poiName: "A 点",
       poiLocation: "地址 A",
@@ -42,7 +43,7 @@ const dataset: RawDatasetSnapshot = {
       categoryL1: "购物",
       categoryL2: "零食",
       categoryL3: "零食",
-      attachments: [{ fileToken: "ft1", name: "a.jpg", localPath: "a", publicPath: "/a" }],
+      attachments: [{ sourceUrl: "https://example.com/a.jpg", name: "a.jpg", localPath: "a", publicPath: "/a" }],
     },
   ],
 };

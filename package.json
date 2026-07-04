@@ -10,8 +10,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npm run test",
-    "sync:guangzhou": "node scripts/sync-guangzhou-dataset.mjs",
-    "preprocess:guangzhou": "node scripts/preprocess-guangzhou.mjs"
+    "sync:dataset": "tsx scripts/sync-dataset.ts",
+    "preprocess:dataset": "tsx scripts/preprocess-dataset.ts",
+    "sync:guangzhou": "tsx scripts/sync-dataset.ts guangzhou",
+    "preprocess:guangzhou": "tsx scripts/preprocess-dataset.ts guangzhou",
+    "sync:hangzhou": "tsx scripts/sync-dataset.ts hangzhou",
+    "preprocess:hangzhou": "tsx scripts/preprocess-dataset.ts hangzhou"
   },
   "dependencies": {
     "lucide-react": "^0.554.0",
@@ -25,14 +29,15 @@
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
-    "@vitejs/plugin-react": "^5.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^27.0.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"

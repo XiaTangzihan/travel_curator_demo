@@ -1,0 +1,30 @@
+{
+  "runId": "run_20260704102418_7in6",
+  "mapId": "map_gz_1783131324445",
+  "datasetKey": "guangzhou",
+  "status": "completed",
+  "stage": "regenerate",
+  "basedOnExistingImage": true,
+  "promptInstruction": "每个event都应该有自己的配图！",
+  "styleKey": "watercolor",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_watercolor_20260702"
+  ],
+  "updatedAt": "2026-07-04T02:24:37.941Z",
+  "inputSummary": {
+    "datasetKey": "guangzhou",
+    "mapName": "广州01",
+    "city": "广州",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1783131324445.route.md",
+    "posterPath": "/mock/posters/map_gz_1783131324445.png",
+    "mapPath": "/mock/maps/map_gz_1783131324445.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-04T02:24:18.443Z",
+  "endedAt": "2026-07-04T02:24:37.941Z"
+}

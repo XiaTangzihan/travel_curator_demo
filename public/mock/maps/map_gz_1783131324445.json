@@ -1,0 +1,26 @@
+{
+  "mapId": "map_gz_1783131324445",
+  "datasetKey": "guangzhou",
+  "mapName": "广州01",
+  "city": "广州",
+  "style": "watercolor",
+  "status": "confirmed",
+  "eventCount": 8,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783131324445.route.md",
+  "posterPath": "/mock/posters/map_gz_1783131324445.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783131324445.knowledge.json",
+  "currentRunId": "run_20260704102533_x71q",
+  "selectedCommentIds": [
+    "sheet_guangzhou_7372159912745158667",
+    "sheet_guangzhou_7372191207356762147",
+    "sheet_guangzhou_7372154217059895331",
+    "sheet_guangzhou_7372082030185580544",
+    "sheet_guangzhou_7373235607771924519",
+    "sheet_guangzhou_7372591657847441447",
+    "sheet_guangzhou_7504217745764993062",
+    "sheet_guangzhou_7504992594020026419"
+  ],
+  "createdAt": "2026-07-04T02:15:24.445Z",
+  "updatedAt": "2026-07-04T02:25:33.269Z",
+  "lastInstruction": "每个event都应该有自己的配图！"
+}

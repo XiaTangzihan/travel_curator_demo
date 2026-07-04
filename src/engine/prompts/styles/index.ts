@@ -18,5 +18,5 @@ export function getStylePreset(styleKey: string) {
     return stylePromptLibrary[styleKey as SupportedStyleKey];
   }
 
-  return stylePromptLibrary[demoConfig.styleKey];
+  return stylePromptLibrary[demoConfig.styleKey as SupportedStyleKey];
 }

@@ -105,6 +105,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
         eyebrow="静态图确认"
         description="检查这张地图的画面和细节，确认后保存为正式作品。"
         activeHref="/workspace"
+        datasetKey={props.mapRecord.datasetKey}
         actions={
           <>
             {props.runDurationLabel ? (

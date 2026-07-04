@@ -59,6 +59,7 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
       eyebrow="动态地图"
       description="沿着时间顺序浏览这趟旅行，在右侧查看当前地点的图文记录。"
       activeHref="/"
+      datasetKey={props.map.datasetKey}
       actions={
         <>
           <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">

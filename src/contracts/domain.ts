@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { supportedDatasetKeys } from "@/src/config/demo";
 
 export const mapStatusSchema = z.enum(["draft", "confirmed", "failed"]);
 export const runStatusSchema = z.enum([
@@ -7,9 +8,10 @@ export const runStatusSchema = z.enum([
   "failed",
   "incomplete",
 ]);
+export const datasetKeySchema = z.enum(supportedDatasetKeys);
 
 export const rawAttachmentSchema = z.object({
-  fileToken: z.string(),
+  sourceUrl: z.string(),
   name: z.string(),
   size: z.number().optional(),
   localPath: z.string(),
@@ -18,9 +20,9 @@ export const rawAttachmentSchema = z.object({
 
 export const rawReviewSchema = z.object({
   recordId: z.string(),
+  sourceReviewId: z.string(),
+  sourceRowNumber: z.number().int().positive().optional(),
   createdAt: z.string(),
-  sourceDay: z.string().optional().default(""),
-  sourceTime: z.string().optional().default(""),
   commentText: z.string().default(""),
   poiName: z.string(),
   poiLocation: z.string(),
@@ -33,14 +35,20 @@ export const rawReviewSchema = z.object({
   attachments: z.array(rawAttachmentSchema),
 });
 
+export const rawSheetSourceSchema = z.object({
+  type: z.literal("sheet"),
+  spreadsheetToken: z.string(),
+  sheetId: z.string(),
+  sheetName: z.string(),
+  url: z.string().optional(),
+  adapterVersion: z.string(),
+});
+
 export const rawDatasetSnapshotSchema = z.object({
+  datasetKey: datasetKeySchema,
   datasetId: z.string(),
   authorName: z.string(),
-  source: z.object({
-    baseToken: z.string(),
-    tableId: z.string(),
-    viewId: z.string(),
-  }),
+  source: rawSheetSourceSchema,
   syncedAt: z.string(),
   reviews: z.array(rawReviewSchema),
 });
@@ -79,6 +87,7 @@ export const preprocessReportSchema = z.object({
 });
 
 export const eventsSnapshotSchema = z.object({
+  datasetKey: datasetKeySchema,
   datasetId: z.string(),
   generatedAt: z.string(),
   report: preprocessReportSchema,
@@ -97,6 +106,7 @@ export const routeArtifactSchema = z.object({
 
 export const mapRecordSchema = z.object({
   mapId: z.string(),
+  datasetKey: datasetKeySchema.optional().default("guangzhou"),
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
@@ -123,6 +133,7 @@ export const mapNodeSchema = z.object({
 
 export const mapViewModelSchema = z.object({
   mapId: z.string(),
+  datasetKey: datasetKeySchema.optional().default("guangzhou"),
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
@@ -150,6 +161,7 @@ export const runProgressStepSchema = z.enum([
 ]);
 
 export const generateRunInputSchema = z.object({
+  datasetKey: datasetKeySchema.optional().default("guangzhou"),
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
@@ -157,6 +169,7 @@ export const generateRunInputSchema = z.object({
 });
 
 export const runInputSummarySchema = z.object({
+  datasetKey: datasetKeySchema.optional().default("guangzhou"),
   mapName: z.string(),
   city: z.string(),
   selectedCommentCount: z.number(),
@@ -165,6 +178,7 @@ export const runInputSummarySchema = z.object({
 export const runTraceSchema = z.object({
   runId: z.string(),
   mapId: z.string(),
+  datasetKey: datasetKeySchema.optional().default("guangzhou"),
   status: runStatusSchema,
   stage: z.enum(["preprocess", "generate", "regenerate", "confirm"]),
   basedOnExistingImage: z.boolean().optional(),

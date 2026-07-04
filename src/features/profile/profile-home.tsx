@@ -12,6 +12,11 @@ import { StatusPill } from "@/src/components/status-pill";
 type ProfileHomeProps = {
   maps: MapRecord[];
   rawCount: number;
+  activeDatasetKey: string;
+  datasetOptions: Array<{
+    key: string;
+    city: string;
+  }>;
 };
 
 export function ProfileHome(props: ProfileHomeProps) {
@@ -76,6 +81,7 @@ export function ProfileHome(props: ProfileHomeProps) {
       eyebrow="旅行作品集"
       description="把一次次出发整理成可以回看的路线、地图和画面。"
       activeHref="/"
+      datasetKey={props.activeDatasetKey}
       actions={
         <>
           {selectionMode ? (
@@ -109,7 +115,7 @@ export function ProfileHome(props: ProfileHomeProps) {
             </button>
           )}
           <Link
-            href="/workspace"
+            href={`/workspace?dataset=${props.activeDatasetKey}`}
             className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
           >
             进入工作台
@@ -138,6 +144,21 @@ export function ProfileHome(props: ProfileHomeProps) {
               <p className="mt-3 max-w-[560px] text-sm leading-7 text-[var(--text-muted)]">
                 在这里保存去过的城市、停留过的时刻，以及那些值得反复回看的旅程片段。
               </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {props.datasetOptions.map((dataset) => (
+                  <Link
+                    key={dataset.key}
+                    href={`/?dataset=${dataset.key}`}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      dataset.key === props.activeDatasetKey
+                        ? "bg-[var(--accent-primary)] text-white"
+                        : "border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-soft)] hover:text-[var(--text-strong)]"
+                    }`}
+                  >
+                    {dataset.city}素材
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -145,7 +166,7 @@ export function ProfileHome(props: ProfileHomeProps) {
           {[
             { label: "旅行作品", value: props.maps.length },
             { label: "旅程足迹", value: totalFootprints },
-            { label: "素材数量", value: props.rawCount },
+            { label: "当前素材", value: props.rawCount },
           ].map((item) => (
             <div
               key={item.label}

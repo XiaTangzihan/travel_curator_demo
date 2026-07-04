@@ -1,0 +1,61 @@
+{
+  "runId": "run_20260704101524_j4kh",
+  "mapId": "map_gz_1783131324445",
+  "datasetKey": "guangzhou",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "watercolor",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_watercolor_20260702"
+  ],
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-04T02:16:25.490Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_guangzhou_7372159912745158667_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372191207356762147_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372191207356762147_2.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372191207356762147_3.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372154217059895331_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372154217059895331_2.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372154217059895331_3.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372082030185580544_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372082030185580544_2.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372082030185580544_3.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7373235607771924519_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7373235607771924519_2.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "guangzhou",
+    "mapName": "广州01",
+    "city": "广州",
+    "style": "watercolor",
+    "selectedCommentIds": [
+      "sheet_guangzhou_7372159912745158667",
+      "sheet_guangzhou_7372191207356762147",
+      "sheet_guangzhou_7372154217059895331",
+      "sheet_guangzhou_7372082030185580544",
+      "sheet_guangzhou_7373235607771924519",
+      "sheet_guangzhou_7372591657847441447",
+      "sheet_guangzhou_7504217745764993062",
+      "sheet_guangzhou_7504992594020026419"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "guangzhou",
+    "mapName": "广州01",
+    "city": "广州",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/guangzhou.raw.json",
+    "eventsPath": "/mock/events/guangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1783131324445.route.md",
+    "posterPath": "/mock/posters/map_gz_1783131324445.png",
+    "mapPath": "/mock/maps/map_gz_1783131324445.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-04T02:15:24.445Z",
+  "endedAt": "2026-07-04T02:16:25.490Z"
+}

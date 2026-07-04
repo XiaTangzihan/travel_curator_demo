@@ -20,10 +20,10 @@ const requestSchema = z.object({
 export async function POST(request: Request, context: RegenerateContext) {
   try {
     const { mapId } = await context.params;
-    const [mapRecord, eventsSnapshot] = await Promise.all([
-      getMapRecord(mapId),
-      getEventsDataset(),
-    ]);
+    const mapRecord = await getMapRecord(mapId);
+    const eventsSnapshot = mapRecord
+      ? await getEventsDataset(mapRecord.datasetKey)
+      : null;
 
     if (!mapRecord || !eventsSnapshot) {
       return NextResponse.json({ error: "地图或事件数据不存在" }, { status: 404 });
