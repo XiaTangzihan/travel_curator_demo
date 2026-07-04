@@ -20,6 +20,7 @@ import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-im
 import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
+import { getFallbackKnowledge } from "@/src/server/datasets/fallback-knowledge";
 import { createFallbackPosterSvg } from "@/src/engine/renderers/fallback-poster";
 import { createDeterministicRouteMarkdown } from "@/src/engine/renderers/route-markdown";
 import { createMapId, createRunId } from "@/src/lib/ids";
@@ -116,23 +117,6 @@ function extractJsonArray(text: string) {
     throw new Error("模型输出中未找到 JSON 数组");
   }
   return JSON.parse(text.slice(start, end + 1)) as Landmark[];
-}
-
-function fallbackKnowledge(city: string): Landmark[] {
-  if (city !== "广州") {
-    return [];
-  }
-
-  return [
-    { name: "广州塔", visual: "修长塔身与夜景灯光" },
-    { name: "珠江", visual: "穿城而过的江面与游船" },
-    { name: "永庆坊", visual: "骑楼街巷与岭南旧城肌理" },
-    { name: "白云山", visual: "城市边缘的山体与绿意" },
-    { name: "沙面", visual: "欧式建筑群与树荫街道" },
-    { name: "北京路", visual: "步行街与城市烟火" },
-    { name: "陈家祠", visual: "岭南木雕与灰塑屋檐" },
-    { name: "上下九", visual: "老广骑楼商业街" },
-  ];
 }
 
 async function ensureEvents(datasetKey: string) {
@@ -246,7 +230,7 @@ async function generateMapDraftCore(
   } catch (error) {
     providerMode = "fallback";
     warnings.push(`P1 已回退：${(error as Error).message}`);
-    knowledge = fallbackKnowledge(input.city);
+    knowledge = getFallbackKnowledge(input.datasetKey);
   }
 
   const routeMarkdown = createDeterministicRouteMarkdown({
@@ -503,7 +487,7 @@ export async function regenerateMapDraft(params: {
   if (!knowledge.length) {
     providerMode = "fallback";
     warnings.push("P1 已回退：当前地图缺少已缓存的城市地标，已使用本地兜底数据。");
-    knowledge = fallbackKnowledge(params.mapRecord.city);
+    knowledge = getFallbackKnowledge(params.mapRecord.datasetKey);
     await saveKnowledge(params.mapRecord.mapId, knowledge);
   }
 

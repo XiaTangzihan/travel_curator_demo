@@ -35,13 +35,6 @@ export const rawReviewSchema = z.object({
   attachments: z.array(rawAttachmentSchema),
 });
 
-export const rawBaseSourceSchema = z.object({
-  type: z.literal("base").optional().default("base"),
-  baseToken: z.string(),
-  tableId: z.string(),
-  viewId: z.string(),
-});
-
 export const rawSheetSourceSchema = z.object({
   type: z.literal("sheet"),
   spreadsheetToken: z.string(),
@@ -55,7 +48,7 @@ export const rawDatasetSnapshotSchema = z.object({
   datasetKey: datasetKeySchema,
   datasetId: z.string(),
   authorName: z.string(),
-  source: z.union([rawBaseSourceSchema, rawSheetSourceSchema]),
+  source: rawSheetSourceSchema,
   syncedAt: z.string(),
   reviews: z.array(rawReviewSchema),
 });

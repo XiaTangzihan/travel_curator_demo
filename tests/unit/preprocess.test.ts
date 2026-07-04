@@ -7,10 +7,11 @@ const dataset: RawDatasetSnapshot = {
   datasetId: "guangzhou-golden",
   authorName: "旅行者小夏",
   source: {
-    type: "base",
-    baseToken: "base",
-    tableId: "table",
-    viewId: "view",
+    type: "sheet",
+    spreadsheetToken: "spreadsheet",
+    sheetId: "sheet",
+    sheetName: "【BAM规范】广州市",
+    adapterVersion: "canonical-raw-v2",
   },
   syncedAt: new Date().toISOString(),
   reviews: [
