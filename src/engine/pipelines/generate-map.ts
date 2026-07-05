@@ -5,6 +5,7 @@ import {
   type EventRecord,
   type Landmark,
   type MapRecord,
+  type ParsedRoute,
   type RawDatasetSnapshot,
   type RunTrace,
 } from "@/src/contracts/domain";
@@ -30,6 +31,7 @@ import {
   getEventsDataset,
   getKnowledge,
   getRawDataset,
+  getRouteMarkdown,
   getRunTrace,
   posterOutputPath,
   posterPublicPath,
@@ -42,6 +44,7 @@ import {
   updateRunTrace,
 } from "@/src/server/repositories/demo-repository";
 import { fromPublicPath, writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
+import { parseRouteMarkdown } from "@/src/engine/parsers/route-markdown";
 
 type GenerateMapInput = GenerateRunInput;
 
@@ -186,15 +189,20 @@ async function generateEventVisualBriefs(params: {
 
 async function writePosterFile(params: {
   mapId: string;
-  city: string;
   styleKey: string;
   referenceImagePaths: string[];
-  events: EventRecord[];
+  parsedRoute: ParsedRoute;
   knowledge: Landmark[];
   instruction?: string;
   basedOnExistingImage?: boolean;
 }) {
-  const prompt = buildPosterPrompt(params);
+  const prompt = buildPosterPrompt({
+    styleKey: params.styleKey,
+    route: params.parsedRoute,
+    knowledge: params.knowledge,
+    instruction: params.instruction,
+    basedOnExistingImage: params.basedOnExistingImage,
+  });
   const image = await runSeedreamImage({
     prompt,
     images: params.referenceImagePaths,
@@ -206,15 +214,20 @@ async function writePosterFile(params: {
 
 async function writeRegeneratedPosterFile(params: {
   mapId: string;
-  city: string;
   styleKey: string;
   referenceImagePaths: string[];
-  events: EventRecord[];
+  parsedRoute: ParsedRoute;
   knowledge: Landmark[];
   instruction: string;
   basedOnExistingImage: boolean;
 }) {
-  const prompt = buildRegeneratePosterPrompt(params);
+  const prompt = buildRegeneratePosterPrompt({
+    styleKey: params.styleKey,
+    route: params.parsedRoute,
+    knowledge: params.knowledge,
+    instruction: params.instruction,
+    basedOnExistingImage: params.basedOnExistingImage,
+  });
   const image = await runSeedreamImage({
     prompt,
     images: params.referenceImagePaths,
@@ -271,6 +284,7 @@ async function generateMapDraftCore(
     events: selectedEventsWithVisualBriefs,
     knowledge,
   });
+  const parsedRoute = parseRouteMarkdown(routeMarkdown);
 
   const routePath = await saveRouteMarkdown(context.mapId, routeMarkdown);
   const knowledgePath = await saveKnowledge(context.mapId, knowledge);
@@ -283,10 +297,9 @@ async function generateMapDraftCore(
   try {
     posterPath = await writePosterFile({
       mapId: context.mapId,
-      city: input.city,
       styleKey: input.style,
       referenceImagePaths,
-      events: selectedEventsWithVisualBriefs,
+      parsedRoute,
       knowledge,
     });
   } catch (error) {
@@ -513,10 +526,6 @@ export async function regenerateMapDraft(params: {
   let providerMode: RunTrace["providerMode"] = "live";
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
-  const eventsWithVisualBriefs = await generateEventVisualBriefs({
-    styleLabel: stylePreset.label,
-    events,
-  });
   const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
   let knowledge = cachedKnowledge;
   if (!knowledge.length) {
@@ -545,26 +554,22 @@ export async function regenerateMapDraft(params: {
     datasetKey: params.mapRecord.datasetKey,
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
-    selectedCommentCount: eventsWithVisualBriefs.length,
+    selectedCommentCount: events.length,
   });
 
-  const routeMarkdown = createDeterministicRouteMarkdown({
-    mapName: params.mapRecord.mapName,
-    city: params.mapRecord.city,
-    styleLabel: stylePreset.label,
-    events: eventsWithVisualBriefs,
-    knowledge,
-  });
-  await saveRouteMarkdown(params.mapRecord.mapId, routeMarkdown);
+  const routeMarkdown = await getRouteMarkdown(params.mapRecord.mapId);
+  if (!routeMarkdown) {
+    throw new Error("当前地图缺少 route.md，无法执行 route-driven 重生成");
+  }
+  const parsedRoute = parseRouteMarkdown(routeMarkdown);
 
   let posterPath: string;
   try {
     posterPath = await writeRegeneratedPosterFile({
       mapId: params.mapRecord.mapId,
-      city: params.mapRecord.city,
       styleKey: params.mapRecord.style,
       referenceImagePaths,
-      events: eventsWithVisualBriefs,
+      parsedRoute,
       knowledge,
       instruction: params.instruction,
       basedOnExistingImage: params.basedOnExistingImage,
@@ -575,7 +580,7 @@ export async function regenerateMapDraft(params: {
     const svg = createFallbackPosterSvg({
       city: params.mapRecord.city,
       styleLabel: stylePreset.label,
-      events: eventsWithVisualBriefs,
+      events,
     });
     await writeTextFile(posterOutputPath(params.mapRecord.mapId, "svg"), svg);
     posterPath = posterPublicPath(params.mapRecord.mapId, "svg");
@@ -589,7 +594,7 @@ export async function regenerateMapDraft(params: {
     style: params.mapRecord.style,
     posterPath,
     routeMarkdown,
-    events: eventsWithVisualBriefs,
+    events,
     knowledge,
   });
   await saveRenderedMap(params.mapRecord.mapId, mapViewModel);

@@ -1,0 +1,59 @@
+{
+  "runId": "run_20260704142554_gjcb",
+  "mapId": "map_gz_1783146354169",
+  "datasetKey": "guangzhou",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "young-cartoon",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_young_cartoon_20260702"
+  ],
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-04T06:27:07.560Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_guangzhou_7372591657847441447_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7372591657847441447_2.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504663064977934345_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504663064977934345_2.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504663064977934345_3.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504663064977934345_4.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504217745764993062_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504217745764993062_2.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504217745764993062_3.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504217745764993062_4.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504994720712558630_1.jpeg",
+    "/mock/files/comments/sheet_guangzhou_7504994720712558630_2.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "guangzhou",
+    "mapName": "广州02",
+    "city": "广东",
+    "style": "young-cartoon",
+    "selectedCommentIds": [
+      "sheet_guangzhou_7372591657847441447",
+      "sheet_guangzhou_7504663064977934345",
+      "sheet_guangzhou_7504217745764993062",
+      "sheet_guangzhou_7504994720712558630",
+      "sheet_guangzhou_7504909894051448841",
+      "sheet_guangzhou_7504992594020026419"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "guangzhou",
+    "mapName": "广州02",
+    "city": "广东",
+    "selectedCommentCount": 6
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/guangzhou.raw.json",
+    "eventsPath": "/mock/events/guangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1783146354169.route.md",
+    "posterPath": "/mock/posters/map_gz_1783146354169.png",
+    "mapPath": "/mock/maps/map_gz_1783146354169.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-04T06:25:54.168Z",
+  "endedAt": "2026-07-04T06:27:07.560Z"
+}

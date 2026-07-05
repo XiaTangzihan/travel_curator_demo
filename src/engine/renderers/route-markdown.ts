@@ -1,11 +1,5 @@
 import type { EventRecord, Landmark } from "@/src/contracts/domain";
-
-const IMPORTANT_RULES = [
-  "所有 event 配图统一服从给定 style，不得自行发散风格。",
-  "背景地标只作为背景视觉参考，不给地标配文。",
-  "每个 event 的 subject 必须是一句完整画面描述。",
-  "每个 event 的 avoid 必须是 3-5 个要避免的意象词。",
-];
+import { p3PosterImportantRules } from "@/src/engine/prompts/p3-poster-important-rules";
 
 function cleanCategory(event: EventRecord) {
   return [event.categoryL1, event.categoryL2, event.categoryL3]
@@ -80,7 +74,7 @@ export function createDeterministicRouteMarkdown(params: {
     "---",
     "",
     "## Important Rules",
-    ...IMPORTANT_RULES.map((rule) => `- ${rule}`),
+    ...p3PosterImportantRules.map((rule) => `- ${rule}`),
     "",
   ];
 

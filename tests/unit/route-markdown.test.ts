@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDeterministicRouteMarkdown } from "@/src/engine/renderers/route-markdown";
 import type { EventRecord, Landmark } from "@/src/contracts/domain";
+import { p3PosterImportantRules } from "@/src/engine/prompts/p3-poster-important-rules";
 
 const events: EventRecord[] = [
   {
@@ -21,7 +22,7 @@ const events: EventRecord[] = [
     categoryL1: "美食",
     categoryL2: "早午餐",
     categoryL3: "早餐",
-    subject: "一间靠近地标的早餐小店内景，餐盘与热饮摆放整齐，呈现轻松明亮的晨间用餐氛围。",
+    subject: "早餐桌、明亮",
     avoid: ["楼层牌", "价格标签", "时间数字"],
     authorName: "旅行者小夏",
   },
@@ -41,11 +42,13 @@ describe("createDeterministicRouteMarkdown", () => {
 
     expect(markdown).toContain("map_name: 广州两日行");
     expect(markdown).toContain("## Important Rules");
-    expect(markdown).toContain("所有 event 配图统一服从给定 style，不得自行发散风格。");
+    p3PosterImportantRules.forEach((rule) => {
+      expect(markdown).toContain(`- ${rule}`);
+    });
     expect(markdown).toContain("# Day 1 (2024:06:01)");
     expect(markdown).toContain("## Event 1 · 广州塔店");
     expect(markdown).toContain("- sequence: 1");
-    expect(markdown).toContain("- subject: 一间靠近地标的早餐小店内景，餐盘与热饮摆放整齐，呈现轻松明亮的晨间用餐氛围。");
+    expect(markdown).toContain("- subject: 早餐桌、明亮");
     expect(markdown).toContain("- avoid: 楼层牌, 价格标签, 时间数字");
     expect(markdown).not.toContain("event标志生图提示");
     expect(markdown).not.toContain("10:20:00");

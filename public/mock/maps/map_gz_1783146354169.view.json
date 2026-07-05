@@ -1,0 +1,335 @@
+{
+  "mapId": "map_gz_1783146354169",
+  "datasetKey": "guangzhou",
+  "mapName": "广州02",
+  "city": "广东",
+  "style": "young-cartoon",
+  "posterPath": "/mock/posters/map_gz_1783146354169.png",
+  "routeMarkdown": "---\nmap_name: 广州02\ncity: 广东\nstyle: 年轻卡通风\ndays: 1\nevent_count: 6\nknowledge_count: 4\n---\n\n## Important Rules\n- 所有 event 配图统一服从给定 style，不得自行发散风格。\n- 背景地标只作为背景视觉参考，不给地标配文。\n- 每个 event 的 subject 必须是一句完整画面描述。\n- 每个 event 的 avoid 必须是 3-5 个要避免的意象词。\n\n# Day 1 (2024:06:02)\n\n## Event 1 · 佳叽Jargee\n- sequence: 1\n- poi: 佳叽Jargee(广州嘉禾金铂天地店)\n- short_name: 佳叽Jargee\n- 类目: 休闲娱乐 / 传统娱乐 / 游戏厅\n- 文案: 小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体玩下来还是很开心的!这个1元团10个币也是很实惠啦\n- 配图: /mock/files/comments/sheet_guangzhou_7372591657847441447_1.jpeg\n- subject: 年轻人在抓娃娃店内开心游玩，周围摆放着各式各样的毛绒公仔\n- avoid: 价格字样, 优惠标识, 门牌号码\n\n## Event 2 · 大榕树下\n- sequence: 2\n- poi: 大榕树下·臻品顺德菜(广州塔店)\n- short_name: 大榕树下\n- 类目: 美食 / 地方菜 / 粤菜\n- 文案: 广州塔附近的一家顺德菜馆，工作日晚上去的，无须排队。印象深刻的是顺德拌鱼皮和咸蛋黄啫鲜虾，鱼皮很鲜嫩，酸甜可口和这前在顺德当地吃得差异不大，鲜虾也还不错，咸蛋黄味道刚好合适。这家店聚个餐没啥问题，上菜速度也还行。\n- 配图: /mock/files/comments/sheet_guangzhou_7504663064977934345_1.jpeg\n- subject: 食客围坐在餐桌旁享用顺德菜，桌上摆着鲜嫩拌鱼皮和咸蛋黄啫鲜虾\n- avoid: 排队人群, 时间标识, 楼层数字\n\n## Event 3 · 彬媽糖水\n- sequence: 3\n- poi: 彬媽糖水(马场路店)\n- short_name: 彬媽糖水\n- 类目: 美食 / 面包甜点 / 甜品\n- 文案: 农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，味道适中，酒酿桃胶汤圆有点子酸酸甜甜的，然后姜撞奶姜味有点子重哈哈，如果喝不习惯的话可能会觉得怪吧，其它品类有机会可以尝尝。\n- 配图: /mock/files/comments/sheet_guangzhou_7504217745764993062_1.jpeg\n- subject: 温馨的糖水小店里，桌面上摆放着姜撞奶、酒酿桃胶汤圆等多款甜水\n- avoid: 银行标识, 楼层数字, 价格字样\n\n## Event 4 · 广州白云国际会议中心越秀万豪酒店\n- sequence: 4\n- poi: 广州白云国际会议中心越秀万豪酒店\n- short_name: 广州白云国际会议中心越秀万豪酒店\n- 类目: 住宿 / 酒店宾馆 / 豪华型酒店\n- 文案: 白云文化广场地铁站附近的一家万豪，大是真得大，入住的房间走到早餐处要走2-3min[微笑]房间的智能马桶还阔以，不过红外线识别太灵敏了，有时人未靠近就自动升盖了[捂脸]早餐是相当丰富，记得早点去品尝广式特色。\n- 配图: /mock/files/comments/sheet_guangzhou_7504994720712558630_1.jpeg\n- subject: 宽敞的酒店内，餐桌上摆满品类丰富的广式特色早餐，旁侧是整洁的客房\n- avoid: 地铁站标识, 智能马桶, 时间字样\n\n## Event 5 · 大鸽饭\n- sequence: 5\n- poi: 大鸽饭(汉溪长隆店)\n- short_name: 大鸽饭\n- 类目: 美食 / 地方菜 / 粤菜\n- 文案: 朋友推荐的大鸽饭，名不虚传！工作日中午来的话是不用排队的，有两层楼用餐可自选。茶位费6/人，选的是大麦茶，口感中规中矩。点赞爆汁红烧鸽皇，服务员会帮忙切好，不是很油腻，肉质也很紧实，唇此留香的。另外的海鲜蚝仔烙也还不错或，主要是挺大一盘，不过吃多了会一点点腻。大鸽饭需要焖两分钟再吃，喜欢吃锅巴的盆友可以让服务员帮忙铲一下咯\n- 配图: /mock/files/comments/sheet_guangzhou_7504909894051448841_1.jpeg\n- subject: 餐桌上摆放着切好的爆汁红烧鸽、海鲜蚝仔烙和喷香的大鸽饭\n- avoid: 排队人群, 茶位费字样, 楼层标识\n\n## Event 6 · YOJO啤酒厂\n- sequence: 6\n- poi: YOJO啤酒厂(保利广场店)\n- short_name: YOJO啤酒厂\n- 类目: 休闲娱乐 / 酒吧 / 清吧\n- 文案: 晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几个选项，酸甜各有差异，按需选择。点的盐湖和金桔，盐湖里话梅口感还是有的，喝得还比较习惯，金桔味道适中，不酸不甜，另外推荐下粗薯条🍟。\n- 配图: /mock/files/comments/sheet_guangzhou_7504992594020026419_1.jpeg\n- subject: 户外露营风的啤酒广场里，人们围坐享用精酿啤酒和香脆粗薯条\n- avoid: 地铁站标识, 时间字样, 价格字样\n",
+  "selectedEventId": "evt_006",
+  "generatedAt": "2026-07-04T06:27:07.550Z",
+  "knowledge": [
+    {
+      "name": "广州塔",
+      "visual": "整体呈扭转收腰的镂空钢结构形态，俗称“小蛮腰”，夜间投射多彩灯光，是广州珠江沿岸天际线的核心标志性建筑"
+    },
+    {
+      "name": "港珠澳大桥",
+      "visual": "横跨伶仃洋的超长跨海通道，包含巨型通航桥、海底隧道配套人工岛，如银色巨龙蜿蜒铺展在蔚蓝海面之上"
+    },
+    {
+      "name": "丹霞山",
+      "visual": "典型丹霞地貌世界自然遗产地，赤红色砂砾岩奇峰林立，丹崖赤壁与穿流而过的碧绿锦江交相辉映"
+    },
+    {
+      "name": "开平碉楼群",
+      "visual": "融合中西建筑风格的多层塔楼式侨乡民居，错落散落在岭南稻田与村落之间，是广东侨乡文化的标志性景观"
+    }
+  ],
+  "nodes": [
+    {
+      "eventId": "evt_006",
+      "day": "2024:06:02",
+      "time": "11:22:00",
+      "title": "佳叽Jargee(广州嘉禾金铂天地店)",
+      "excerpt": "小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体...",
+      "thumbnail": "/mock/files/comments/sheet_guangzhou_7372591657847441447_1.jpeg"
+    },
+    {
+      "eventId": "evt_007",
+      "day": "2024:06:02",
+      "time": "12:52:00",
+      "title": "大榕树下·臻品顺德菜(广州塔店)",
+      "excerpt": "广州塔附近的一家顺德菜馆，工作日晚上去的，无须排队。印象深刻的是顺德拌鱼皮和咸蛋黄啫鲜虾，鱼皮很...",
+      "thumbnail": "/mock/files/comments/sheet_guangzhou_7504663064977934345_1.jpeg"
+    },
+    {
+      "eventId": "evt_008",
+      "day": "2024:06:02",
+      "time": "14:06:00",
+      "title": "彬媽糖水(马场路店)",
+      "excerpt": "农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，...",
+      "thumbnail": "/mock/files/comments/sheet_guangzhou_7504217745764993062_1.jpeg"
+    },
+    {
+      "eventId": "evt_009",
+      "day": "2024:06:02",
+      "time": "15:15:00",
+      "title": "广州白云国际会议中心越秀万豪酒店",
+      "excerpt": "白云文化广场地铁站附近的一家万豪，大是真得大，入住的房间走到早餐处要走2-3min[微笑]房间的...",
+      "thumbnail": "/mock/files/comments/sheet_guangzhou_7504994720712558630_1.jpeg"
+    },
+    {
+      "eventId": "evt_010",
+      "day": "2024:06:02",
+      "time": "17:49:00",
+      "title": "大鸽饭(汉溪长隆店)",
+      "excerpt": "朋友推荐的大鸽饭，名不虚传！工作日中午来的话是不用排队的，有两层楼用餐可自选。茶位费6/人，选的...",
+      "thumbnail": "/mock/files/comments/sheet_guangzhou_7504909894051448841_1.jpeg"
+    },
+    {
+      "eventId": "evt_011",
+      "day": "2024:06:02",
+      "time": "20:06:00",
+      "title": "YOJO啤酒厂(保利广场店)",
+      "excerpt": "晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几...",
+      "thumbnail": "/mock/files/comments/sheet_guangzhou_7504992594020026419_1.jpeg"
+    }
+  ],
+  "events": [
+    {
+      "eventId": "evt_006",
+      "commentId": "sheet_guangzhou_7372591657847441447",
+      "day": "2024:06:02",
+      "time": "11:22:00",
+      "commentText": "小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体玩下来还是很开心的!这个1元团10个币也是很实惠啦",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7372591657847441447_1.jpeg",
+          "name": "sheet_guangzhou_7372591657847441447_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7372591657847441447_2.jpeg",
+          "name": "sheet_guangzhou_7372591657847441447_2.jpeg"
+        }
+      ],
+      "poiName": "佳叽Jargee(广州嘉禾金铂天地店)",
+      "poiLocation": "鹤龙二路85号嘉禾金铂天地一层116号铺（1号门右手边手扶梯Nike对面）",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "白云区",
+      "categoryL1": "休闲娱乐",
+      "categoryL2": "传统娱乐",
+      "categoryL3": "游戏厅",
+      "authorName": "旅行者小夏",
+      "sequence": 1,
+      "canonicalName": "佳叽Jargee(广州嘉禾金铂天地店)",
+      "shortName": "佳叽Jargee",
+      "subject": "年轻人在抓娃娃店内开心游玩，周围摆放着各式各样的毛绒公仔",
+      "avoid": [
+        "价格字样",
+        "优惠标识",
+        "门牌号码"
+      ]
+    },
+    {
+      "eventId": "evt_007",
+      "commentId": "sheet_guangzhou_7504663064977934345",
+      "day": "2024:06:02",
+      "time": "12:52:00",
+      "commentText": "广州塔附近的一家顺德菜馆，工作日晚上去的，无须排队。印象深刻的是顺德拌鱼皮和咸蛋黄啫鲜虾，鱼皮很鲜嫩，酸甜可口和这前在顺德当地吃得差异不大，鲜虾也还不错，咸蛋黄味道刚好合适。这家店聚个餐没啥问题，上菜速度也还行。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504663064977934345_1.jpeg",
+          "name": "sheet_guangzhou_7504663064977934345_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504663064977934345_2.jpeg",
+          "name": "sheet_guangzhou_7504663064977934345_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504663064977934345_3.jpeg",
+          "name": "sheet_guangzhou_7504663064977934345_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504663064977934345_4.jpeg",
+          "name": "sheet_guangzhou_7504663064977934345_4.jpeg"
+        }
+      ],
+      "poiName": "大榕树下·臻品顺德菜(广州塔店)",
+      "poiLocation": "赤岗街道广州塔路广州塔广场B1层B161号商铺大榕树下(广州塔广场店)",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "海珠区",
+      "categoryL1": "美食",
+      "categoryL2": "地方菜",
+      "categoryL3": "粤菜",
+      "authorName": "旅行者小夏",
+      "sequence": 2,
+      "canonicalName": "大榕树下·臻品顺德菜(广州塔店)",
+      "shortName": "大榕树下",
+      "subject": "食客围坐在餐桌旁享用顺德菜，桌上摆着鲜嫩拌鱼皮和咸蛋黄啫鲜虾",
+      "avoid": [
+        "排队人群",
+        "时间标识",
+        "楼层数字"
+      ]
+    },
+    {
+      "eventId": "evt_008",
+      "commentId": "sheet_guangzhou_7504217745764993062",
+      "day": "2024:06:02",
+      "time": "14:06:00",
+      "commentText": "农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，味道适中，酒酿桃胶汤圆有点子酸酸甜甜的，然后姜撞奶姜味有点子重哈哈，如果喝不习惯的话可能会觉得怪吧，其它品类有机会可以尝尝。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504217745764993062_1.jpeg",
+          "name": "sheet_guangzhou_7504217745764993062_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504217745764993062_2.jpeg",
+          "name": "sheet_guangzhou_7504217745764993062_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504217745764993062_3.jpeg",
+          "name": "sheet_guangzhou_7504217745764993062_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504217745764993062_4.jpeg",
+          "name": "sheet_guangzhou_7504217745764993062_4.jpeg"
+        }
+      ],
+      "poiName": "彬媽糖水(马场路店)",
+      "poiLocation": "马场路珠光新城国际商务中心B座首层103（甲子路东北段）",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "天河区",
+      "categoryL1": "美食",
+      "categoryL2": "面包甜点",
+      "categoryL3": "甜品",
+      "authorName": "旅行者小夏",
+      "sequence": 3,
+      "canonicalName": "彬媽糖水(马场路店)",
+      "shortName": "彬媽糖水",
+      "subject": "温馨的糖水小店里，桌面上摆放着姜撞奶、酒酿桃胶汤圆等多款甜水",
+      "avoid": [
+        "银行标识",
+        "楼层数字",
+        "价格字样"
+      ]
+    },
+    {
+      "eventId": "evt_009",
+      "commentId": "sheet_guangzhou_7504994720712558630",
+      "day": "2024:06:02",
+      "time": "15:15:00",
+      "commentText": "白云文化广场地铁站附近的一家万豪，大是真得大，入住的房间走到早餐处要走2-3min[微笑]房间的智能马桶还阔以，不过红外线识别太灵敏了，有时人未靠近就自动升盖了[捂脸]早餐是相当丰富，记得早点去品尝广式特色。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504994720712558630_1.jpeg",
+          "name": "sheet_guangzhou_7504994720712558630_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504994720712558630_2.jpeg",
+          "name": "sheet_guangzhou_7504994720712558630_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504994720712558630_3.jpeg",
+          "name": "sheet_guangzhou_7504994720712558630_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504994720712558630_4.jpeg",
+          "name": "sheet_guangzhou_7504994720712558630_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504994720712558630_5.jpeg",
+          "name": "sheet_guangzhou_7504994720712558630_5.jpeg"
+        }
+      ],
+      "poiName": "广州白云国际会议中心越秀万豪酒店",
+      "poiLocation": "云城街云城中二路6号、8号、10号",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "白云区",
+      "categoryL1": "住宿",
+      "categoryL2": "酒店宾馆",
+      "categoryL3": "豪华型酒店",
+      "authorName": "旅行者小夏",
+      "sequence": 4,
+      "canonicalName": "广州白云国际会议中心越秀万豪酒店",
+      "shortName": "广州白云国际会议中心越秀万豪酒店",
+      "subject": "宽敞的酒店内，餐桌上摆满品类丰富的广式特色早餐，旁侧是整洁的客房",
+      "avoid": [
+        "地铁站标识",
+        "智能马桶",
+        "时间字样"
+      ]
+    },
+    {
+      "eventId": "evt_010",
+      "commentId": "sheet_guangzhou_7504909894051448841",
+      "day": "2024:06:02",
+      "time": "17:49:00",
+      "commentText": "朋友推荐的大鸽饭，名不虚传！工作日中午来的话是不用排队的，有两层楼用餐可自选。茶位费6/人，选的是大麦茶，口感中规中矩。点赞爆汁红烧鸽皇，服务员会帮忙切好，不是很油腻，肉质也很紧实，唇此留香的。另外的海鲜蚝仔烙也还不错或，主要是挺大一盘，不过吃多了会一点点腻。大鸽饭需要焖两分钟再吃，喜欢吃锅巴的盆友可以让服务员帮忙铲一下咯",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504909894051448841_1.jpeg",
+          "name": "sheet_guangzhou_7504909894051448841_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504909894051448841_2.jpeg",
+          "name": "sheet_guangzhou_7504909894051448841_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504909894051448841_3.jpeg",
+          "name": "sheet_guangzhou_7504909894051448841_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504909894051448841_4.jpeg",
+          "name": "sheet_guangzhou_7504909894051448841_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504909894051448841_5.jpeg",
+          "name": "sheet_guangzhou_7504909894051448841_5.jpeg"
+        }
+      ],
+      "poiName": "大鸽饭(汉溪长隆店)",
+      "poiLocation": "汉溪大道东时代EPARK二期B3栋一层",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "番禺区",
+      "categoryL1": "美食",
+      "categoryL2": "地方菜",
+      "categoryL3": "粤菜",
+      "authorName": "旅行者小夏",
+      "sequence": 5,
+      "canonicalName": "大鸽饭(汉溪长隆店)",
+      "shortName": "大鸽饭",
+      "subject": "餐桌上摆放着切好的爆汁红烧鸽、海鲜蚝仔烙和喷香的大鸽饭",
+      "avoid": [
+        "排队人群",
+        "茶位费字样",
+        "楼层标识"
+      ]
+    },
+    {
+      "eventId": "evt_011",
+      "commentId": "sheet_guangzhou_7504992594020026419",
+      "day": "2024:06:02",
+      "time": "20:06:00",
+      "commentText": "晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几个选项，酸甜各有差异，按需选择。点的盐湖和金桔，盐湖里话梅口感还是有的，喝得还比较习惯，金桔味道适中，不酸不甜，另外推荐下粗薯条🍟。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504992594020026419_1.jpeg",
+          "name": "sheet_guangzhou_7504992594020026419_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504992594020026419_2.jpeg",
+          "name": "sheet_guangzhou_7504992594020026419_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_guangzhou_7504992594020026419_3.jpeg",
+          "name": "sheet_guangzhou_7504992594020026419_3.jpeg"
+        }
+      ],
+      "poiName": "YOJO啤酒厂(保利广场店)",
+      "poiLocation": "新港东路10号保利广场一层外广场",
+      "poiProvince": "广东省",
+      "poiCity": "广州市",
+      "poiDistrict": "海珠区",
+      "categoryL1": "休闲娱乐",
+      "categoryL2": "酒吧",
+      "categoryL3": "清吧",
+      "authorName": "旅行者小夏",
+      "sequence": 6,
+      "canonicalName": "YOJO啤酒厂(保利广场店)",
+      "shortName": "YOJO啤酒厂",
+      "subject": "户外露营风的啤酒广场里，人们围坐享用精酿啤酒和香脆粗薯条",
+      "avoid": [
+        "地铁站标识",
+        "时间字样",
+        "价格字样"
+      ]
+    }
+  ]
+}
