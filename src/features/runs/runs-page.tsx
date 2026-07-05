@@ -1,167 +1,175 @@
 "use client";
 
-import { useState } from "react";
-import type { RunTrace } from "@/src/contracts/domain";
+import { useEffect, useMemo, useState } from "react";
 import { SiteShell } from "@/src/components/site-shell";
-import { StatusPill } from "@/src/components/status-pill";
+import { TraceMapDetailPanel } from "@/src/features/runs/components/trace-map-detail-panel";
+import {
+  TraceMapListPanel,
+  type TraceMapListFilters,
+} from "@/src/features/runs/components/trace-map-list-panel";
+import { TraceOverviewStats } from "@/src/features/runs/components/trace-overview-stats";
+import { matchesMapSearch } from "@/src/features/runs/presentation";
+import type {
+  TraceMapDetailViewModel,
+  TraceOverviewViewModel,
+} from "@/src/server/trace-diagnostics/types";
 
 type RunsPageProps = {
-  runs: RunTrace[];
+  overview: TraceOverviewViewModel;
+  initialDetail: TraceMapDetailViewModel | null;
 };
 
-const stageLabels: Record<RunTrace["stage"], string> = {
-  preprocess: "素材准备",
-  generate: "首次生成",
-  regenerate: "重新生成",
-  confirm: "确认保存",
+const defaultFilters: TraceMapListFilters = {
+  searchQuery: "",
+  datasetKey: "all",
+  mapStatus: "all",
+  selectedPosterSourceRunStatus: "all",
+  latestLifecycleRunStatus: "all",
+  providerMode: "all",
 };
-
-const traceSections = [
-  { key: "rawPath", label: "原始评论" },
-  { key: "eventsPath", label: "事件数据" },
-  { key: "routePath", label: "route.md" },
-  { key: "posterPath", label: "地图主图" },
-  { key: "mapPath", label: "地图视图文件" },
-] as const;
 
 export function RunsPage(props: RunsPageProps) {
-  const [selectedRunId, setSelectedRunId] = useState(props.runs[0]?.runId ?? "");
-  const selectedRun = props.runs.find((run) => run.runId === selectedRunId) ?? props.runs[0];
-  const traceFlow = selectedRun
-    ? traceSections
-        .filter((section) => selectedRun.artifacts[section.key])
-        .map((section) => section.label)
-    : [];
+  const [filters, setFilters] = useState<TraceMapListFilters>(defaultFilters);
+  const [requestedMapId, setRequestedMapId] = useState(
+    props.initialDetail?.mapId ?? props.overview.mapItems[0]?.mapId ?? "",
+  );
+  const [detailCache, setDetailCache] = useState<Record<string, TraceMapDetailViewModel>>(
+    props.initialDetail ? { [props.initialDetail.mapId]: props.initialDetail } : {},
+  );
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState("");
+
+  const filteredMapItems = useMemo(
+    () =>
+      props.overview.mapItems.filter((item) => {
+        if (!matchesMapSearch(item, filters.searchQuery)) {
+          return false;
+        }
+        if (filters.datasetKey !== "all" && item.datasetKey !== filters.datasetKey) {
+          return false;
+        }
+        if (filters.mapStatus !== "all" && item.mapStatus !== filters.mapStatus) {
+          return false;
+        }
+        if (
+          filters.selectedPosterSourceRunStatus !== "all" &&
+          item.selectedPosterSourceRunStatus !== filters.selectedPosterSourceRunStatus
+        ) {
+          return false;
+        }
+        if (
+          filters.latestLifecycleRunStatus !== "all" &&
+          item.latestLifecycleRunStatus !== filters.latestLifecycleRunStatus
+        ) {
+          return false;
+        }
+        if (filters.providerMode !== "all" && item.selectedPosterSourceRunProviderMode !== filters.providerMode) {
+          return false;
+        }
+        return true;
+      }),
+    [filters, props.overview.mapItems],
+  );
+
+  const selectedMapId = useMemo(() => {
+    if (!filteredMapItems.length) {
+      return "";
+    }
+
+    if (filteredMapItems.some((item) => item.mapId === requestedMapId)) {
+      return requestedMapId;
+    }
+
+    return filteredMapItems[0].mapId;
+  }, [filteredMapItems, requestedMapId]);
+
+  const selectedDetail = selectedMapId ? detailCache[selectedMapId] ?? null : null;
+
+  useEffect(() => {
+    if (!selectedMapId || selectedDetail) {
+      return;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+
+    async function loadDetail() {
+      try {
+        setLoadingDetail(true);
+        setDetailError("");
+        const response = await fetch(`/api/runs/maps/${selectedMapId}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = (await response.json()) as {
+          detail?: TraceMapDetailViewModel;
+          error?: string;
+        };
+
+        if (!response.ok || !payload.detail) {
+          throw new Error(payload.error ?? "读取作品追踪详情失败");
+        }
+
+        if (!active) {
+          return;
+        }
+
+        setDetailCache((current) => ({
+          ...current,
+          [payload.detail!.mapId]: payload.detail!,
+        }));
+      } catch (error) {
+        if ((error as Error).name === "AbortError") {
+          return;
+        }
+        if (!active) {
+          return;
+        }
+        setDetailError((error as Error).message || "读取作品追踪详情失败");
+      } finally {
+        if (active) {
+          setLoadingDetail(false);
+        }
+      }
+    }
+
+    void loadDetail();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [selectedDetail, selectedMapId]);
 
   return (
     <SiteShell
       title="测试追踪页"
-      eyebrow="生成记录"
-      description="查看每一次生成的阶段、产物路径和处理留痕。"
+      eyebrow="作品诊断台"
+      description="先按作品定位，再查看当前态、AI Contract、当前产物与 run 时间线。"
       activeHref="/runs"
     >
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)]">
-          <p className="px-3 pt-2 text-xs tracking-[0.14em] text-[var(--text-muted)]">Run 列表</p>
-          <div className="mt-4 grid gap-3">
-            {props.runs.length ? (
-              props.runs.map((run) => (
-                <button
-                  type="button"
-                  key={run.runId}
-                  onClick={() => setSelectedRunId(run.runId)}
-                  className={`rounded-[22px] border px-4 py-4 text-left transition ${
-                    selectedRun?.runId === run.runId
-                      ? "border-[var(--accent-primary)] bg-[var(--accent-tint)]"
-                      : "border-[color:var(--line-subtle)] bg-[var(--bg-soft)]"
-                  }`}
-                >
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-[var(--text-strong)]">{run.runId}</p>
-                    <StatusPill status={run.status} />
-                  </div>
-                  <p className="text-xs text-[var(--text-muted)]">{stageLabels[run.stage]}</p>
-                </button>
-              ))
-            ) : (
-              <div className="rounded-[22px] border border-dashed border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-6 text-sm text-[var(--text-muted)]">
-                还没有 run 记录。先去工作台生成一次地图。
-              </div>
-            )}
-          </div>
-        </aside>
+      <div className="grid gap-6">
+        <TraceOverviewStats
+          globalStats={props.overview.globalStats}
+          datasetStats={props.overview.datasetStats}
+        />
 
-        <section className="grid gap-4">
-          {selectedRun ? (
-            <>
-              <article className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">当前记录</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
-                      {selectedRun.runId}
-                    </h2>
-                    <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
-                      当前阶段：{stageLabels[selectedRun.stage]}
-                    </p>
-                    <p className="text-sm leading-7 text-[var(--text-muted)]">
-                      风格键：{selectedRun.styleKey ?? "未记录"}
-                    </p>
-                    <p className="text-sm leading-7 text-[var(--text-muted)]">
-                      Prompt 版本：{selectedRun.promptVersion ?? "未记录"}
-                    </p>
-                  </div>
-                  <StatusPill status={selectedRun.status} />
-                </div>
+        <div className="grid gap-6 xl:grid-cols-[400px_minmax(0,1fr)]">
+          <TraceMapListPanel
+            mapItems={filteredMapItems}
+            totalCount={props.overview.mapItems.length}
+            selectedMapId={selectedMapId}
+            filters={filters}
+            onSelectMap={setRequestedMapId}
+            onFiltersChange={setFilters}
+          />
 
-                {selectedRun.errorMessage ? (
-                  <div className="mt-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
-                    {selectedRun.errorMessage}
-                  </div>
-                ) : null}
-              </article>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                {traceSections.map((section) => (
-                  <article
-                    key={section.key}
-                    className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5"
-                  >
-                    <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">{section.label}</p>
-                    <p className="mt-3 break-all text-sm leading-6 text-[var(--text-muted)]">
-                      {selectedRun.artifacts[section.key] || "本期未接入真实内容，仅保留结构位置"}
-                    </p>
-                  </article>
-                ))}
-                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
-                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">提示与警告</p>
-                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
-                    {selectedRun.warnings.length
-                      ? selectedRun.warnings.join("；")
-                      : "当前 run 没有额外警告。"}
-                  </p>
-                </article>
-                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
-                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">输入摘要</p>
-                  {selectedRun.inputSummary ? (
-                    <div className="mt-3 space-y-2 text-sm leading-6 text-[var(--text-muted)]">
-                      <p>地图名称：{selectedRun.inputSummary.mapName}</p>
-                      <p>目的地：{selectedRun.inputSummary.city}</p>
-                      <p>选中评论数：{selectedRun.inputSummary.selectedCommentCount}</p>
-                    </div>
-                  ) : (
-                    <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
-                      当前 run 还没有输入摘要。
-                    </p>
-                  )}
-                </article>
-                <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
-                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">风格参考图</p>
-                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
-                    {selectedRun.referenceIds?.length ? selectedRun.referenceIds.join("；") : "当前 run 还没有参考图留痕。"}
-                  </p>
-                </article>
-              </div>
-
-              <article className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
-                <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">追溯链</p>
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-1 text-xs text-[var(--text-muted)]">
-                    {stageLabels[selectedRun.stage]}
-                  </span>
-                  {traceFlow.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-1 text-xs text-[var(--text-muted)]"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            </>
-          ) : null}
-        </section>
+          <TraceMapDetailPanel
+            detail={selectedDetail}
+            loading={loadingDetail}
+            error={detailError}
+          />
+        </div>
       </div>
     </SiteShell>
   );

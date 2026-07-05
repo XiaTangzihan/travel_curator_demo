@@ -70,9 +70,13 @@ export type TraceMapListItem = {
   currentPosterPath: string;
   selectedPosterSourceRunId: string | null;
   selectedPosterSourceRunStatus: TraceRunStatusValue;
+  selectedPosterSourceRunProviderMode: RunTrace["providerMode"] | "missing";
   latestLifecycleRunId: string | null;
   latestLifecycleRunStatus: TraceRunStatusValue;
   latestLifecycleRunStage: RunTrace["stage"] | null;
+  posterVersionIds: string[];
+  relatedRunIds: string[];
+  selectedCommentIds: string[];
   issueCodes: TraceIntegrityIssueCode[];
 };
 

@@ -37,7 +37,6 @@ import {
   type TraceMapDetailViewModel,
   type TraceMapListItem,
   type TraceOverviewViewModel,
-  type TracePosterVersionInfo,
   type TraceRouteArtifactEntry,
   type TraceKnowledgeArtifactEntry,
   type TraceMapViewArtifactEntry,
@@ -217,17 +216,19 @@ async function buildDatasetArtifactEntry(params: {
       ? `/mock/raw/${dataset.rawFileName}`
       : `/mock/events/${dataset.eventsFileName}`);
 
-  const snapshot =
-    params.kind === "raw"
-      ? await getRawDataset(params.datasetKey)
-      : await getEventsDataset(params.datasetKey);
+  let count: number | null = null;
+
+  if (params.kind === "raw") {
+    const snapshot = await getRawDataset(params.datasetKey);
+    count = snapshot?.reviews.length ?? null;
+  } else {
+    const snapshot = await getEventsDataset(params.datasetKey);
+    count = snapshot?.events.length ?? null;
+  }
 
   return {
     publicPath,
-    count:
-      params.kind === "raw"
-        ? snapshot?.reviews.length ?? null
-        : snapshot?.events.length ?? null,
+    count,
     source: params.selectedRunPath ? "selected_run" : "dataset_inferred",
   };
 }
@@ -579,9 +580,13 @@ async function buildMapListItem(params: {
     currentPosterPath: params.mapRecord.posterPath,
     selectedPosterSourceRunId: selectedPosterSourceRun?.runId ?? null,
     selectedPosterSourceRunStatus: selectedPosterSourceRun?.status ?? "missing",
+    selectedPosterSourceRunProviderMode: selectedPosterSourceRun?.providerMode ?? "missing",
     latestLifecycleRunId: latestLifecycleRun?.runId ?? null,
     latestLifecycleRunStatus: latestLifecycleRun?.status ?? "missing",
     latestLifecycleRunStage: latestLifecycleRun?.stage ?? null,
+    posterVersionIds: normalizePosterVersions(params.mapRecord).map((version) => version.versionId),
+    relatedRunIds: params.relatedRuns.map((run) => run.runId),
+    selectedCommentIds: params.mapRecord.selectedCommentIds,
     issueCodes,
   } satisfies TraceMapListItem;
 }
