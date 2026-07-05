@@ -15,15 +15,22 @@
 
 ## 已确认决策
 
-- `P6` 作为“确认后的可选增强能力”，主入口只放在动态地图页。
+- `P6` 作为“确认后的可选增强能力”，主入口只放在动态地图页，并建立在既有 IA 前提之上：动态地图页最终采用 `地图 / 视频 / 图文` 三个 detab。
 - 视频存储采用方案 `A`：最终 MP4 下载到本地并落盘到 `public/mock/videos/{mapId}.mp4`。
 - 请求默认 `generate_audio = true`，当前版本不向用户暴露音频开关。
 - 视频时长档位固定为 `5s / 7s / 9s`，默认选中 `5s`。
 - `P6` 对现有三种地图风格全部开放；用户不单独选择视频风格，视频默认继承当前地图 `style`。
 - 发起视频生成后，用户应跳转到独立等待页；等待页设计和交互逻辑参考当前图片生成等待页。
-- 动态地图页成功态采用两个 tab：`动态地图` 与 `视频`；`视频` tab 负责播放和下载。
+- 动态地图页遵循上游 spec 已确定的 detab IA：`地图 / 视频 / 图文`。其中 `视频` detab 由本 spec 激活，`图文` 继续保持灰态占位。
 - 海报后续变化不会自动使已生成视频失效；旧视频保留，直到用户再次生成并覆盖。
 - Seedance 输入规格按当前共识处理：支持 `png/jpg/webp`，不支持 `svg`，视频任务为异步。
+- 视频模型选择采用服务端 registry，不在前端硬编码模型 ID。
+- 当前已验证可用的默认视频模型是 `doubao-seedance-1-5-pro-251215`。
+- `.env.local` 当前已预留两组视频模型配置位：
+  - `SEEDANCE_1_5_MODEL_ID / SEEDANCE_1_5_API_KEY`
+  - `SEEDANCE_1_0_PRO_FAST_MODEL_ID / SEEDANCE_1_0_PRO_FAST_API_KEY`
+- 根据当前公开资料，`1.0-pro-fast` 的默认候选 model id 采用 `doubao-seedance-1-0-pro-fast-251015`，最终以本地环境配置为准。
+- 视频提示词在架构上采用与图片提示词相同的“通用提示词 + 风格提示词”双层结构，位置、命名和导出方式应模仿现有图片 prompt 体系，便于后续开发者查看、调试和追溯。
 - Seedance 环境约定为独立的 `SEEDANCE_BASE_URL / SEEDANCE_MODEL_ID / SEEDANCE_API_KEY`，真实密钥不进仓库。
 
 ## 当前代码现状
@@ -31,6 +38,10 @@
 - `src/features/dynamic-map/dynamic-map-page.tsx`
   - 当前是单页式动态地图浏览器：左侧展示海报和路线轴，右侧展示当前地点图文。
   - 页面没有 tab 结构，也没有任何视频入口、视频状态或下载能力。
+
+- `docs/superpowers/specs/2026-07-05-profile-workspace-regenerate-model-alignment-design.md`
+  - 已明确把动态地图页 IA 收敛为 `地图 / 视频 / 图文` detab，其中 `视频 / 图文` 原本为灰态占位。
+  - 本 spec 需要在不打破该 IA 前提的情况下，激活 `视频` detab，而不是另起一套双 tab 结构。
 
 - `app/api/maps/generate/route.ts`、`app/workspace/generating/[runId]/page.tsx`、`src/features/generating/generating-page.tsx`
   - 图片主链路已经改为异步 run + 独立等待页。
@@ -47,6 +58,10 @@
   - 当前只有 `runDoubaoChat` 和 `runSeedreamImage` 两类能力。
   - 尚未接入 Seedance 的“创建任务 / 查询任务 / 下载最终 MP4”契约。
 
+- `src/engine/prompts/shared.ts`、`src/engine/prompts/styles/*.ts`、`src/engine/prompts/index.ts`
+  - 当前图片提示词已经采用“通用 prompt + 风格 preset + 统一导出入口”的组织方式。
+  - `P6` 当前 spec 还没有把视频提示词的目录和配置方式硬性对齐到这套结构，这会影响后续查看、调试和追溯效率。
+
 - `src/server/repositories/demo-repository.ts`
   - 当前管理 `raw / events / routes / posters / maps / runs` 本地 mock 产物。
   - 尚未提供 `videos` 目录的路径助手、视频读写与删除聚合。
@@ -61,9 +76,9 @@
 | ID | 优化项 | 目标状态 | 高层方案 |
 | --- | --- | --- | --- |
 | P6-1 | 数据契约与本地存储 | `MapRecord / MapViewModel / RunTrace / repository` 能表达视频状态与视频产物 | 增加 `currentVideoRunId`、`videoPath`、`videoDurationSeconds`、`providerTaskId` 等最小字段，并引入 `public/mock/videos` |
-| P6-2 | Seedance 接入 | 代码可创建 Seedance 异步任务、查询状态并下载 MP4 | 在 provider 层新增视频任务 API 封装，显式处理异步与远端临时 URL |
+| P6-2 | Seedance 接入与视频模型选择 | 代码可创建 Seedance 异步任务、查询状态并下载 MP4，且用户可选择视频模型 | 在 provider 层新增视频模型 registry 与视频任务 API 封装，显式处理异步与远端临时 URL |
 | P6-3 | P6 API 与等待页 | 动态地图页发起视频生成后跳转等待页，完成后回到 `?tab=video` | 新增 `POST /api/maps/[mapId]/video/generate` 与 `/maps/[mapId]/video/generating/[runId]` |
-| P6-4 | 动态地图页视频体验 | 页面变为 `动态地图 / 视频` 双 tab，成功后可播放和下载 | 在现有动态地图页内局部改造，不拆新的作品详情页 |
+| P6-4 | 动态地图页视频体验 | 页面采用 `地图 / 视频 / 图文` 三 detab，激活 `视频`，保留 `图文` 灰态 | 在现有动态地图页内局部改造，不拆新的作品详情页 |
 | P6-5 | 追踪与验证 | P6 可被测试追踪页看到，并有稳定的验收清单 | 扩展 run 展示、补单测和关键 smoke test |
 
 ## 分阶段计划
@@ -101,10 +116,13 @@
 * 接入 Seedance 创建任务、查询任务和下载 MP4 的能力
 * 明确 `generate_audio = true`、`5s / 7s / 9s` 和当前地图风格继承
 * 对 `svg` 底片做硬门禁
+* 将视频 prompt 架构对齐到现有图片 prompt 的“通用 + 风格”组织方式
+* 建立视频模型 registry，支持用户在生成视频时选择模型
 
 **建议改动面**
 * `src/engine/providers/ark-provider.ts`
 * `src/engine/pipelines/`（新增或扩展 P6 pipeline）
+* `src/engine/prompts/video/**` 或与现有图片 prompt 同构的目录
 * `.env.local.example`
 
 **验收标准**
@@ -112,6 +130,9 @@
 * 请求体默认带 `generate_audio = true`
 * 输入时长仅允许 `5 / 7 / 9`
 * 当底片为 `svg` 时，后端直接拒绝 P6 请求并返回可读错误
+* 服务端 registry 至少支持 `1.5-pro` 和 `1.0-pro-fast` 两个视频模型槽位
+* 用户可在生成视频时选择模型；当某模型环境配置不完整时，不展示为可选项
+* 视频 prompt 采用“通用提示词 + 风格提示词”双层组装，且目录、命名、导出方式与图片 prompt 体系同构
 
 **风险提示**
 * 这是本轮最高风险阶段，外部模型契约、异步轮询、远端临时 `video_url` 下载都集中在这里，必须独立隔离。
@@ -147,7 +168,7 @@
 * `frontend-design`
 
 **范围**
-* 在动态地图页引入 `动态地图 / 视频` 双 tab
+* 在动态地图页引入 `地图 / 视频 / 图文` 三个 detab
 * 实现视频空态、禁用态、成功态与失败后的回到视频 tab 行为
 * 提供本地 MP4 播放与下载
 
@@ -157,13 +178,14 @@
 * `src/components/**`（若需要抽小组件）
 
 **验收标准**
-* `动态地图` tab 原有路线浏览体验保持不变
-* `视频` tab 空态只提供时长选择和生成入口
+* `地图` detab 原有路线浏览体验保持不变
+* `视频` detab 空态提供时长选择、模型选择和生成入口
 * 成功态可播放本地 MP4 并下载
+* `图文` detab 继续保持灰态占位，不提前实现
 * `svg` 底片会展示禁用态说明，不允许点击生成
 
 **风险提示**
-* 页面是现有作品详情主入口，若把视频能力直接塞进原布局而不做 tab 隔离，会明显抬高阅读密度并破坏当前主体验。
+* 页面是现有作品详情主入口，若忽略上游 spec 已确定的三 detab IA，后续会出现跨 spec 结构冲突。
 
 ### Phase 5：追踪页、测试与阶段收口
 
@@ -281,17 +303,20 @@
 
 #### 1.1 动态地图页
 
-- 动态地图页改为双 tab：
-  - `动态地图`
+- 动态地图页采用三 detab：
+  - `地图`
   - `视频`
-- 默认进入 `动态地图` tab；当 URL 带 `?tab=video` 时直接打开 `视频` tab。
-- `动态地图` tab 保持现有路线轴、地点卡片和图片预览体验，不因 `P6` 改造而降级。
+  - `图文`
+- 默认进入 `地图` detab；当 URL 带 `?tab=video` 时直接打开 `视频` detab。
+- `地图` detab 保持现有路线轴、地点卡片和图片预览体验，不因 `P6` 改造而降级。
+- `图文` detab 本轮继续灰态不可点。
 
 #### 1.2 视频 tab
 
 - 空态：
   - 展示视频能力说明
   - 展示 `5s / 7s / 9s` 三档时长选择
+  - 展示视频模型选择器
   - 展示“生成视频”按钮
 - 禁用态：
   - 当 `posterPath` 为 `svg` 时，按钮禁用
@@ -313,11 +338,15 @@
 
 ```json
 {
-  "durationSeconds": 5
+  "durationSeconds": 5,
+  "videoModel": "seedance-1-5-pro"
 }
 ```
 
 - 合法值仅允许：`5 | 7 | 9`
+- `videoModel` 至少支持：
+  - `seedance-1-5-pro`
+  - `seedance-1-0-pro-fast`
 - 服务端根据 `mapId` 读取当前地图：
   - 复用当前 `style`
   - 读取当前 `posterPath`
@@ -363,6 +392,7 @@
 - 增加可选字段：
   - `providerTaskId`
   - `videoDurationSeconds`
+  - `videoModel`
 - `artifacts` 增加：
   - `videoPath`
 
@@ -378,6 +408,15 @@
   1. 创建视频任务
   2. 查询任务状态
   3. 下载最终 MP4 到本地
+- 视频模型通过服务端 registry 组织，至少包含：
+  - `seedance-1-5-pro -> doubao-seedance-1-5-pro-251215`
+  - `seedance-1-0-pro-fast -> doubao-seedance-1-0-pro-fast-251015`（默认候选值，最终以本地 env 为准）
+- 视频 prompt 采用与图片 prompt 相同的配置方式：
+  1. 一份视频通用提示词
+  2. 三份视频风格提示词
+  3. 一个统一的 prompt 组装入口
+- 目录、命名和导出方式应尽量模仿现有图片 prompt 体系，避免把视频 prompt 硬编码在 pipeline 或 provider 中。
+- 当前默认验证模型是 `doubao-seedance-1-5-pro-251215`
 - 请求默认带：
   - `generate_audio = true`
   - `duration = 5 | 7 | 9`

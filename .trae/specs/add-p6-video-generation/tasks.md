@@ -6,9 +6,12 @@
 
 - [ ] Task 2: 完成 Phase 2 的 Seedance Provider 与异步 run 编排
   - [ ] SubTask 2.1: 在 `src/engine/providers/ark-provider.ts` 中新增创建 Seedance 视频任务、查询任务状态与下载 MP4 的能力
-  - [ ] SubTask 2.2: 在 P6 pipeline 中固定 `generate_audio = true`，并只允许 `5 / 7 / 9` 三档时长
-  - [ ] SubTask 2.3: 明确视频 Prompt 继承当前地图 `style`，不新增独立视频风格选择器
-  - [ ] SubTask 2.4: 在服务端为 `svg` 底片增加硬门禁与可读错误
+  - [ ] SubTask 2.2: 建立服务端视频模型 registry，至少支持 `seedance-1-5-pro` 与 `seedance-1-0-pro-fast` 两个选择位
+  - [ ] SubTask 2.3: 在 P6 pipeline 中固定 `generate_audio = true`，并只允许 `5 / 7 / 9` 三档时长
+  - [ ] SubTask 2.4: 将默认验证模型落为 `doubao-seedance-1-5-pro-251215`，并为 `1.0-pro-fast` 预留官方 model id 配置位
+  - [ ] SubTask 2.5: 在 `src/engine/prompts/` 下按与图片 prompt 同构的“通用 + 风格 + 统一导出入口”方式组织视频提示词
+  - [ ] SubTask 2.6: 明确视频 Prompt 继承当前地图 `style`
+  - [ ] SubTask 2.7: 在服务端为 `svg` 底片增加硬门禁与可读错误
 
 - [ ] Task 3: 完成 Phase 3 的 P6 API 与等待页链路
   - [ ] SubTask 3.1: 新增 `POST /api/maps/[mapId]/video/generate`，返回 `runId` 与 `waitPath`
@@ -16,10 +19,11 @@
   - [ ] SubTask 3.3: 成功后自动回到 `/maps/[mapId]?tab=video`，失败后允许返回地图页继续重试
 
 - [ ] Task 4: 完成 Phase 4 的动态地图页双 tab 体验
-  - [ ] SubTask 4.1: 将动态地图页改为 `动态地图 / 视频` 双 tab，保持 `动态地图` tab 原有浏览体验不变
-  - [ ] SubTask 4.2: 在 `视频` tab 中实现空态、时长选择器、生成按钮和说明文案
-  - [ ] SubTask 4.3: 在 `视频` tab 中实现本地 MP4 播放器与下载按钮
-  - [ ] SubTask 4.4: 在 `svg` 底片场景中展示禁用态说明，而不是允许点击生成
+  - [ ] SubTask 4.1: 将动态地图页改为 `地图 / 视频 / 图文` 三 detab，保持 `地图` detab 原有浏览体验不变
+  - [ ] SubTask 4.2: 在 `视频` detab 中实现空态、时长选择器、视频模型选择器、生成按钮和说明文案
+  - [ ] SubTask 4.3: 在 `视频` detab 中实现本地 MP4 播放器与下载按钮
+  - [ ] SubTask 4.4: 维持 `图文` detab 灰态占位，不提前实现
+  - [ ] SubTask 4.5: 在 `svg` 底片场景中展示禁用态说明，而不是允许点击生成
 
 - [ ] Task 5: 完成 Phase 5 的追踪、测试与文档收口
   - [ ] SubTask 5.1: 在 `src/features/runs/runs-page.tsx` 中展示 `video_generate`、`videoDurationSeconds` 与 `artifacts.videoPath`
