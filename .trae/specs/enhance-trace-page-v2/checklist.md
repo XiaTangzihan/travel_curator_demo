@@ -1,0 +1,14 @@
+- [ ] `/runs` 顶栏已展示全局统计与 `datasetKey` 统计，且 `guangzhou / hangzhou` 的 `map` 数一眼可见
+- [ ] 左侧索引已从 run 视角切换为作品视角，并支持 `mapName / mapId / runId / commentId / versionId` 搜索
+- [ ] 单作品详情已显式区分 `currentRunIdRaw / selectedPosterVersion / selectedPosterSourceRun / latestLifecycleRun`
+- [ ] 当前主诊断对象默认是 `selectedPosterSourceRun`，而不是直接拿 `currentRunId` 充当“最新 run”
+- [ ] 当 `selectedPosterSourceRun` 缺少 `rawPath / eventsPath` 时，页面仍能按 `datasetKey` 正确补出当前 `raw/events` 入口
+- [ ] 追踪页已提供结构化 `AI Contract` 面板，并能展示 `Important Rules`、event 级 `subject / avoid`、`knowledge` 摘要
+- [ ] `AI Contract` 解析失败时，只阻断该面板，不拖垮整页其他信息
+- [ ] 当前作品详情已能展示当前选中主图、当前产物摘要与当前实际使用的评论卡带
+- [ ] run 时间线已区分 `selected source / latest lifecycle / history` 三类角色
+- [ ] 历史图片产物已使用 `present / pruned / unknown` 语义，且被确认流程裁剪的旧候选版本不会被误报为系统异常
+- [ ] 当前选中产物缺失、`selectedPosterSourceRun` 断链、route 解析失败、`map.view` 缺失、orphan run 等问题能被明确暴露
+- [ ] `/runs` 的 section-level 错误降级已成立，单卡读取失败不会拖垮整页
+- [ ] 与本次改造相关的聚合层单测、页面 smoke test 与主链路回归验证已通过
+- [ ] 最终实现结果已与 `docs/superpowers/specs/2026-07-04-test-trace-diagnostics-design.md` v2 逐项对齐
