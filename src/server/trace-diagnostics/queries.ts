@@ -710,7 +710,7 @@ export async function getTraceMapDetailViewModel(mapId: string): Promise<TraceMa
         run,
         isSelectedPosterSource: run.runId === selectedPosterSourceRun?.runId,
         isLatestLifecycle: run.runId === latestLifecycleRun?.runId,
-        posterAssetState: run.artifacts.posterPath
+        posterAssetState: isImageProducingRun(run)
           ? await resolveHistoryPosterState({
               run,
               mapRecord,
@@ -754,6 +754,7 @@ export async function getTraceMapDetailViewModel(mapId: string): Promise<TraceMa
     datasetKey: mapRecord.datasetKey,
     mapStatus: mapRecord.status,
     eventCount: mapRecord.eventCount,
+    posterVersionCount: normalizePosterVersions(mapRecord).length,
     updatedAt: mapRecord.updatedAt,
     currentRunIdRaw: mapRecord.currentRunId,
     selectedPosterVersion: selectedPosterVersion ? createPosterVersionInfo(selectedPosterVersion) : null,

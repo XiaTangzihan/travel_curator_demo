@@ -196,6 +196,7 @@ export type TraceMapDetailViewModel = {
   datasetKey: DemoDatasetKey;
   mapStatus: "draft" | "confirmed" | "failed";
   eventCount: number;
+  posterVersionCount: number;
   updatedAt: string;
   currentRunIdRaw: string;
   selectedPosterVersion: TracePosterVersionInfo | null;

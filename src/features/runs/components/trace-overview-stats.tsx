@@ -50,7 +50,13 @@ export function TraceOverviewStats(props: TraceOverviewStatsProps) {
         <article className="rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
           <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">运行提醒</p>
           <div className="mt-4 grid gap-3 text-sm leading-7 text-[var(--text-muted)]">
-            <div className="rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3">
+            <div
+              className={`rounded-[20px] border px-4 py-3 ${
+                props.globalStats.orphanRunCount
+                  ? "border-transparent bg-[var(--danger-tint)] text-[var(--danger-ink)]"
+                  : "border-[color:var(--line-subtle)] bg-[var(--bg-soft)]"
+              }`}
+            >
               orphan runs：{props.globalStats.orphanRunCount}
             </div>
             <div className="rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3">

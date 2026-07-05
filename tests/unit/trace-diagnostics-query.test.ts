@@ -414,4 +414,89 @@ knowledge_count: 1
     expect(detail?.aiContract.error).toMatch(/Important Rules/);
     expect(detail?.integrityIssues.some((issue) => issue.code === "route_parse_failed")).toBe(true);
   });
+
+  it("当当前选中海报断链且 map.view 缺失时，会给出硬完整性告警", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const mapId = `trace_diag_missing_assets_${token}`;
+    const missingRunId = `run_missing_source_${token}`;
+    createdMapIds.push(mapId);
+
+    const event = createEvent(`evt_missing_${token}`, `comment_missing_${token}`);
+    const knowledge: Landmark[] = [{ name: "湘湖旅游度假区", visual: "滨湖风光与江南水岸" }];
+    const routeMarkdown = buildValidRouteMarkdown({
+      mapName: `地图-${token}`,
+      city: "萧山",
+      event,
+      knowledgeCount: knowledge.length,
+    });
+
+    const routePath = await saveRouteMarkdown(mapId, routeMarkdown);
+    const knowledgePath = await saveKnowledge(mapId, knowledge);
+
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        mapId,
+        datasetKey: "hangzhou",
+        mapName: `地图-${token}`,
+        city: "萧山",
+        style: "young-cartoon",
+        status: "draft",
+        eventCount: 1,
+        routePath,
+        posterPath: `/mock/posters/${mapId}__${missingRunId}.png`,
+        knowledgePath,
+        currentRunId: missingRunId,
+        posterVersions: [
+          {
+            versionId: missingRunId,
+            posterPath: `/mock/posters/${mapId}__${missingRunId}.png`,
+            runId: missingRunId,
+            createdAt: "2026-07-05T05:30:59.285Z",
+          },
+        ],
+        selectedPosterVersionId: missingRunId,
+        selectedCommentIds: [event.commentId],
+        createdAt: "2026-07-05T05:30:59.285Z",
+        updatedAt: "2026-07-05T05:32:52.400Z",
+      }),
+    );
+
+    const detail = await getTraceMapDetailViewModel(mapId);
+
+    expect(detail).not.toBeNull();
+    expect(detail?.selectedPosterSourceRun).toBeNull();
+    expect(detail?.integrityIssues.some((issue) => issue.code === "selected_poster_source_run_missing")).toBe(true);
+    expect(detail?.integrityIssues.some((issue) => issue.code === "current_poster_missing")).toBe(true);
+    expect(detail?.integrityIssues.some((issue) => issue.code === "map_view_missing")).toBe(true);
+  });
+
+  it("当历史 image-producing run 缺少 posterPath 时，会落为 unknown 状态", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const seeded = await seedTraceScenario(token);
+    const unknownRunId = `run_unknown_${token}`;
+    createdRunIds.push(unknownRunId);
+
+    await saveRunTrace(
+      runTraceSchema.parse({
+        runId: unknownRunId,
+        mapId: seeded.mapId,
+        datasetKey: "hangzhou",
+        status: "completed",
+        stage: "regenerate",
+        warnings: [],
+        artifacts: {
+          routePath: `/mock/routes/${seeded.mapId}.route.md`,
+          mapPath: `/mock/maps/${seeded.mapId}.view.json`,
+        },
+        providerMode: "fallback",
+        startedAt: "2026-07-05T06:10:00.000Z",
+        endedAt: "2026-07-05T06:10:10.000Z",
+      }),
+    );
+
+    const detail = await getTraceMapDetailViewModel(seeded.mapId);
+    const unknownRun = detail?.runHistory.find((run) => run.runId === unknownRunId);
+
+    expect(unknownRun?.posterAssetState).toBe("unknown");
+  });
 });

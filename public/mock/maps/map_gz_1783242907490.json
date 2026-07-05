@@ -1,0 +1,35 @@
+{
+  "mapId": "map_gz_1783242907490",
+  "datasetKey": "hangzhou",
+  "mapName": "杭州-1-2",
+  "city": "杭州",
+  "style": "watercolor",
+  "status": "confirmed",
+  "eventCount": 8,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783242907490.route.md",
+  "posterPath": "/mock/posters/map_gz_1783242907490__run_20260705171820_pdt6.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783242907490.knowledge.json",
+  "currentRunId": "run_20260705172130_hyxm",
+  "posterVersions": [
+    {
+      "versionId": "run_20260705171820_pdt6",
+      "posterPath": "/mock/posters/map_gz_1783242907490__run_20260705171820_pdt6.png",
+      "runId": "run_20260705171820_pdt6",
+      "createdAt": "2026-07-05T09:18:20.176Z"
+    }
+  ],
+  "selectedPosterVersionId": "run_20260705171820_pdt6",
+  "selectedCommentIds": [
+    "sheet_hangzhou_7441614964332169252",
+    "sheet_hangzhou_7442702742558083091",
+    "sheet_hangzhou_7443020777257043987",
+    "sheet_hangzhou_7443593968841361471",
+    "sheet_hangzhou_7456427367863437375",
+    "sheet_hangzhou_7457206519067707431",
+    "sheet_hangzhou_7499867497853454387",
+    "sheet_hangzhou_7554647459973089290"
+  ],
+  "createdAt": "2026-07-05T09:15:07.490Z",
+  "updatedAt": "2026-07-05T09:21:30.711Z",
+  "lastInstruction": ""
+}

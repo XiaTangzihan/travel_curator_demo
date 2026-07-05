@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   formatDateTimeLabel,
   formatDurationSecondsLabel,
+  integrityIssueLabels,
 } from "@/src/features/runs/presentation";
 import {
   TraceAssetStatePill,
@@ -91,7 +92,7 @@ function CurrentArtifactCard(props: CurrentArtifactCardProps) {
         ) : null}
       </div>
 
-      {props.publicPath ? (
+      {props.publicPath && props.exists !== false ? (
         <div className="mt-4">
           <a
             href={props.publicPath}
@@ -229,6 +230,19 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
   }
 
   const detail = props.detail;
+  const currentStateIssues = detail.integrityIssues.filter((issue) =>
+    [
+      "selected_poster_version_missing",
+      "selected_poster_source_run_missing",
+      "route_missing",
+      "route_parse_failed",
+      "knowledge_missing",
+      "knowledge_parse_failed",
+      "current_poster_missing",
+      "map_view_missing",
+      "map_view_parse_failed",
+    ].includes(issue.code),
+  );
 
   return (
     <section className="grid gap-4">
@@ -283,13 +297,30 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
               ))}
             </div>
           ) : null}
+
+          {currentStateIssues.length ? (
+            <div className="mt-5 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4">
+              <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">完整性告警</p>
+              <div className="mt-3 grid gap-2 text-sm leading-6 text-[var(--text-muted)]">
+                {currentStateIssues.map((issue) => (
+                  <div
+                    key={`${issue.code}-${issue.message}-message`}
+                    className="rounded-[14px] bg-[var(--bg-surface)] px-3 py-2"
+                  >
+                    <p className="font-medium text-[var(--text-strong)]">{integrityIssueLabels[issue.code]}</p>
+                    <p className="mt-1">{issue.message}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </article>
 
         <article className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
           <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">版本与来源</p>
           <div className="mt-4 space-y-3 text-sm text-[var(--text-muted)]">
             <p>当前版本：{detail.selectedPosterVersion?.versionId ?? "未识别"}</p>
-            <p>候选版本数：{detail.selectedPosterVersion ? "已识别" : "未识别"}</p>
+            <p>候选版本数：{detail.posterVersionCount}</p>
             <p>海报来源：{detail.selectedPosterSourceRun?.runId ?? "缺失"}</p>
             <p>Lifecycle：{detail.latestLifecycleRun?.runId ?? "缺失"}</p>
           </div>
@@ -331,6 +362,14 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
               />
             ) : null}
           </div>
+
+          {!detail.selectedPosterVersion || !detail.selectedPosterSourceRun ? (
+            <div className="mt-4 rounded-[18px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
+              当前态语义不完整：{!detail.selectedPosterVersion ? "选中版本缺失" : ""}
+              {!detail.selectedPosterVersion && !detail.selectedPosterSourceRun ? "；" : ""}
+              {!detail.selectedPosterSourceRun ? "来源 run 缺失" : ""}
+            </div>
+          ) : null}
         </article>
       </div>
 
@@ -354,7 +393,7 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
           )}
         </div>
 
-        {detail.currentArtifacts.poster.publicPath ? (
+        {detail.currentArtifacts.poster.publicPath && detail.currentArtifacts.poster.exists ? (
           <div className="mt-4 overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
             <Image
               src={detail.currentArtifacts.poster.publicPath}
@@ -367,7 +406,9 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
           </div>
         ) : (
           <div className="mt-4 flex min-h-[240px] items-center justify-center rounded-[24px] bg-[var(--bg-soft)] text-sm text-[var(--text-muted)]">
-            当前没有可预览海报
+            {detail.currentArtifacts.poster.publicPath
+              ? "当前海报路径已记录，但文件缺失"
+              : "当前没有可预览海报"}
           </div>
         )}
       </article>
@@ -436,6 +477,11 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                 subtitle="当前选中的海报版本"
                 publicPath={detail.currentArtifacts.poster.publicPath}
                 exists={detail.currentArtifacts.poster.exists}
+                error={
+                  detail.currentArtifacts.poster.exists
+                    ? undefined
+                    : "当前选中的海报文件不存在，请先检查选中版本与来源 run 的一致性。"
+                }
                 detailLines={[
                   `路径：${detail.currentArtifacts.poster.publicPath ?? "未记录"}`,
                   `来源 run：${detail.currentArtifacts.poster.sourceRunId ?? "缺失"}`,
@@ -590,8 +636,20 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
               </div>
             </div>
           ) : (
-            <div className="mt-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
-              {detail.aiContract.error ?? "当前 AI Contract 不可用"}
+            <div className="mt-4 grid gap-3">
+              <div className="rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
+                {detail.aiContract.error ?? "当前 AI Contract 不可用"}
+              </div>
+              {detail.currentArtifacts.route.previewLines.length ? (
+                <div className="rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4 text-sm leading-6 text-[var(--text-muted)]">
+                  <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">降级为 route 文本只读预览</p>
+                  <div className="mt-3 space-y-1">
+                    {detail.currentArtifacts.route.previewLines.map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
         </article>
@@ -651,6 +709,16 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                 <p>Prompt 版本：{run.promptVersion ?? "未记录"}</p>
                 <p>route：{run.artifacts.routePath ?? "未记录"}</p>
                 <p>poster：{run.artifacts.posterPath ?? "未记录"}</p>
+                {run.posterAssetState ? (
+                  <p>
+                    产物状态：
+                    {run.posterAssetState === "present"
+                      ? "存在"
+                      : run.posterAssetState === "pruned"
+                        ? "已被确认流程裁剪"
+                        : "未知"}
+                  </p>
+                ) : null}
                 {run.errorMessage ? (
                   <p className="rounded-[14px] bg-[var(--danger-tint)] px-3 py-2 text-[var(--danger-ink)]">
                     {run.errorMessage}

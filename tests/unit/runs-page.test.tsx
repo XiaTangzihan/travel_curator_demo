@@ -36,6 +36,7 @@ function createDetail(params: {
     datasetKey: "hangzhou",
     mapStatus: "confirmed",
     eventCount: 1,
+    posterVersionCount: 2,
     updatedAt: "2026-07-05T05:39:37.081Z",
     currentRunIdRaw: params.lifecycleRunId,
     selectedPosterVersion: {
@@ -367,5 +368,58 @@ describe("RunsPage", () => {
       expect(screen.getAllByText("杭州 B").length).toBeGreaterThan(0);
       expect(screen.getAllByText("run_source_b").length).toBeGreaterThan(0);
     });
+  });
+
+  it("在 AI Contract 失败和当前海报缺失时，会展示完整性告警但保留其他区域", () => {
+    const degradedDetail: TraceMapDetailViewModel = {
+      ...detailA,
+      selectedPosterSourceRun: null,
+      currentArtifacts: {
+        ...detailA.currentArtifacts,
+        poster: {
+          ...detailA.currentArtifacts.poster,
+          exists: false,
+        },
+        route: {
+          ...detailA.currentArtifacts.route,
+          parsed: false,
+          error: "route 缺少 Important Rules 区块",
+          previewLines: ["---", "map_name: 杭州 A"],
+        },
+      },
+      aiContract: {
+        available: false,
+        error: "route 缺少 Important Rules 区块",
+        frontMatter: null,
+        importantRules: [],
+        events: [],
+        knowledge: [],
+      },
+      integrityIssues: [
+        {
+          code: "selected_poster_source_run_missing",
+          severity: "error",
+          message: "当前作品无法定位当前选中海报的来源 run",
+        },
+        {
+          code: "current_poster_missing",
+          severity: "error",
+          message: "当前选中的海报文件不存在",
+        },
+        {
+          code: "route_parse_failed",
+          severity: "error",
+          message: "route 缺少 Important Rules 区块",
+        },
+      ],
+    };
+
+    render(<RunsPage overview={overview} initialDetail={degradedDetail} />);
+
+    expect(screen.getByText("完整性告警")).toBeInTheDocument();
+    expect(screen.getByText("当前作品无法定位当前选中海报的来源 run")).toBeInTheDocument();
+    expect(screen.getByText("当前海报路径已记录，但文件缺失")).toBeInTheDocument();
+    expect(screen.getByText("降级为 route 文本只读预览")).toBeInTheDocument();
+    expect(screen.getAllByText("当前产物摘要").length).toBeGreaterThan(0);
   });
 });

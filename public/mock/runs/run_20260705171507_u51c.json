@@ -1,0 +1,61 @@
+{
+  "runId": "run_20260705171507_u51c",
+  "mapId": "map_gz_1783242907490",
+  "datasetKey": "hangzhou",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "watercolor",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_watercolor_20260702"
+  ],
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-05T09:17:34.624Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_1.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_2.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_3.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_4.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_5.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_1.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_2.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_3.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_4.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_5.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_6.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_7.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州-1-2",
+    "city": "杭州",
+    "style": "watercolor",
+    "selectedCommentIds": [
+      "sheet_hangzhou_7441614964332169252",
+      "sheet_hangzhou_7443593968841361471",
+      "sheet_hangzhou_7457206519067707431",
+      "sheet_hangzhou_7442702742558083091",
+      "sheet_hangzhou_7456427367863437375",
+      "sheet_hangzhou_7443020777257043987",
+      "sheet_hangzhou_7499867497853454387",
+      "sheet_hangzhou_7554647459973089290"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州-1-2",
+    "city": "杭州",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/hangzhou.raw.json",
+    "eventsPath": "/mock/events/hangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1783242907490.route.md",
+    "posterPath": "/mock/posters/map_gz_1783242907490.png",
+    "mapPath": "/mock/maps/map_gz_1783242907490.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T09:15:07.490Z",
+  "endedAt": "2026-07-05T09:17:34.624Z"
+}
