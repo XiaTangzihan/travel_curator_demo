@@ -1,4 +1,8 @@
-import type { DemoDatasetKey } from "@/src/config/demo";
+import {
+  getDemoDataset,
+  supportedDatasetKeys,
+  type DemoDatasetKey,
+} from "@/src/config/demo";
 import type { RunTrace } from "@/src/contracts/domain";
 import { summarizeIssueCodes } from "@/src/features/runs/presentation";
 import {
@@ -40,6 +44,14 @@ const providerModeOptions: Array<{ value: RunTrace["providerMode"] | "missing"; 
   { value: "fallback", label: "本地回退" },
   { value: "missing", label: "未记录" },
 ];
+
+const datasetFilterOptions = supportedDatasetKeys.map((key) => {
+  const dataset = getDemoDataset(key);
+  return {
+    value: key,
+    label: `${dataset.city} · ${key}`,
+  };
+});
 
 export function TraceMapListPanel(props: TraceMapListPanelProps) {
   const issueSummary =
@@ -99,8 +111,11 @@ export function TraceMapListPanel(props: TraceMapListPanelProps) {
                 className="rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm outline-none"
               >
                 <option value="all">全部数据集</option>
-                <option value="guangzhou">guangzhou</option>
-                <option value="hangzhou">hangzhou</option>
+                {datasetFilterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </label>
 

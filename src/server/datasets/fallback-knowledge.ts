@@ -13,6 +13,7 @@ const fallbackKnowledgeByDataset: Record<DemoDatasetKey, Landmark[]> = {
     { name: "上下九", visual: "老广骑楼商业街" },
   ],
   hangzhou: [],
+  meishan: [],
 };
 
 export function getFallbackKnowledge(datasetKey: DemoDatasetKey) {

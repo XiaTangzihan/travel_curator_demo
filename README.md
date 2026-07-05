@@ -22,6 +22,8 @@ npm run sync:dataset -- hangzhou
 npm run preprocess:dataset -- hangzhou
 npm run sync:dataset -- guangzhou
 npm run preprocess:dataset -- guangzhou
+npm run sync:dataset -- meishan
+npm run preprocess:dataset -- meishan
 ```
 
 也可使用城市别名命令：
@@ -31,6 +33,8 @@ npm run sync:hangzhou
 npm run preprocess:hangzhou
 npm run sync:guangzhou
 npm run preprocess:guangzhou
+npm run sync:meishan
+npm run preprocess:meishan
 ```
 
 3. 启动开发服务器（固定使用 `localhost:3001`）
@@ -59,6 +63,8 @@ npm run sync:guangzhou
 npm run preprocess:guangzhou
 npm run sync:hangzhou
 npm run preprocess:hangzhou
+npm run sync:meishan
+npm run preprocess:meishan
 ```
 
 ## 环境变量
