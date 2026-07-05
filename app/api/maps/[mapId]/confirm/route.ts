@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { mapRecordSchema, runTraceSchema } from "@/src/contracts/domain";
+import { prunePosterVersionsForConfirm } from "@/src/engine/pipelines/generate-map";
 import { createRunId } from "@/src/lib/ids";
 import {
   getMapRecord,
@@ -22,9 +23,11 @@ export async function POST(_request: Request, context: ConfirmContext) {
       return NextResponse.json({ error: "地图不存在" }, { status: 404 });
     }
 
+    const prunedRecord = await prunePosterVersionsForConfirm({ mapRecord });
+
     const runId = createRunId();
     const confirmedRecord = mapRecordSchema.parse({
-      ...mapRecord,
+      ...prunedRecord,
       status: "confirmed",
       currentRunId: runId,
       updatedAt: new Date().toISOString(),

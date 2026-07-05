@@ -6,6 +6,7 @@ import {
   type Landmark,
   type MapRecord,
   type ParsedRoute,
+  type PosterVersion,
   type RawDatasetSnapshot,
   type RunTrace,
 } from "@/src/contracts/domain";
@@ -31,6 +32,7 @@ import {
   getEventsDataset,
   getKnowledge,
   getRawDataset,
+  getRenderedMap,
   getRouteMarkdown,
   getRunTrace,
   posterOutputPath,
@@ -43,7 +45,12 @@ import {
   saveRunTrace,
   updateRunTrace,
 } from "@/src/server/repositories/demo-repository";
-import { fromPublicPath, writeBinaryFile, writeTextFile } from "@/src/server/utils/storage";
+import {
+  deleteFilePaths,
+  fromPublicPath,
+  writeBinaryFile,
+  writeTextFile,
+} from "@/src/server/utils/storage";
 import { parseRouteMarkdown } from "@/src/engine/parsers/route-markdown";
 
 type GenerateMapInput = GenerateRunInput;
@@ -80,6 +87,52 @@ function buildDatasetArtifactPaths(datasetKey: string) {
     rawPath: `/mock/raw/${dataset.rawFileName}`,
     eventsPath: `/mock/events/${dataset.eventsFileName}`,
   };
+}
+
+function buildPosterVersion(params: {
+  versionId: string;
+  posterPath: string;
+  runId: string;
+  createdAt: string;
+  instruction?: string;
+  basedOnExistingImage?: boolean;
+}): PosterVersion {
+  return {
+    versionId: params.versionId,
+    posterPath: params.posterPath,
+    runId: params.runId,
+    createdAt: params.createdAt,
+    instruction: params.instruction,
+    basedOnExistingImage: params.basedOnExistingImage,
+  };
+}
+
+function ensurePosterVersions(mapRecord: MapRecord): PosterVersion[] {
+  if (mapRecord.posterVersions.length) {
+    return mapRecord.posterVersions;
+  }
+
+  return [
+    buildPosterVersion({
+      versionId: mapRecord.currentRunId || "initial",
+      posterPath: mapRecord.posterPath,
+      runId: mapRecord.currentRunId || "initial",
+      createdAt: mapRecord.updatedAt || mapRecord.createdAt,
+      instruction: mapRecord.lastInstruction,
+    }),
+  ];
+}
+
+function resolveSelectedPosterVersion(params: {
+  mapRecord: MapRecord;
+  posterVersions: PosterVersion[];
+}) {
+  return (
+    params.posterVersions.find((version) => version.versionId === params.mapRecord.selectedPosterVersionId) ??
+    params.posterVersions.find((version) => version.posterPath === params.mapRecord.posterPath) ??
+    params.posterVersions.at(-1) ??
+    null
+  );
 }
 
 function buildPreviewImagePaths(params: {
@@ -214,6 +267,7 @@ async function writePosterFile(params: {
 
 async function writeRegeneratedPosterFile(params: {
   mapId: string;
+  runId: string;
   styleKey: string;
   referenceImagePaths: string[];
   parsedRoute: ParsedRoute;
@@ -232,9 +286,9 @@ async function writeRegeneratedPosterFile(params: {
     prompt,
     images: params.referenceImagePaths,
   });
-  const outputPath = posterOutputPath(params.mapId, "png");
+  const outputPath = posterOutputPath(params.mapId, "png", params.runId);
   await writeBinaryFile(outputPath, image);
-  return posterPublicPath(params.mapId, "png");
+  return posterPublicPath(params.mapId, "png", params.runId);
 }
 
 async function generateMapDraftCore(
@@ -343,6 +397,15 @@ async function generateMapDraftCore(
     posterPath,
     knowledgePath,
     currentRunId: context.runId,
+    posterVersions: [
+      buildPosterVersion({
+        versionId: context.runId,
+        posterPath,
+        runId: context.runId,
+        createdAt: context.startedAt,
+      }),
+    ],
+    selectedPosterVersionId: context.runId,
     selectedCommentIds: selectedEventsWithVisualBriefs.map((event) => event.commentId),
     createdAt: context.startedAt,
     updatedAt: new Date().toISOString(),
@@ -526,6 +589,10 @@ export async function regenerateMapDraft(params: {
   let providerMode: RunTrace["providerMode"] = "live";
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
+  const normalizedInstruction = params.instruction.trim();
+  const effectiveBasedOnExistingImage = normalizedInstruction
+    ? params.basedOnExistingImage
+    : false;
   const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
   let knowledge = cachedKnowledge;
   if (!knowledge.length) {
@@ -538,10 +605,10 @@ export async function regenerateMapDraft(params: {
   const referenceImagePublicPaths = buildRegenerateImagePublicPaths({
     styleReferencePublicPath: stylePreset.referencePublicPath,
     existingPosterPublicPath: params.mapRecord.posterPath,
-    basedOnExistingImage: params.basedOnExistingImage,
+    basedOnExistingImage: effectiveBasedOnExistingImage,
   });
   if (
-    params.basedOnExistingImage &&
+    effectiveBasedOnExistingImage &&
     !referenceImagePublicPaths.includes(params.mapRecord.posterPath)
   ) {
     warnings.push("P4 提示：当前旧底片不是 PNG/JPG/WebP，已仅使用风格参考图重绘。");
@@ -567,12 +634,13 @@ export async function regenerateMapDraft(params: {
   try {
     posterPath = await writeRegeneratedPosterFile({
       mapId: params.mapRecord.mapId,
+      runId,
       styleKey: params.mapRecord.style,
       referenceImagePaths,
       parsedRoute,
       knowledge,
-      instruction: params.instruction,
-      basedOnExistingImage: params.basedOnExistingImage,
+      instruction: normalizedInstruction,
+      basedOnExistingImage: effectiveBasedOnExistingImage,
     });
   } catch (error) {
     providerMode = "fallback";
@@ -601,9 +669,21 @@ export async function regenerateMapDraft(params: {
 
   const updatedMap = mapRecordSchema.parse({
     ...params.mapRecord,
+    posterVersions: [
+      ...ensurePosterVersions(params.mapRecord),
+      buildPosterVersion({
+        versionId: runId,
+        posterPath,
+        runId,
+        createdAt: startedAt,
+        instruction: normalizedInstruction || undefined,
+        basedOnExistingImage: normalizedInstruction ? effectiveBasedOnExistingImage : undefined,
+      }),
+    ],
+    selectedPosterVersionId: runId,
     posterPath,
     currentRunId: runId,
-    lastInstruction: params.instruction,
+    lastInstruction: normalizedInstruction,
     updatedAt: new Date().toISOString(),
   });
   await saveMapRecord(updatedMap);
@@ -614,8 +694,8 @@ export async function regenerateMapDraft(params: {
     datasetKey: params.mapRecord.datasetKey,
     status: "completed",
     stage: "regenerate",
-    basedOnExistingImage: params.basedOnExistingImage,
-    promptInstruction: params.instruction,
+    basedOnExistingImage: effectiveBasedOnExistingImage,
+    promptInstruction: normalizedInstruction,
     styleKey: params.mapRecord.style,
     promptVersion: stylePreset.promptVersion,
     referenceIds: [stylePreset.referenceId],
@@ -639,4 +719,78 @@ export async function regenerateMapDraft(params: {
     mapViewModel,
     runTrace,
   };
+}
+
+export async function selectMapPosterVersion(params: { mapRecord: MapRecord; versionId: string }) {
+  const posterVersions = ensurePosterVersions(params.mapRecord);
+  const selectedVersion = posterVersions.find((version) => version.versionId === params.versionId);
+  if (!selectedVersion) {
+    throw new Error("指定的海报版本不存在");
+  }
+  const renderedMap = await getRenderedMap(params.mapRecord.mapId);
+  if (!renderedMap) {
+    throw new Error("当前地图视图不存在，无法切换海报版本");
+  }
+
+  const nextMapRecord = mapRecordSchema.parse({
+    ...params.mapRecord,
+    posterVersions,
+    selectedPosterVersionId: selectedVersion.versionId,
+    posterPath: selectedVersion.posterPath,
+    currentRunId: selectedVersion.runId,
+    updatedAt: new Date().toISOString(),
+  });
+  await saveMapRecord(nextMapRecord);
+
+  const nextMapViewModel = {
+    ...renderedMap,
+    posterPath: selectedVersion.posterPath,
+    generatedAt: new Date().toISOString(),
+  };
+  await saveRenderedMap(params.mapRecord.mapId, nextMapViewModel);
+
+  return {
+    mapRecord: nextMapRecord,
+    mapViewModel: nextMapViewModel,
+  };
+}
+
+export async function prunePosterVersionsForConfirm(params: { mapRecord: MapRecord }) {
+  const posterVersions = ensurePosterVersions(params.mapRecord);
+  const selectedVersion = resolveSelectedPosterVersion({
+    mapRecord: params.mapRecord,
+    posterVersions,
+  });
+  if (!selectedVersion) {
+    throw new Error("当前没有可确认的海报版本");
+  }
+
+  const discardedPaths = posterVersions
+    .filter((version) => version.versionId !== selectedVersion.versionId)
+    .map((version) => fromPublicPath(version.posterPath))
+    .filter((filePath, index, list) => list.indexOf(filePath) === index);
+  if (discardedPaths.length) {
+    await deleteFilePaths(discardedPaths);
+  }
+
+  const renderedMap = await getRenderedMap(params.mapRecord.mapId);
+  const nextMapRecord = mapRecordSchema.parse({
+    ...params.mapRecord,
+    posterVersions: [selectedVersion],
+    selectedPosterVersionId: selectedVersion.versionId,
+    posterPath: selectedVersion.posterPath,
+    currentRunId: selectedVersion.runId,
+    updatedAt: new Date().toISOString(),
+  });
+  await saveMapRecord(nextMapRecord);
+
+  if (renderedMap) {
+    await saveRenderedMap(params.mapRecord.mapId, {
+      ...renderedMap,
+      posterPath: selectedVersion.posterPath,
+      generatedAt: new Date().toISOString(),
+    });
+  }
+
+  return nextMapRecord;
 }

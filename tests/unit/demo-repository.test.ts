@@ -5,6 +5,10 @@ import {
   type EventRecord,
   type Landmark,
 } from "@/src/contracts/domain";
+import {
+  prunePosterVersionsForConfirm,
+  selectMapPosterVersion,
+} from "@/src/engine/pipelines/generate-map";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
 import {
   deleteMapArtifacts,
@@ -130,5 +134,226 @@ describe("deleteMapArtifacts", () => {
     expect(await getRenderedMap(otherMapId)).not.toBeNull();
     expect(await getRunTrace(otherRunId)).not.toBeNull();
     expect(await pathExists(posterOutputPath(otherMapId, "png"))).toBe(true);
+  });
+
+  it("会删除 mapRecord 上挂载的 posterVersions 与 run artifacts 中的版本化海报", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const mapId = `test_delete_versioned_${token}`;
+    const runId = `run_delete_versioned_${token}`;
+    createdMapIds.push(mapId);
+
+    await seedMapArtifacts(mapId, runId);
+    const versionedPath = posterOutputPath(mapId, "png", "run_regen_001");
+    await writeBinaryFile(versionedPath, Buffer.from("poster-versioned"));
+
+    const mapRecord = await getMapRecord(mapId);
+    if (!mapRecord) {
+      throw new Error("seed mapRecord failed");
+    }
+
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        ...mapRecord,
+        posterVersions: [
+          {
+            versionId: runId,
+            posterPath: posterPublicPath(mapId, "png"),
+            runId,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_001",
+            posterPath: posterPublicPath(mapId, "png", "run_regen_001"),
+            runId: "run_regen_001",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        selectedPosterVersionId: "run_regen_001",
+      }),
+    );
+
+    await saveRunTrace(
+      runTraceSchema.parse({
+        runId: "run_regen_001",
+        mapId,
+        status: "completed",
+        stage: "regenerate",
+        warnings: [],
+        artifacts: {
+          posterPath: posterPublicPath(mapId, "png", "run_regen_001"),
+        },
+        providerMode: "live",
+        startedAt: new Date().toISOString(),
+        endedAt: new Date().toISOString(),
+      }),
+    );
+
+    const result = await deleteMapArtifacts(mapId);
+
+    expect(result?.verified).toBe(true);
+    expect(await pathExists(versionedPath)).toBe(false);
+    expect(await getRunTrace("run_regen_001")).toBeNull();
+  });
+
+  it("selectMapPosterVersion 会切换当前选中的海报版本", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const mapId = `test_select_version_${token}`;
+    const runId = `run_select_version_${token}`;
+    createdMapIds.push(mapId);
+
+    await seedMapArtifacts(mapId, runId);
+    const currentPosterPath = posterPublicPath(mapId, "png", "run_regen_002");
+    const currentPosterOutputPath = posterOutputPath(mapId, "png", "run_regen_002");
+    await writeBinaryFile(currentPosterOutputPath, Buffer.from("poster-current"));
+
+    const mapRecord = await getMapRecord(mapId);
+    const renderedMap = await getRenderedMap(mapId);
+    if (!mapRecord || !renderedMap) {
+      throw new Error("seed map artifacts failed");
+    }
+
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        ...mapRecord,
+        posterVersions: [
+          {
+            versionId: runId,
+            posterPath: posterPublicPath(mapId, "png"),
+            runId,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_002",
+            posterPath: currentPosterPath,
+            runId: "run_regen_002",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        selectedPosterVersionId: "run_regen_002",
+        posterPath: currentPosterPath,
+        currentRunId: "run_regen_002",
+      }),
+    );
+
+    await saveRenderedMap(mapId, {
+      ...renderedMap,
+      posterPath: currentPosterPath,
+    });
+
+    const result = await selectMapPosterVersion({
+      mapRecord: mapRecordSchema.parse({
+        ...mapRecord,
+        posterVersions: [
+          {
+            versionId: runId,
+            posterPath: posterPublicPath(mapId, "png"),
+            runId,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_002",
+            posterPath: currentPosterPath,
+            runId: "run_regen_002",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        selectedPosterVersionId: "run_regen_002",
+        posterPath: currentPosterPath,
+        currentRunId: "run_regen_002",
+      }),
+      versionId: runId,
+    });
+
+    expect(result.mapRecord.posterPath).toBe(posterPublicPath(mapId, "png"));
+    expect(result.mapRecord.currentRunId).toBe(runId);
+    expect(result.mapRecord.selectedPosterVersionId).toBe(runId);
+
+    const nextMapRecord = await getMapRecord(mapId);
+    const nextRenderedMap = await getRenderedMap(mapId);
+    expect(nextMapRecord?.posterPath).toBe(posterPublicPath(mapId, "png"));
+    expect(nextRenderedMap?.posterPath).toBe(posterPublicPath(mapId, "png"));
+  });
+
+  it("prunePosterVersionsForConfirm 会只保留当前选中版本并删除未选中产物", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const mapId = `test_prune_versions_${token}`;
+    const runId = `run_prune_versions_${token}`;
+    createdMapIds.push(mapId);
+
+    await seedMapArtifacts(mapId, runId);
+    const selectedPosterPath = posterPublicPath(mapId, "png", "run_regen_003");
+    const selectedPosterOutputPath = posterOutputPath(mapId, "png", "run_regen_003");
+    const stalePosterPath = posterPublicPath(mapId, "png", "run_regen_004");
+    const stalePosterOutputPath = posterOutputPath(mapId, "png", "run_regen_004");
+    await writeBinaryFile(selectedPosterOutputPath, Buffer.from("poster-selected"));
+    await writeBinaryFile(stalePosterOutputPath, Buffer.from("poster-stale"));
+
+    const mapRecord = await getMapRecord(mapId);
+    if (!mapRecord) {
+      throw new Error("seed mapRecord failed");
+    }
+
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        ...mapRecord,
+        posterPath: selectedPosterPath,
+        currentRunId: "run_regen_003",
+        posterVersions: [
+          {
+            versionId: runId,
+            posterPath: posterPublicPath(mapId, "png"),
+            runId,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_003",
+            posterPath: selectedPosterPath,
+            runId: "run_regen_003",
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_004",
+            posterPath: stalePosterPath,
+            runId: "run_regen_004",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        selectedPosterVersionId: "run_regen_003",
+      }),
+    );
+
+    const result = await prunePosterVersionsForConfirm({
+      mapRecord: mapRecordSchema.parse({
+        ...mapRecord,
+        posterPath: selectedPosterPath,
+        currentRunId: "run_regen_003",
+        posterVersions: [
+          {
+            versionId: runId,
+            posterPath: posterPublicPath(mapId, "png"),
+            runId,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_003",
+            posterPath: selectedPosterPath,
+            runId: "run_regen_003",
+            createdAt: new Date().toISOString(),
+          },
+          {
+            versionId: "run_regen_004",
+            posterPath: stalePosterPath,
+            runId: "run_regen_004",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        selectedPosterVersionId: "run_regen_003",
+      }),
+    });
+
+    expect(result.posterVersions).toHaveLength(1);
+    expect(result.posterVersions[0].versionId).toBe("run_regen_003");
+    expect(await pathExists(selectedPosterOutputPath)).toBe(true);
+    expect(await pathExists(stalePosterOutputPath)).toBe(false);
   });
 });

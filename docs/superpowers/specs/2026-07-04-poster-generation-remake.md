@@ -39,7 +39,7 @@
 * Seedream 图像接口不作为“可靠支持独立 `system_prompt`”的契约处理；需要强调的通用规则统一写进主 prompt 顶部的“重要事项区”。
 * “图中有字”和“路径顺序”属于整图级约束，主修复层在 `Important Rules + P3`，不由 `P2` 承担。
 * 当前联调默认图片模型已切换到 Seedream 5.0。
-* 图片重生成只支持“回退上一次”，不引入完整历史版本管理。
+* 静态图确认阶段改为“多版候选比较”，不再采用“回退上一次”的单指针模型。
 * 工作台对 `selectedCommentIds.length > 8` 只做 warning，不做硬阻断。
 * 本轮不为旧 route 兼容性额外加 fallback 逻辑。
 
@@ -75,11 +75,11 @@
 * 同文件还增强了 `avoid` 的文字噪声示例，并加入了对 string `avoid` 的归一化容错。
 * 当前需要明确的是：这些收紧属于 event 局部语义层，不能替代 `P3` 的整图规则。
 
-### 4.6 当前重生成会覆写同一路径海报，缺少“回退上一次”所需状态
+### 4.6 当前静态图确认页仍缺少多版候选比较状态
 
-* `src/server/repositories/demo-repository.ts` 当前 `posterOutputPath(mapId)` / `posterPublicPath(mapId)` 都只按 `mapId` 生成固定文件名。
-* `src/contracts/domain.ts` 中 `mapRecordSchema` 当前只有 `posterPath`，没有 `previousPosterPath` 或上一版本关联字段。
-* `src/features/confirm/confirm-page.tsx` 当前重生成成功后只执行 `router.refresh()`，没有版本化路径切换，也没有回退入口。
+* 当前如果用户想比较多张候选海报，系统没有 `posterVersions` 或 `selectedPosterVersionId` 之类的结构化状态。
+* `confirm-page` 仍缺少显式的版本切换区，用户无法在多版之间反复比较。
+* `confirm` 动作也没有“仅保留选中版本、丢弃其他版本”的收口逻辑。
 
 ### 4.7 工作台当前没有“> 8 条评价”的软提示
 
@@ -95,7 +95,7 @@
 | R3 | `route.md parser` | P3/P4 能从 route 读取结构化输入；route 非法时明确失败 | 新增 parser + zod schema，严格校验 front matter / rules / events |
 | R4 | P3/P4 route-driven prompt | P3/P4 的最终 prompt 来源切换为 `parsedRoute + knowledge + C-通用 + C-风格`，且整图规则收紧 | 调整 prompt builder 与 generate/regenerate pipeline，并把共享 `Important Rules` 写入 route 与 P3 |
 | R5 | 背景标志去文字化与路径顺序收紧 | 背景地标只作为背景视觉，不给地标配文；主路径以左到右为主阅读轴 | 通过共享 `Important Rules` 与 P3 顶部重要事项区强化硬约束，不改写 `knowledge.visual` |
-| R6 | 重生成刷新与回退 | 重生成成功后展示新图，并允许回退上一次图片版本 | 海报文件路径版本化，MapRecord 增加上一版本指针，新增回退接口与确认页入口 |
+| R6 | 多版候选比较与定稿 | 重生成成功后新增候选版本；用户可在多版中切换；确认时仅保留选中版本 | 海报文件路径版本化，MapRecord 增加 `posterVersions + selectedPosterVersionId`，新增版本切换接口与确认时清理逻辑 |
 | R7 | 工作台高风险提示 | 选中评价数 `<= 8` 时静默，`> 8` 时展示 warning，但仍允许生成 | 在工作台新增非阻断提示文案，不进入后端强校验 |
 
 ## 6. 分阶段计划
@@ -173,7 +173,7 @@
 * 这是本轮最核心的架构切换：route 从“展示产物”变成“权威输入”
 * parser 严格失败会直接改变当前 happy path，需要单独隔离验证
 
-### Phase 3：重生成版本化刷新与上一次回退
+### Phase 3：多版海报候选比较与定稿
 
 **执行 Agent 可用 Skills**
 * `executing-plans`
@@ -181,29 +181,32 @@
 
 **范围**
 * 海报输出路径版本化，不再按 `mapId` 固定覆写
-* MapRecord 增加上一版本图片指针
-* 确认页重生成后展示新图
-* 新增“回退上一次”动作，只支持单步回退
+* MapRecord 增加 `posterVersions + selectedPosterVersionId`
+* 每次重生成新增一个候选版本，而不是覆盖当前版本
+* 确认页支持在多版候选图之间切换比较
+* 确认保存时仅保留当前选中版本，其余版本清理
 
 **建议改动面**
 * `src/contracts/domain.ts`
 * `src/server/repositories/demo-repository.ts`
 * `src/engine/pipelines/generate-map.ts`
 * `app/api/maps/[mapId]/regenerate/route.ts`
-* `app/api/maps/[mapId]/rollback/route.ts`（新增）
+* `app/api/maps/[mapId]/poster-versions/select/route.ts`（新增）
 * `src/features/confirm/confirm-page.tsx`
+* `app/api/maps/[mapId]/confirm/route.ts`
 * `tests/unit/demo-repository.test.ts`
 
 **验收标准**
-* 每次重生成后 `posterPath` 变为新版本路径
-* 确认页刷新后能看到新图而不是旧缓存图
-* `mapRecord` 能保留“上一次图片版本”的最小回退信息
-* 用户可在确认页执行“回退上一次”
-* 回退后不进入多版本历史管理，只保留当前图与下一次可能的新上一次
+* 每次重生成后会新增一个新版本，不覆盖已有候选图
+* 用户可在确认页的多版候选图之间反复切换比较
+* 用户当前选中的版本有明确状态，不是隐含状态
+* 若不填额外提示词直接重生成，默认按首次生成的原始输入重新采样
+* 点击确认保存后，只保留选中版本，其他未选中版本被清理
 
 **风险提示**
 * 海报产物命名规则变化会影响删除逻辑、run artifacts 与缓存行为
-* 当前图与上一次图的指针切换如果不严谨，会产生回退错位
+* 多版切换需要保证 `mapRecord.posterPath`、`currentRunId` 与 `renderedMap.posterPath` 始终一致
+* 确认时的未选中版本清理若不严谨，会误删最终定稿图
 
 ### Phase 4：工作台 `> 8` 风险 warning 与整链路回归
 
@@ -273,14 +276,14 @@ feat(route-parser): 切换 P3/P4 为 route 驱动生图输入
 1. 先验 `route.md` 契约升级是否成立。
 2. 再验 parser 是否能严格读取并校验新 route。
 3. 再验 P3/P4 是否已真正改为 route-driven。
-4. 再验重生成的新图展示与上一次回退。
+4. 再验多版候选图的切换比较与定稿清理。
 5. 最后验工作台 `> 8` warning 与整链路回归。
 
 这样排序的原因是：
 
 * `route.md` 契约是整个改造的地基。
 * parser 是把“人类可读 route”转成“机器可用输入”的门。
-* 只有 route-driven 生图链稳定后，重生成版本化和回退才有可靠价值。
+* 只有 route-driven 生图链稳定后，多版版本集与定稿清理才有可靠价值。
 * 工作台 warning 不改变核心架构，应最后纳入，避免分散主链路调试注意力。
 
 ## 9. 方案选型
@@ -340,21 +343,21 @@ feat(route-parser): 切换 P3/P4 为 route 驱动生图输入
 * 当前项目封装与现有实测都不足以把 Seedream 的独立 `system_prompt` 视为可靠契约。
 * 主 prompt 顶部的重要事项区可被当前代码路径直接稳定控制。
 
-### 9.4 重生成回退方案选型
+### 9.4 多版候选比较方案选型
 
 候选方案：
 
-1. `推荐方案`：海报路径版本化 + MapRecord 保留上一版本指针
+1. `推荐方案`：海报路径版本化 + `posterVersions` 候选集 + `selectedPosterVersionId`
 2. 继续覆写同一路径，仅靠 `router.refresh()` 强刷
-3. 引入完整历史版本管理
+3. 单步回退指针模型
 
 结论：选择方案 1。
 
 原因：
 
-* 它正好满足“重生成后看见新图 + 支持回退上一次”的最小需求。
-* 相比覆写同一路径，它能避免缓存错觉。
-* 相比完整历史版本管理，它的状态和交互都更收敛。
+* 它正好满足“生成多版候选图、反复比较、显式定稿”的产品目标。
+* 相比覆写同一路径，它能保留真正可比较的候选集。
+* 相比单步回退指针，它更贴合用户的“1 / 2 / 3 版来回切换”需求。
 
 ## 10. 目标设计
 
@@ -489,34 +492,41 @@ P3/P4 最终图像 prompt 的来源统一改成：
 * 主路径必须左起右终，节点横向位置随编号递增。
 * P3/P4 不再依赖独立 `system_prompt`。
 
-### 10.5 重生成与回退
+### 10.5 多版候选比较与定稿
 
 重生成成功后，不再覆写 `posterPath` 对应的同一路径文件。
 
 建议：
 
 * 新图按 `mapId + runId` 生成版本化路径，例如：`/mock/posters/<mapId>__<runId>.png`
-* `mapRecord.posterPath` 指向当前图
-* 新增 `previousPosterPath`、`previousPosterRunId`（或等效字段）指向上一次图
+* `mapRecord.posterVersions` 存储当前所有候选版本
+* `mapRecord.selectedPosterVersionId` 表示当前选中的版本
+* `mapRecord.posterPath` 与 `currentRunId` 始终镜像当前选中版本，供确认页和动态地图继续复用现有入口
 
 重生成成功流：
 
 1. 生成新图
-2. 把当前 `posterPath` 挂到 `previousPosterPath`
-3. 把新版本路径写入 `posterPath`
-4. 确认页 refresh 后展示新图
+2. 将新图追加到 `posterVersions`
+3. 默认把新图设为当前选中版本
+4. 确认页 refresh 后可立即切到该新版本进行比较
 
-回退流：
+切换版本流：
 
-1. 用户点击“回退上一次”
-2. 后端把 `previousPosterPath` 切回当前 `posterPath`
-3. 回退成功后清空上一次指针，不进入完整历史版本管理
+1. 用户点击某个候选版本
+2. 后端把 `selectedPosterVersionId`、`posterPath`、`currentRunId` 切到对应版本
+3. `renderedMap.posterPath` 同步切换，保证确认页主图立即展示选中版本
 
-这样设计可以保证：
+确认保存流：
 
-* 用户一定能看到新图
-* 回退只支持一步
-* 状态模型仍然收敛
+1. 用户点击确认保存
+2. 后端只保留当前选中版本
+3. 其他未选中版本的文件立即删除
+4. 动态地图页使用当前选中版本作为最终静态底图
+
+默认重生成策略：
+
+* 若用户未填写额外提示词，则默认按第一次生成时的原始输入重新采样，不继承当前选中图的局部修改痕迹
+* 若用户填写了额外提示词，则生成一个新的候选版本；该版本是否采用，仍由用户显式选择
 
 ### 10.6 工作台 `> 8` warning
 

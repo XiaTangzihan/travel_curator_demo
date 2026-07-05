@@ -156,6 +156,15 @@ export const parsedRouteSchema = z
     }
   });
 
+export const posterVersionSchema = z.object({
+  versionId: z.string(),
+  posterPath: z.string(),
+  runId: z.string(),
+  createdAt: z.string(),
+  instruction: z.string().optional(),
+  basedOnExistingImage: z.boolean().optional(),
+});
+
 export const mapRecordSchema = z.object({
   mapId: z.string(),
   datasetKey: datasetKeySchema.optional().default("guangzhou"),
@@ -168,6 +177,8 @@ export const mapRecordSchema = z.object({
   posterPath: z.string(),
   knowledgePath: z.string(),
   currentRunId: z.string(),
+  posterVersions: z.array(posterVersionSchema).optional().default([]),
+  selectedPosterVersionId: z.string().optional(),
   selectedCommentIds: z.array(z.string()),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -262,6 +273,7 @@ export type Landmark = z.infer<typeof landmarkSchema>;
 export type RouteArtifact = z.infer<typeof routeArtifactSchema>;
 export type ParsedRouteEvent = z.infer<typeof parsedRouteEventSchema>;
 export type ParsedRoute = z.infer<typeof parsedRouteSchema>;
+export type PosterVersion = z.infer<typeof posterVersionSchema>;
 export type MapRecord = z.infer<typeof mapRecordSchema>;
 export type MapNode = z.infer<typeof mapNodeSchema>;
 export type MapViewModel = z.infer<typeof mapViewModelSchema>;

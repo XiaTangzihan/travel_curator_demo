@@ -25,10 +25,23 @@ export function ConfirmPage(props: ConfirmPageProps) {
   const router = useRouter();
   const [instruction, setInstruction] = useState("");
   const [basedOnExistingImage, setBasedOnExistingImage] = useState(true);
-  const [pending, setPending] = useState<"regenerate" | "confirm" | null>(null);
+  const [pending, setPending] = useState<"regenerate" | "select" | "confirm" | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState<AiNotice | null>(null);
   const actionsLocked = pending !== null;
+  const posterVersions = props.mapRecord.posterVersions.length
+    ? props.mapRecord.posterVersions
+    : [
+        {
+          versionId: props.mapRecord.currentRunId || "initial",
+          posterPath: props.mapRecord.posterPath,
+          runId: props.mapRecord.currentRunId,
+          createdAt: props.mapRecord.updatedAt,
+        },
+      ];
+  const selectedPosterVersionId =
+    props.mapRecord.selectedPosterVersionId ?? posterVersions.at(-1)?.versionId ?? "";
+  const instructionReady = Boolean(instruction.trim());
 
   useEffect(() => {
     const nextNotice = consumeAiNotice();
@@ -70,6 +83,31 @@ export function ConfirmPage(props: ConfirmPageProps) {
         persistAiNotice(nextNotice);
       }
 
+      router.refresh();
+    } catch (requestError) {
+      setError((requestError as Error).message);
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function handleSelectVersion(versionId: string) {
+    if (versionId === selectedPosterVersionId) {
+      return;
+    }
+
+    try {
+      setPending("select");
+      setError("");
+      const response = await fetch(`/api/maps/${props.mapRecord.mapId}/poster-versions/select`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ versionId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error ?? "切换海报版本失败");
+      }
       router.refresh();
     } catch (requestError) {
       setError((requestError as Error).message);
@@ -144,6 +182,33 @@ export function ConfirmPage(props: ConfirmPageProps) {
               <p className="mt-2 text-lg font-semibold text-[var(--text-strong)]">
                 {props.mapRecord.eventCount} 个足迹
               </p>
+              <p className="mt-2 text-sm text-[var(--text-muted)]">
+                当前共有 {posterVersions.length} 个候选版本，确认保存时仅保留你选中的版本。
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4">
+              <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">候选版本</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {posterVersions.map((version, index) => {
+                  const selected = version.versionId === selectedPosterVersionId;
+                  return (
+                    <button
+                      type="button"
+                      key={version.versionId}
+                      onClick={() => handleSelectVersion(version.versionId)}
+                      disabled={actionsLocked}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                        selected
+                          ? "bg-[var(--accent-primary)] text-white"
+                          : "border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] text-[var(--text-strong)] hover:bg-[var(--bg-soft)]"
+                      } disabled:opacity-60`}
+                    >
+                      第 {index + 1} 版
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <label className="mt-6 block text-sm font-medium text-[var(--text-strong)]">
@@ -162,10 +227,16 @@ export function ConfirmPage(props: ConfirmPageProps) {
                 type="checkbox"
                 checked={basedOnExistingImage}
                 onChange={(event) => setBasedOnExistingImage(event.target.checked)}
+                disabled={!instructionReady}
                 className="h-4 w-4 accent-[var(--accent-primary)]"
               />
               是否基于旧图修改
             </label>
+            {!instructionReady ? (
+              <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">
+                不填额外提示词时，默认按第一次生成的原始输入重新采样，生成新的候选版本。
+              </p>
+            ) : null}
 
             {error ? (
               <div className="mt-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
@@ -185,7 +256,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                重新生成
+                生成新版本
               </button>
               <button
                 type="button"
