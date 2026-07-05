@@ -1,0 +1,30 @@
+{
+  "runId": "run_20260705171820_pdt6",
+  "mapId": "map_gz_1783242907490",
+  "datasetKey": "hangzhou",
+  "status": "completed",
+  "stage": "regenerate",
+  "basedOnExistingImage": false,
+  "promptInstruction": "",
+  "styleKey": "watercolor",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_watercolor_20260702"
+  ],
+  "updatedAt": "2026-07-05T09:19:12.530Z",
+  "inputSummary": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州-1-2",
+    "city": "杭州",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1783242907490.route.md",
+    "posterPath": "/mock/posters/map_gz_1783242907490__run_20260705171820_pdt6.png",
+    "mapPath": "/mock/maps/map_gz_1783242907490.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T09:18:20.176Z",
+  "endedAt": "2026-07-05T09:19:12.530Z"
+}

@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { supportedDatasetKeys } from "@/src/config/demo";
+import {
+  persistedImageModelKeys,
+  selectableImageModelKeys,
+} from "@/src/config/image-models";
 
 export const mapStatusSchema = z.enum(["draft", "confirmed", "failed"]);
 export const runStatusSchema = z.enum([
@@ -9,6 +13,8 @@ export const runStatusSchema = z.enum([
   "incomplete",
 ]);
 export const datasetKeySchema = z.enum(supportedDatasetKeys);
+export const imageModelSchema = z.enum(persistedImageModelKeys);
+export const selectableImageModelSchema = z.enum(selectableImageModelKeys);
 
 export const rawAttachmentSchema = z.object({
   sourceUrl: z.string(),
@@ -59,6 +65,7 @@ export const eventPictureSchema = z.object({
 });
 
 export const eventVisualBriefSchema = z.object({
+  shortName: z.string().trim().min(1).max(32),
   subject: z.string().trim().min(1),
   avoid: z.array(z.string().trim().min(1)).min(3).max(5),
 });
@@ -160,6 +167,7 @@ export const posterVersionSchema = z.object({
   versionId: z.string(),
   posterPath: z.string(),
   runId: z.string(),
+  imageModel: imageModelSchema.optional().default("unknown"),
   createdAt: z.string(),
   instruction: z.string().optional(),
   basedOnExistingImage: z.boolean().optional(),
@@ -171,6 +179,7 @@ export const mapRecordSchema = z.object({
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
+  imageModel: imageModelSchema.optional().default("unknown"),
   status: mapStatusSchema,
   eventCount: z.number(),
   routePath: z.string(),
@@ -200,6 +209,7 @@ export const mapViewModelSchema = z.object({
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
+  imageModel: imageModelSchema.optional().default("unknown"),
   posterPath: z.string(),
   routeMarkdown: z.string(),
   selectedEventId: z.string(),
@@ -228,6 +238,7 @@ export const generateRunInputSchema = z.object({
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
+  imageModel: selectableImageModelSchema.optional(),
   selectedCommentIds: z.array(z.string()).min(1),
 });
 
@@ -244,6 +255,7 @@ export const runTraceSchema = z.object({
   datasetKey: datasetKeySchema.optional().default("guangzhou"),
   status: runStatusSchema,
   stage: z.enum(["preprocess", "generate", "regenerate", "confirm"]),
+  imageModel: imageModelSchema.optional().default("unknown"),
   basedOnExistingImage: z.boolean().optional(),
   promptInstruction: z.string().optional(),
   styleKey: z.string().optional(),
@@ -278,6 +290,8 @@ export type MapRecord = z.infer<typeof mapRecordSchema>;
 export type MapNode = z.infer<typeof mapNodeSchema>;
 export type MapViewModel = z.infer<typeof mapViewModelSchema>;
 export type RunProgressStep = z.infer<typeof runProgressStepSchema>;
+export type ImageModel = z.infer<typeof imageModelSchema>;
+export type SelectableImageModel = z.infer<typeof selectableImageModelSchema>;
 export type GenerateRunInput = z.infer<typeof generateRunInputSchema>;
 export type RunInputSummary = z.infer<typeof runInputSummarySchema>;
 export type RunTrace = z.infer<typeof runTraceSchema>;

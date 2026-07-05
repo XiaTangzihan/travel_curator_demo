@@ -4,6 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CheckCheck, LoaderCircle, RefreshCw } from "lucide-react";
+import {
+  imageModelLabels,
+  isSelectableImageModel,
+} from "@/src/config/image-models";
 import type { RunTrace } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { StatusPill } from "@/src/components/status-pill";
@@ -78,6 +82,10 @@ export function GeneratingPage(props: GeneratingPageProps) {
     () => buildFilmStripFrames(JSON.parse(previewImagesJson) as string[]),
     [previewImagesJson],
   );
+  const imageModelLabel =
+    run.imageModel && isSelectableImageModel(run.imageModel)
+      ? imageModelLabels[run.imageModel]
+      : null;
 
   useEffect(() => {
     if (run.status !== "completed" || redirectingRef.current) {
@@ -181,9 +189,11 @@ export function GeneratingPage(props: GeneratingPageProps) {
                   <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
                     {run.inputSummary?.city ?? run.generateInput?.city ?? "未填写目的地"}
                   </span>
-                  <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
-                    Run {run.runId}
-                  </span>
+                  {imageModelLabel ? (
+                    <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
+                      {imageModelLabel}
+                    </span>
+                  ) : null}
                 </div>
 
                 <div className="mt-8 rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-page)] p-6">

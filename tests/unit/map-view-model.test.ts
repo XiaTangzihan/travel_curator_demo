@@ -53,6 +53,7 @@ describe("buildMapViewModel", () => {
     });
 
     expect(model.selectedEventId).toBe("evt_001");
+    expect(model.imageModel).toBe("unknown");
     expect(model.nodes[0]?.eventId).toBe("evt_001");
     expect(model.events[0]?.eventId).toBe("evt_001");
     expect(model.nodes[1]?.eventId).toBe("evt_002");

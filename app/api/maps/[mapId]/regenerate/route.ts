@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { selectableImageModelSchema } from "@/src/contracts/domain";
+import {
+  resolveRegenerateExecutionPlan,
+} from "@/src/features/confirm/regenerate-policy";
 import { regenerateMapDraft } from "@/src/engine/pipelines/generate-map";
 import {
   getEventsDataset,
@@ -13,8 +17,9 @@ type RegenerateContext = {
 };
 
 const requestSchema = z.object({
+  mode: z.enum(["variant", "edit"]),
   instruction: z.string().default(""),
-  basedOnExistingImage: z.boolean().default(true),
+  imageModel: selectableImageModelSchema.optional(),
 });
 
 export async function POST(request: Request, context: RegenerateContext) {
@@ -30,6 +35,10 @@ export async function POST(request: Request, context: RegenerateContext) {
     }
 
     const body = requestSchema.parse(await request.json());
+    const executionPlan = resolveRegenerateExecutionPlan({
+      mode: body.mode,
+      instruction: body.instruction,
+    });
     const events = eventsSnapshot.events.filter((event) =>
       mapRecord.selectedCommentIds.includes(event.commentId),
     );
@@ -37,8 +46,9 @@ export async function POST(request: Request, context: RegenerateContext) {
     const result = await regenerateMapDraft({
       mapRecord,
       events,
-      instruction: body.instruction,
-      basedOnExistingImage: body.basedOnExistingImage,
+      mode: executionPlan.mode,
+      instruction: executionPlan.instruction,
+      imageModel: body.imageModel,
     });
 
     return NextResponse.json({

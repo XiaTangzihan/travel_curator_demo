@@ -1,3 +1,8 @@
+export {
+  buildMechanicalShortName,
+  SHORT_NAME_MAX_LENGTH,
+} from "@/src/lib/short-name";
+
 export type StylePromptPreset = {
   key: string;
   label: string;
@@ -18,17 +23,3 @@ export const commonPosterPrompt = [
   "全图视觉语言统一，信息可读，避免文字遮挡。",
   "每个打卡点的图标（如：热气腾腾的鸡公煲）的直径应当小于1cm。",
 ].join("\n");
-
-export function buildMechanicalShortName(name: string) {
-  const stripped = name
-    .replace(/（[^）]*）/g, "")
-    .replace(/\([^)]*\)/g, "")
-    .trim();
-  const candidate = stripped || name.trim();
-  const firstSegment = candidate
-    .split(/[·•｜|／/]/)
-    .map((segment) => segment.trim())
-    .find(Boolean);
-
-  return (firstSegment ?? candidate).slice(0, 18) || candidate.slice(0, 18);
-}

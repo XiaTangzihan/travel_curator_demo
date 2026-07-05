@@ -1,0 +1,477 @@
+{
+  "mapId": "map_gz_1783242907490",
+  "datasetKey": "hangzhou",
+  "mapName": "杭州-1-2",
+  "city": "杭州",
+  "style": "watercolor",
+  "posterPath": "/mock/posters/map_gz_1783242907490__run_20260705171820_pdt6.png",
+  "routeMarkdown": "---\nmap_name: 杭州-1-2\ncity: 杭州\nstyle: 清新水彩风\ndays: 8\nevent_count: 8\nknowledge_count: 4\n---\n\n## Important Rules\n- 所有 event 配图统一服从给定 style，不得自行发散风格。\n- 背景地标只作为背景视觉参考，不给地标配文。\n- 所有 event 主体图标内部禁止出现任何可读文字、字母、数字、logo、水印、菜单、招牌或屏幕字幕。\n- 点位名称和编号只能作为节点外部标注，不能嵌入主体图标内部。\n- 若场景天然包含店招、路牌、菜单或电子屏，统一简化为无字形状，不保留可读字符。\n- 主路径必须从画面左侧起、向右侧结束，节点编号顺序必须与空间阅读顺序一致。\n- 节点中心点横向位置应随编号递增，只允许轻微上下起伏，不允许回头路、环形主路径或纵向堆叠成为主顺序。\n- 每个 event 的 subject 必须是 1 个简短中文名词和 1 个简短中文形容词，用顿号连接，顺序固定为“名词、形容词”。\n- 每个 event 的 avoid 必须是 3-5 个要避免的意象词。\n\n# Day 1 (2024:11:26)\n\n## Event 1 · 杭州万豪行政公寓\n- sequence: 1\n- poi: 杭州万豪行政公寓\n- short_name: 杭州万豪行政公寓\n- 类目: 住宿 / 酒店宾馆 / 豪华型酒店\n- 文案: 在T10，很气派，离附近的商圈也很近。除了没有行政酒廊和早餐权益，其它的还行，房间里配备了洗衣机和厨具，非常适合呆很久出差的人。早餐中规中矩，健身房有点小，只有一些基本的器械，整体还行。\n- 配图: /mock/files/comments/sheet_hangzhou_7441614964332169252_1.jpeg\n- subject: 客房、整洁\n- avoid: 楼层标识, 权益文字, 店招文字, 价格字样\n\n# Day 2 (2024:11:29)\n\n## Event 2 · 目里三克映画\n- sequence: 2\n- poi: 目里三克映画\n- short_name: 目里三克映画\n- 类目: 美食 / 西餐 / 西式简餐\n- 文案: 天目里负一楼的一家创意菜，和电影结合，可以边吃西餐或者火锅边看电影，特别神奇，因为没有合适的场次这次只能在外面点餐。比较推荐烤鸡，味道不错，还有那个肉串，稍微有点子辣，菠萝炒饭中规中矩吧，整体性价比一般。\n- 配图: /mock/files/comments/sheet_hangzhou_7442702742558083091_1.jpeg\n- subject: 餐桌、暖调\n- avoid: 楼层指示牌, 场次字幕, 菜单字样, 价格标识\n\n# Day 3 (2024:11:30)\n\n## Event 3 · 兰木肆云南菜\n- sequence: 3\n- poi: 兰木肆云南菜(西溪天街店)\n- short_name: 兰木肆云南菜\n- 类目: 美食 / 地方菜 / 云贵菜\n- 文案: 西溪天街店六楼，位置好找，早点来不然得排队哟。整体口味还是能还原云南当地的，喜欢吃铜锅油焖鸡和炭烤包浆豆腐，蘸点海椒面，妙的很!注意晾一下再吃，不然会烫嘴。还点了个苦菜汤，配个小蘸水也是一绝，可惜牛肝菌炒饭上得有点晚了，不然咔咔多吃几碗饭。\n- 配图: /mock/files/comments/sheet_hangzhou_7443020777257043987_1.jpeg\n- subject: 铜锅、亮泽\n- avoid: 楼层数字, 排队人群, 店招文字, 菜单字样\n\n# Day 4 (2024:12:02)\n\n## Event 4 · 杭州西溪喜来登度假大酒店\n- sequence: 4\n- poi: 杭州西溪喜来登度假大酒店\n- short_name: 杭州西溪喜来登度假大酒店\n- 类目: 住宿 / 酒店宾馆 / 豪华型酒店\n- 文案: 西溪湿地里面的一家万豪，占地面积灰常大，离最近的东岳地铁站有近1km左右。房间是在五楼，挑高大概有5-6m，躺着看房梁的感觉很惬意。有个小阳台，只不过对着的不是山水，可以自行选择关闭门窗。行政酒廊虽然22:30关，但去晚了基本没啥东西了，早餐也得早点去，去晚了想吃特色烧饼的得排大队呀。\n- 配图: /mock/files/comments/sheet_hangzhou_7443593968841361471_1.jpeg\n- subject: 阳台、清新\n- avoid: 楼层标识, 时间数字, 排队人群, 路牌文字\n\n# Day 5 (2025:01:05)\n\n## Event 5 · 魁元万通里小炉子地摊烧烤\n- sequence: 5\n- poi: 魁元万通里小炉子地摊烧烤·东北大油边(余杭万通店)\n- short_name: 魁元万通里小炉子地摊烧烤\n- 类目: 美食 / 热门/特色菜 / 烧烤\n- 文案: 万通底层的一家东北烧烤店，可以选择自己烤或者后厨加工，这个套餐荤素不限共40串，服务员也会友好提醒数量。肉质都很新鲜，火烧得也很快，不一会就烤熟了，注意勤翻面，比如面包片翻完就糊黑了。蘸料有三种，再点个淄博饼子+烤肉，真是绝了!\n- 配图: /mock/files/comments/sheet_hangzhou_7456427367863437375_1.jpeg\n- subject: 烤炉、暖黄\n- avoid: 套餐数字, 楼层标识, 菜单字样, 价格文字\n\n# Day 6 (2025:01:08)\n\n## Event 6 · 杭州奥克斯中心皇冠假日酒店\n- sequence: 6\n- poi: 杭州奥克斯中心皇冠假日酒店\n- short_name: 杭州奥克斯中心皇冠假日酒店\n- 类目: 住宿 / 酒店宾馆 / 豪华型酒店\n- 文案: 位置没得说，就在万达广场附近，去哪吃啥都很方便。前台需上五楼，配备的健身房和游泳池以及早餐在六楼。房间还是挺大的，尤其是床，没想到这么大，可能是两张床拼的hh。早餐种类很丰富，工作日竟然可以到10：30，适合差旅出行!\n- 配图: /mock/files/comments/sheet_hangzhou_7457206519067707431_1.jpeg\n- subject: 床品、素净\n- avoid: 楼层数字, 时间标识, 店招文字, 价格字样\n\n# Day 7 (2025:05:02)\n\n## Event 7 · 十二番\n- sequence: 7\n- poi: 十二番·烧鸟小酒馆\n- short_name: 十二番\n- 类目: 美食 / 日韩料理 / 日料\n- 文案: 美塘广场附近的一家烧鸟小酒馆，工作日晚上去的，人不是很多，店里店外都可以坐，随意。上菜挺快的，服务员也会报菜名，挺客气。推荐他家的招牌M9烤牛肋条和明太子西葫芦🫡M9和牛饭还有三文鱼茶泡饭中规中矩吧，整体还行。\n- 配图: /mock/files/comments/sheet_hangzhou_7499867497853454387_1.jpeg\n- subject: 烧鸟串、油亮\n- avoid: 菜名字幕, 店招文字, 菜单字样, 价格标识\n\n# Day 8 (2025:09:27)\n\n## Event 8 · 杭州萧山国际机场凯悦酒店\n- sequence: 8\n- poi: 杭州萧山国际机场凯悦酒店\n- short_name: 杭州萧山国际机场凯悦酒店\n- 类目: 住宿 / 酒店宾馆 / 豪华型酒店\n- 文案: 酒店虽然在机场里，但还算是很安静，晚上隔音效果比预期得要好，因为入住酒店也会给登机快速安检券，这个还不错的😜房间还是挺大的，卫生间和浴室都是干湿分离的，有个小阳台的地方可以观景（虽然是机场之景😕）早餐很丰富，能碰到好多外国人。\n- 配图: /mock/files/comments/sheet_hangzhou_7554647459973089290_1.jpeg\n- subject: 客房、明净\n- avoid: 安检券文字, 机场路牌, 店招文字, 菜单字样\n",
+  "selectedEventId": "evt_002",
+  "generatedAt": "2026-07-05T09:21:30.703Z",
+  "knowledge": [
+    {
+      "name": "西湖",
+      "visual": "三面群山环抱开阔湖面，苏堤、白堤等长堤横卧波心，三潭印月三座石塔静立水面，春桃夏荷秋桂冬雪，晴雨各有风韵的经典江南山水胜景"
+    },
+    {
+      "name": "灵隐飞来峰景区（灵隐寺）",
+      "visual": "千年古刹隐于苍翠山林之间，黄墙黛瓦的古建错落排布，飞来峰崖壁上遍布历代摩崖佛造像，香火氤氲充满禅意"
+    },
+    {
+      "name": "西溪国家湿地公园",
+      "visual": "河港纵横交错，洲渚星罗棋布，连片芦苇荡随风起伏，竹林柿树掩映着临水江南民居，是城市核心区的原生态湿地景观"
+    },
+    {
+      "name": "京杭大运河杭州段（拱宸桥片区）",
+      "visual": "千年古运河穿城而过，百年石拱宸桥横跨河面，沿岸保留着古街老巷、漕运历史遗存，兼具江南水乡烟火气与厚重历史感"
+    }
+  ],
+  "nodes": [
+    {
+      "eventId": "evt_002",
+      "day": "2024:11:26",
+      "time": "23:48:30",
+      "title": "杭州万豪行政公寓",
+      "excerpt": "在T10，很气派，离附近的商圈也很近。除了没有行政酒廊和早餐权益，其它的还行，房间里配备了洗衣机...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7441614964332169252_1.jpeg"
+    },
+    {
+      "eventId": "evt_004",
+      "day": "2024:11:29",
+      "time": "22:09:08",
+      "title": "目里三克映画",
+      "excerpt": "天目里负一楼的一家创意菜，和电影结合，可以边吃西餐或者火锅边看电影，特别神奇，因为没有合适的场次...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7442702742558083091_1.jpeg"
+    },
+    {
+      "eventId": "evt_005",
+      "day": "2024:11:30",
+      "time": "18:43:07",
+      "title": "兰木肆云南菜(西溪天街店)",
+      "excerpt": "西溪天街店六楼，位置好找，早点来不然得排队哟。整体口味还是能还原云南当地的，喜欢吃铜锅油焖鸡和炭...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7443020777257043987_1.jpeg"
+    },
+    {
+      "eventId": "evt_006",
+      "day": "2024:12:02",
+      "time": "07:55:14",
+      "title": "杭州西溪喜来登度假大酒店",
+      "excerpt": "西溪湿地里面的一家万豪，占地面积灰常大，离最近的东岳地铁站有近1km左右。房间是在五楼，挑高大概...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7443593968841361471_1.jpeg"
+    },
+    {
+      "eventId": "evt_007",
+      "day": "2025:01:05",
+      "time": "21:47:46",
+      "title": "魁元万通里小炉子地摊烧烤·东北大油边(余杭万通店)",
+      "excerpt": "万通底层的一家东北烧烤店，可以选择自己烤或者后厨加工，这个套餐荤素不限共40串，服务员也会友好提...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7456427367863437375_1.jpeg"
+    },
+    {
+      "eventId": "evt_010",
+      "day": "2025:01:08",
+      "time": "00:15:48",
+      "title": "杭州奥克斯中心皇冠假日酒店",
+      "excerpt": "位置没得说，就在万达广场附近，去哪吃啥都很方便。前台需上五楼，配备的健身房和游泳池以及早餐在六楼...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7457206519067707431_1.jpeg"
+    },
+    {
+      "eventId": "evt_011",
+      "day": "2025:05:02",
+      "time": "23:17:34",
+      "title": "十二番·烧鸟小酒馆",
+      "excerpt": "美塘广场附近的一家烧鸟小酒馆，工作日晚上去的，人不是很多，店里店外都可以坐，随意。上菜挺快的，服...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7499867497853454387_1.jpeg"
+    },
+    {
+      "eventId": "evt_015",
+      "day": "2025:09:27",
+      "time": "14:11:06",
+      "title": "杭州萧山国际机场凯悦酒店",
+      "excerpt": "酒店虽然在机场里，但还算是很安静，晚上隔音效果比预期得要好，因为入住酒店也会给登机快速安检券，这...",
+      "thumbnail": "/mock/files/comments/sheet_hangzhou_7554647459973089290_1.jpeg"
+    }
+  ],
+  "events": [
+    {
+      "eventId": "evt_002",
+      "commentId": "sheet_hangzhou_7441614964332169252",
+      "sequence": 1,
+      "day": "2024:11:26",
+      "time": "23:48:30",
+      "commentText": "在T10，很气派，离附近的商圈也很近。除了没有行政酒廊和早餐权益，其它的还行，房间里配备了洗衣机和厨具，非常适合呆很久出差的人。早餐中规中矩，健身房有点小，只有一些基本的器械，整体还行。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_1.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_2.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_3.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_4.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_5.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_6.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7441614964332169252_7.jpeg",
+          "name": "sheet_hangzhou_7441614964332169252_7.jpeg"
+        }
+      ],
+      "canonicalName": "杭州万豪行政公寓",
+      "shortName": "杭州万豪行政公寓",
+      "poiName": "杭州万豪行政公寓",
+      "poiLocation": "仓前街道余杭塘路2609号EFC欧美金融城10幢3楼",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "余杭区",
+      "categoryL1": "住宿",
+      "categoryL2": "酒店宾馆",
+      "categoryL3": "豪华型酒店",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_004",
+      "commentId": "sheet_hangzhou_7442702742558083091",
+      "sequence": 2,
+      "day": "2024:11:29",
+      "time": "22:09:08",
+      "commentText": "天目里负一楼的一家创意菜，和电影结合，可以边吃西餐或者火锅边看电影，特别神奇，因为没有合适的场次这次只能在外面点餐。比较推荐烤鸡，味道不错，还有那个肉串，稍微有点子辣，菠萝炒饭中规中矩吧，整体性价比一般。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_1.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_2.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_3.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_4.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_5.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_6.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7442702742558083091_7.jpeg",
+          "name": "sheet_hangzhou_7442702742558083091_7.jpeg"
+        }
+      ],
+      "canonicalName": "目里三克映画",
+      "shortName": "目里三克映画",
+      "poiName": "目里三克映画",
+      "poiLocation": "古荡街道天目山路398号天目里地下一层第19-25号商铺",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "西湖区",
+      "categoryL1": "美食",
+      "categoryL2": "西餐",
+      "categoryL3": "西式简餐",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_005",
+      "commentId": "sheet_hangzhou_7443020777257043987",
+      "sequence": 3,
+      "day": "2024:11:30",
+      "time": "18:43:07",
+      "commentText": "西溪天街店六楼，位置好找，早点来不然得排队哟。整体口味还是能还原云南当地的，喜欢吃铜锅油焖鸡和炭烤包浆豆腐，蘸点海椒面，妙的很!注意晾一下再吃，不然会烫嘴。还点了个苦菜汤，配个小蘸水也是一绝，可惜牛肝菌炒饭上得有点晚了，不然咔咔多吃几碗饭。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_1.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_2.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_3.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_4.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_5.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_6.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_7.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_7.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_8.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_8.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443020777257043987_9.jpeg",
+          "name": "sheet_hangzhou_7443020777257043987_9.jpeg"
+        }
+      ],
+      "canonicalName": "兰木肆云南菜(西溪天街店)",
+      "shortName": "兰木肆云南菜",
+      "poiName": "兰木肆云南菜(西溪天街店)",
+      "poiLocation": "蒋村街道余杭塘路1001号花蒋天街商业中心2号楼6层05-06",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "西湖区",
+      "categoryL1": "美食",
+      "categoryL2": "地方菜",
+      "categoryL3": "云贵菜",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_006",
+      "commentId": "sheet_hangzhou_7443593968841361471",
+      "sequence": 4,
+      "day": "2024:12:02",
+      "time": "07:55:14",
+      "commentText": "西溪湿地里面的一家万豪，占地面积灰常大，离最近的东岳地铁站有近1km左右。房间是在五楼，挑高大概有5-6m，躺着看房梁的感觉很惬意。有个小阳台，只不过对着的不是山水，可以自行选择关闭门窗。行政酒廊虽然22:30关，但去晚了基本没啥东西了，早餐也得早点去，去晚了想吃特色烧饼的得排大队呀。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_1.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_2.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_3.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_4.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_5.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_6.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7443593968841361471_7.jpeg",
+          "name": "sheet_hangzhou_7443593968841361471_7.jpeg"
+        }
+      ],
+      "canonicalName": "杭州西溪喜来登度假大酒店",
+      "shortName": "杭州西溪喜来登度假大酒店",
+      "poiName": "杭州西溪喜来登度假大酒店",
+      "poiLocation": "紫金港路西溪天堂国际旅游综合体1号",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "西湖区",
+      "categoryL1": "住宿",
+      "categoryL2": "酒店宾馆",
+      "categoryL3": "豪华型酒店",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_007",
+      "commentId": "sheet_hangzhou_7456427367863437375",
+      "sequence": 5,
+      "day": "2025:01:05",
+      "time": "21:47:46",
+      "commentText": "万通底层的一家东北烧烤店，可以选择自己烤或者后厨加工，这个套餐荤素不限共40串，服务员也会友好提醒数量。肉质都很新鲜，火烧得也很快，不一会就烤熟了，注意勤翻面，比如面包片翻完就糊黑了。蘸料有三种，再点个淄博饼子+烤肉，真是绝了!",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_1.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_2.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_3.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_4.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_5.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_6.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7456427367863437375_7.jpeg",
+          "name": "sheet_hangzhou_7456427367863437375_7.jpeg"
+        }
+      ],
+      "canonicalName": "魁元万通里小炉子地摊烧烤·东北大油边(余杭万通店)",
+      "shortName": "魁元万通里小炉子地摊烧烤",
+      "poiName": "魁元万通里小炉子地摊烧烤·东北大油边(余杭万通店)",
+      "poiLocation": "仓前街道时尚万通城1幢1-13、1-14、1-15室",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "余杭区",
+      "categoryL1": "美食",
+      "categoryL2": "热门/特色菜",
+      "categoryL3": "烧烤",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_010",
+      "commentId": "sheet_hangzhou_7457206519067707431",
+      "sequence": 6,
+      "day": "2025:01:08",
+      "time": "00:15:48",
+      "commentText": "位置没得说，就在万达广场附近，去哪吃啥都很方便。前台需上五楼，配备的健身房和游泳池以及早餐在六楼。房间还是挺大的，尤其是床，没想到这么大，可能是两张床拼的hh。早餐种类很丰富，工作日竟然可以到10：30，适合差旅出行!",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7457206519067707431_1.jpeg",
+          "name": "sheet_hangzhou_7457206519067707431_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7457206519067707431_2.jpeg",
+          "name": "sheet_hangzhou_7457206519067707431_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7457206519067707431_3.jpeg",
+          "name": "sheet_hangzhou_7457206519067707431_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7457206519067707431_4.jpeg",
+          "name": "sheet_hangzhou_7457206519067707431_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7457206519067707431_5.jpeg",
+          "name": "sheet_hangzhou_7457206519067707431_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7457206519067707431_6.jpeg",
+          "name": "sheet_hangzhou_7457206519067707431_6.jpeg"
+        }
+      ],
+      "canonicalName": "杭州奥克斯中心皇冠假日酒店",
+      "shortName": "杭州奥克斯中心皇冠假日酒店",
+      "poiName": "杭州奥克斯中心皇冠假日酒店",
+      "poiLocation": "创景路与联创街交汇处万达广场(未来科技城店)F4",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "余杭区",
+      "categoryL1": "住宿",
+      "categoryL2": "酒店宾馆",
+      "categoryL3": "豪华型酒店",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_011",
+      "commentId": "sheet_hangzhou_7499867497853454387",
+      "sequence": 7,
+      "day": "2025:05:02",
+      "time": "23:17:34",
+      "commentText": "美塘广场附近的一家烧鸟小酒馆，工作日晚上去的，人不是很多，店里店外都可以坐，随意。上菜挺快的，服务员也会报菜名，挺客气。推荐他家的招牌M9烤牛肋条和明太子西葫芦🫡M9和牛饭还有三文鱼茶泡饭中规中矩吧，整体还行。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7499867497853454387_1.jpeg",
+          "name": "sheet_hangzhou_7499867497853454387_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7499867497853454387_2.jpeg",
+          "name": "sheet_hangzhou_7499867497853454387_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7499867497853454387_3.jpeg",
+          "name": "sheet_hangzhou_7499867497853454387_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7499867497853454387_4.jpeg",
+          "name": "sheet_hangzhou_7499867497853454387_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7499867497853454387_5.jpeg",
+          "name": "sheet_hangzhou_7499867497853454387_5.jpeg"
+        }
+      ],
+      "canonicalName": "十二番·烧鸟小酒馆",
+      "shortName": "十二番",
+      "poiName": "十二番·烧鸟小酒馆",
+      "poiLocation": "仓前街道欧美广场T7负一楼马记永旁边",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "余杭区",
+      "categoryL1": "美食",
+      "categoryL2": "日韩料理",
+      "categoryL3": "日料",
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_015",
+      "commentId": "sheet_hangzhou_7554647459973089290",
+      "sequence": 8,
+      "day": "2025:09:27",
+      "time": "14:11:06",
+      "commentText": "酒店虽然在机场里，但还算是很安静，晚上隔音效果比预期得要好，因为入住酒店也会给登机快速安检券，这个还不错的😜房间还是挺大的，卫生间和浴室都是干湿分离的，有个小阳台的地方可以观景（虽然是机场之景😕）早餐很丰富，能碰到好多外国人。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7554647459973089290_1.jpeg",
+          "name": "sheet_hangzhou_7554647459973089290_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7554647459973089290_2.jpeg",
+          "name": "sheet_hangzhou_7554647459973089290_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7554647459973089290_3.jpeg",
+          "name": "sheet_hangzhou_7554647459973089290_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7554647459973089290_4.jpeg",
+          "name": "sheet_hangzhou_7554647459973089290_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_hangzhou_7554647459973089290_5.jpeg",
+          "name": "sheet_hangzhou_7554647459973089290_5.jpeg"
+        }
+      ],
+      "canonicalName": "杭州萧山国际机场凯悦酒店",
+      "shortName": "杭州萧山国际机场凯悦酒店",
+      "poiName": "杭州萧山国际机场凯悦酒店",
+      "poiLocation": "杭州萧山国际机场4号航站楼到达层交通中心2楼",
+      "poiProvince": "浙江省",
+      "poiCity": "杭州市",
+      "poiDistrict": "萧山区",
+      "categoryL1": "住宿",
+      "categoryL2": "酒店宾馆",
+      "categoryL3": "豪华型酒店",
+      "authorName": "旅行者小夏"
+    }
+  ]
+}

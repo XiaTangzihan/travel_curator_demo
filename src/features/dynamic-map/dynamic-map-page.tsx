@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, LoaderCircle, SearchCheck, Trash2 } from "lucide-react";
 import type { MapViewModel } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 
@@ -17,6 +18,11 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const canDownloadPoster = props.map.posterPath.trim().length > 0;
+  const activeTab = "map";
+  const posterExtension =
+    props.map.posterPath.split(".").pop()?.split("?")[0]?.trim() || "png";
+  const downloadFileName = `${props.map.mapName}-${props.map.city}海报.${posterExtension}`;
 
   const selectedEvent = useMemo(
     () =>
@@ -62,12 +68,73 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
       datasetKey={props.map.datasetKey}
       actions={
         <>
+          <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-1 shadow-[var(--shadow-soft)]">
+            <button
+              type="button"
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                activeTab === "map"
+                  ? "bg-[var(--bg-soft)] text-[var(--text-strong)]"
+                  : "text-[var(--text-muted)]"
+              }`}
+            >
+              地图
+            </button>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="rounded-full px-4 py-2 text-sm font-medium text-[var(--text-muted)] opacity-55"
+            >
+              视频
+            </button>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="rounded-full px-4 py-2 text-sm font-medium text-[var(--text-muted)] opacity-55"
+            >
+              图文
+            </button>
+          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            回到主页
+          </Link>
+          <Link
+            href={`/runs?mapId=${props.map.mapId}`}
+            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
+          >
+            <SearchCheck className="h-4 w-4" />
+            查看测试追踪
+          </Link>
           <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
             {props.map.city}
           </span>
           <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
             {props.map.nodes.length} 站
           </span>
+          {canDownloadPoster ? (
+            <a
+              href={props.map.posterPath}
+              download={downloadFileName}
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
+            >
+              <Download className="h-4 w-4" />
+              下载图片
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)] opacity-60"
+            >
+              <Download className="h-4 w-4" />
+              下载图片
+            </button>
+          )}
           <button
             type="button"
             onClick={handleDeleteMap}

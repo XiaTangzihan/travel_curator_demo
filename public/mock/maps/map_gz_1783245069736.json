@@ -1,0 +1,34 @@
+{
+  "mapId": "map_gz_1783245069736",
+  "datasetKey": "meishan",
+  "mapName": "眉山-1-1",
+  "city": "眉山",
+  "style": "storybook",
+  "status": "confirmed",
+  "eventCount": 8,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783245069736.route.md",
+  "posterPath": "/mock/posters/map_gz_1783245069736.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783245069736.knowledge.json",
+  "currentRunId": "run_20260705175352_dewb",
+  "posterVersions": [
+    {
+      "versionId": "run_20260705175109_ne3p",
+      "posterPath": "/mock/posters/map_gz_1783245069736.png",
+      "runId": "run_20260705175109_ne3p",
+      "createdAt": "2026-07-05T09:51:09.736Z"
+    }
+  ],
+  "selectedPosterVersionId": "run_20260705175109_ne3p",
+  "selectedCommentIds": [
+    "sheet_meishan_7590699730691295270",
+    "sheet_meishan_7591124262744868905",
+    "sheet_meishan_7562784688855599114",
+    "sheet_meishan_7575493849243371566",
+    "sheet_meishan_7575518337074382898",
+    "sheet_meishan_7575497971280316426",
+    "sheet_meishan_7590707291226982450",
+    "sheet_meishan_7644172679455639590"
+  ],
+  "createdAt": "2026-07-05T09:51:09.736Z",
+  "updatedAt": "2026-07-05T09:53:52.555Z"
+}

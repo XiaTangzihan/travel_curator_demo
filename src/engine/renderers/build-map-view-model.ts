@@ -1,5 +1,5 @@
-import type { DemoDatasetKey } from "@/src/config/demo";
-import type { EventRecord, Landmark, MapViewModel } from "@/src/contracts/domain";
+import { resolveDatasetKey, type DemoDatasetKey } from "@/src/config/demo";
+import type { EventRecord, ImageModel, Landmark, MapViewModel } from "@/src/contracts/domain";
 
 function excerpt(text: string) {
   if (text.length <= 48) {
@@ -21,10 +21,11 @@ function compareEventOrder(left: EventRecord, right: EventRecord) {
 
 export function buildMapViewModel(params: {
   mapId: string;
-  datasetKey: DemoDatasetKey;
+  datasetKey?: DemoDatasetKey;
   mapName: string;
   city: string;
   style: string;
+  imageModel?: ImageModel;
   posterPath: string;
   routeMarkdown: string;
   events: EventRecord[];
@@ -36,10 +37,11 @@ export function buildMapViewModel(params: {
 
   const viewModel: MapViewModel = {
     mapId: params.mapId,
-    datasetKey: params.datasetKey,
+    datasetKey: resolveDatasetKey(params.datasetKey),
     mapName: params.mapName,
     city: params.city,
     style: params.style,
+    imageModel: params.imageModel ?? "unknown",
     posterPath: params.posterPath,
     routeMarkdown: params.routeMarkdown,
     selectedEventId,

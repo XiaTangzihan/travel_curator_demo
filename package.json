@@ -15,7 +15,9 @@
     "sync:guangzhou": "tsx scripts/sync-dataset.ts guangzhou",
     "preprocess:guangzhou": "tsx scripts/preprocess-dataset.ts guangzhou",
     "sync:hangzhou": "tsx scripts/sync-dataset.ts hangzhou",
-    "preprocess:hangzhou": "tsx scripts/preprocess-dataset.ts hangzhou"
+    "preprocess:hangzhou": "tsx scripts/preprocess-dataset.ts hangzhou",
+    "sync:meishan": "tsx scripts/sync-dataset.ts meishan",
+    "preprocess:meishan": "tsx scripts/preprocess-dataset.ts meishan"
   },
   "dependencies": {
     "lucide-react": "^0.554.0",

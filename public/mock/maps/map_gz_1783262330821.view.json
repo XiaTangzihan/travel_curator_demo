@@ -1,0 +1,478 @@
+{
+  "mapId": "map_gz_1783262330821",
+  "datasetKey": "meishan",
+  "mapName": "眉山1-1",
+  "city": "眉山",
+  "style": "young-cartoon",
+  "imageModel": "seedream-4-5",
+  "posterPath": "/mock/posters/map_gz_1783262330821.png",
+  "routeMarkdown": "---\nmap_name: 眉山1-1\ncity: 眉山\nstyle: 年轻卡通风\ndays: 3\nevent_count: 8\nknowledge_count: 4\n---\n\n## Important Rules\n- 所有 event 配图统一服从给定 style，不得自行发散风格。\n- 背景地标只作为背景视觉参考，不给地标配文。\n- 所有 event 主体图标内部禁止出现任何可读文字、字母、数字、logo、水印、菜单、招牌或屏幕字幕。\n- 点位名称和编号只能作为节点外部标注，不能嵌入主体图标内部。\n- 若场景天然包含店招、路牌、菜单或电子屏，统一简化为无字形状，不保留可读字符。\n- 主路径必须从画面左侧起、向右侧结束，节点编号顺序必须与空间阅读顺序一致。\n- 节点中心点横向位置应随编号递增，只允许轻微上下起伏，不允许回头路、环形主路径或纵向堆叠成为主顺序。\n- 每个 event 的 subject 必须是 1 个简短中文名词和 1 个简短中文形容词，用顿号连接，顺序固定为“名词、形容词”。\n- 每个 event 的 avoid 必须是 3-5 个要避免的意象词。\n\n# Day 1 (2024:05:04)\n\n## Event 1 · 许潇姚东门碗碗\n- sequence: 1\n- poi: 许潇姚东门碗碗牛肉\n- short_name: 许潇姚东门碗碗\n- 类目: 美食 / 快餐小吃 / 快餐\n- 文案: 供电局附近的老店了，开了好几间都可以坐，下午快14点才走到，店家基本快打烊了，不过还是很热情。点了碗碗牛肉大份和肥肠小份，大小份的盘子差还挺多，牛肉确实挺好吃的，还试了豆花和血旺，特别下饭，还有免费的泡菜和热乎乎的米汤提供，整体用餐体验ok的\n- 配图: /mock/files/comments/sheet_meishan_7590701804305549362_1.jpeg\n- subject: 牛肉碗、热乎\n- avoid: 店招文字, 价格字样, 时间标识\n\n## Event 2 · 眉州东坡\n- sequence: 2\n- poi: 眉州东坡(三苏祠店)\n- short_name: 眉州东坡\n- 类目: 美食 / 地方菜 / 川菜\n- 文案: 三苏祠西大门旁边就是，和王家渡火锅是一家，位置嘿大，记得线上取号排队!就餐环境不错，旁边有山有水，只是节假日上菜有点慢。它家必吃东坡肘子，偏甜辣口，肉质非常软糯，老少皆宜，服务员也很好，要催菜及时提醒下哈。\n- 配图: /mock/files/comments/sheet_meishan_7421422785244841984_1.jpeg\n- subject: 肘子、软糯\n- avoid: 排队字样, 催菜提示, 店招文字\n\n# Day 2 (2024:05:05)\n\n## Event 3 · 灶门签串串\n- sequence: 3\n- poi: 灶门签串串香(民和北路店)\n- short_name: 灶门签串串\n- 类目: 美食 / 火锅 / 串串香\n- 文案: 这家店还是很火爆的，排队排了四十多分钟，两人桌位置不是很大，那边串串儿的话食材是比较新鲜，啥子菜都有，它比较主打的是那个啥子耙鸡脚和香菜牛肉，点了个鸳鸯锅，素菜一般谈白锅嘛，荤菜烫红锅，火还热的比较快，整体吃的话感觉还不错，他家串串的话不光可以煮，还可以点起去嘞个给你油炸串，再给你放上来，这个之前没遇到过，确实还可以哈。\n- 配图: /mock/files/comments/sheet_meishan_7590763173083383834_1.jpeg\n- subject: 串串锅、热辣\n- avoid: 排队字样, 菜单文字, 取号标识\n\n## Event 4 · 蒋二姐米线\n- sequence: 4\n- poi: 蒋二姐米线(商业街总店)\n- short_name: 蒋二姐米线\n- 类目: 美食 / 快餐小吃 / 米粉米线\n- 文案: 彭山区中心商业街的一家开了二十几年的老店，位置好找的。老板特别有眼力见，差不多能记住顾客点的东西，需要小碗和勺子也能观察到顾客需求主动咨询。米线是那种细的，煮的时长刚刚好，老少皆宜，红汤也不是很辣。绍子里会有酸萝卜、芹菜，这是之前没吃到过的，来个二两还是不错！\n- 配图: /mock/files/comments/sheet_meishan_7562737514940598323_1.jpeg\n- subject: 米线、爽滑\n- avoid: 店招文字, 价目表, 门牌号码\n\n## Event 5 · 泡菜博物馆\n- sequence: 5\n- poi: 中国泡菜博物馆\n- short_name: 泡菜博物馆\n- 类目: 游玩 / 展馆/展览 / 博物馆\n- 文案: 免费直接进，不用预约，不用刷身份证，方便得很!博物馆共有三层，顺序循序渐进，一层世界泡菜，二层四川泡菜，三层眉山泡菜，主要是本土品牌介绍，一楼还有泡菜可以买，适合喜欢腌制品的盆友。欣赏得慢的话差不多半小时就能搞定。\n- 配图: /mock/files/comments/sheet_meishan_7421441998185318411_1.jpeg\n- subject: 泡菜坛、鲜亮\n- avoid: 楼层标识, 介绍文字, 门票字样\n\n## Event 6 · 冯记凉串串\n- sequence: 6\n- poi: 公园山冯记凉串串\n- short_name: 冯记凉串串\n- 类目: 美食 / 火锅 / 串串香\n- 文案: 公园山的百步梯对面的一家乐山老字号凉串串，到得太早了，没有吃凉串串，主要吃卤味炸土豆🥔嬢嬢很热情，不一会就做好了端上来。第一次这种炸过和卤过的土豆，外皮很舒脆，不过好像没有剃掉土豆皮，这点可以改良下，配的海椒面也挺好吃的。油也是真的油，重油爱好者可以试试。\n- 配图: /mock/files/comments/sheet_meishan_7562780230654511113_1.jpeg\n- subject: 炸土豆、酥脆\n- avoid: 店招文字, 价格字样, 排队提示\n\n## Event 7 · 张三小吃\n- sequence: 7\n- poi: 张三小吃(小东街店)\n- short_name: 张三小吃\n- 类目: 美食 / 快餐小吃 / 快餐\n- 文案: 彭山区小东街的一家夜宵小吃，店面还挺大，有两间屋，外头还摆了桌子，晚上八点过来人还是很多！点了经典的红油饺子🥟和牛肉豆腐脑，分量都挺多的，红油调的味道还可以，蘸起来麻辣得当，豆腐脑也要点个赞，牛肉给得还算多。\n- 配图: /mock/files/comments/sheet_meishan_7590370458759956490_1.jpeg\n- subject: 饺子、麻辣\n- avoid: 时间标识, 店招文字, 菜单文字\n\n# Day 3 (2024:05:06)\n\n## Event 8 · 鞠婆婆绵绵冰\n- sequence: 8\n- poi: 鞠婆婆绵绵冰(眉山穿越盛世店)\n- short_name: 鞠婆婆绵绵冰\n- 类目: 美食 / 面包甜点 / 甜品\n- 文案: 穿越盛世入口就是，好找得很。一眼看中了峨眉雪绵绵冰，尝尝当地独特的口味。点的是大份，大家一起分享的感觉不错。奥利奥碎恰到好处，整体冰感十足，回味十足，只是分量再大一点就好了\n- 配图: /mock/files/comments/sheet_meishan_7421508021962016779_1.jpeg\n- subject: 绵绵冰、冰爽\n- avoid: 店招文字, 价格字样, 分量标注\n",
+  "selectedEventId": "evt_020",
+  "generatedAt": "2026-07-05T14:40:41.564Z",
+  "knowledge": [
+    {
+      "name": "三苏祠",
+      "visual": "典型川西清代文人祠堂建筑群，红墙衬竹影，矗立苏洵、苏轼、苏辙三尊主塑像，园内分布古木、古井与大量苏氏相关历史文物展陈"
+    },
+    {
+      "name": "瓦屋山国家森林公园",
+      "visual": "国内体量最大的桌山状丹霞方山，山顶覆盖万亩原始冷杉林，可观赏云海、飞瀑、日出与冬季高山雪原景观"
+    },
+    {
+      "name": "东坡城市湿地公园（东坡水街）",
+      "visual": "以东坡文化为核心的城市滨水地标，仿宋临水古建群夜间灯火连片，廊桥水榭倒映湖面，国风氛围感极强"
+    },
+    {
+      "name": "黑龙滩风景区",
+      "visual": "川西知名大型人工湖泊，湖区散落近百座翠色小岛，环湖分布唐代摩崖造像、生态绿道与滨水休憩场景"
+    }
+  ],
+  "nodes": [
+    {
+      "eventId": "evt_020",
+      "day": "2024:05:04",
+      "time": "17:35:00",
+      "title": "许潇姚东门碗碗牛肉",
+      "excerpt": "供电局附近的老店了，开了好几间都可以坐，下午快14点才走到，店家基本快打烊了，不过还是很热情。点...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7590701804305549362_1.jpeg"
+    },
+    {
+      "eventId": "evt_021",
+      "day": "2024:05:04",
+      "time": "18:54:00",
+      "title": "眉州东坡(三苏祠店)",
+      "excerpt": "三苏祠西大门旁边就是，和王家渡火锅是一家，位置嘿大，记得线上取号排队!就餐环境不错，旁边有山有水...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7421422785244841984_1.jpeg"
+    },
+    {
+      "eventId": "evt_022",
+      "day": "2024:05:05",
+      "time": "11:40:00",
+      "title": "灶门签串串香(民和北路店)",
+      "excerpt": "这家店还是很火爆的，排队排了四十多分钟，两人桌位置不是很大，那边串串儿的话食材是比较新鲜，啥子菜...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7590763173083383834_1.jpeg"
+    },
+    {
+      "eventId": "evt_023",
+      "day": "2024:05:05",
+      "time": "12:57:00",
+      "title": "蒋二姐米线(商业街总店)",
+      "excerpt": "彭山区中心商业街的一家开了二十几年的老店，位置好找的。老板特别有眼力见，差不多能记住顾客点的东西...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7562737514940598323_1.jpeg"
+    },
+    {
+      "eventId": "evt_024",
+      "day": "2024:05:05",
+      "time": "14:22:00",
+      "title": "中国泡菜博物馆",
+      "excerpt": "免费直接进，不用预约，不用刷身份证，方便得很!博物馆共有三层，顺序循序渐进，一层世界泡菜，二层四...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7421441998185318411_1.jpeg"
+    },
+    {
+      "eventId": "evt_025",
+      "day": "2024:05:05",
+      "time": "17:51:00",
+      "title": "公园山冯记凉串串",
+      "excerpt": "公园山的百步梯对面的一家乐山老字号凉串串，到得太早了，没有吃凉串串，主要吃卤味炸土豆🥔嬢嬢很热...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7562780230654511113_1.jpeg"
+    },
+    {
+      "eventId": "evt_026",
+      "day": "2024:05:05",
+      "time": "19:07:00",
+      "title": "张三小吃(小东街店)",
+      "excerpt": "彭山区小东街的一家夜宵小吃，店面还挺大，有两间屋，外头还摆了桌子，晚上八点过来人还是很多！点了经...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7590370458759956490_1.jpeg"
+    },
+    {
+      "eventId": "evt_027",
+      "day": "2024:05:06",
+      "time": "14:03:00",
+      "title": "鞠婆婆绵绵冰(眉山穿越盛世店)",
+      "excerpt": "穿越盛世入口就是，好找得很。一眼看中了峨眉雪绵绵冰，尝尝当地独特的口味。点的是大份，大家一起分享...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7421508021962016779_1.jpeg"
+    }
+  ],
+  "events": [
+    {
+      "eventId": "evt_020",
+      "commentId": "sheet_meishan_7590701804305549362",
+      "sequence": 1,
+      "day": "2024:05:04",
+      "time": "17:35:00",
+      "commentText": "供电局附近的老店了，开了好几间都可以坐，下午快14点才走到，店家基本快打烊了，不过还是很热情。点了碗碗牛肉大份和肥肠小份，大小份的盘子差还挺多，牛肉确实挺好吃的，还试了豆花和血旺，特别下饭，还有免费的泡菜和热乎乎的米汤提供，整体用餐体验ok的",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590701804305549362_1.jpeg",
+          "name": "sheet_meishan_7590701804305549362_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590701804305549362_2.jpeg",
+          "name": "sheet_meishan_7590701804305549362_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590701804305549362_3.jpeg",
+          "name": "sheet_meishan_7590701804305549362_3.jpeg"
+        }
+      ],
+      "canonicalName": "许潇姚东门碗碗牛肉",
+      "shortName": "许潇姚东门碗碗",
+      "poiName": "许潇姚东门碗碗牛肉",
+      "poiLocation": "马草街50号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "美食",
+      "categoryL2": "快餐小吃",
+      "categoryL3": "快餐",
+      "subject": "牛肉碗、热乎",
+      "avoid": [
+        "店招文字",
+        "价格字样",
+        "时间标识"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_021",
+      "commentId": "sheet_meishan_7421422785244841984",
+      "sequence": 2,
+      "day": "2024:05:04",
+      "time": "18:54:00",
+      "commentText": "三苏祠西大门旁边就是，和王家渡火锅是一家，位置嘿大，记得线上取号排队!就餐环境不错，旁边有山有水，只是节假日上菜有点慢。它家必吃东坡肘子，偏甜辣口，肉质非常软糯，老少皆宜，服务员也很好，要催菜及时提醒下哈。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421422785244841984_1.jpeg",
+          "name": "sheet_meishan_7421422785244841984_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421422785244841984_2.jpeg",
+          "name": "sheet_meishan_7421422785244841984_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421422785244841984_3.jpeg",
+          "name": "sheet_meishan_7421422785244841984_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421422785244841984_4.jpeg",
+          "name": "sheet_meishan_7421422785244841984_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421422785244841984_5.jpeg",
+          "name": "sheet_meishan_7421422785244841984_5.jpeg"
+        }
+      ],
+      "canonicalName": "眉州东坡(三苏祠店)",
+      "shortName": "眉州东坡",
+      "poiName": "眉州东坡(三苏祠店)",
+      "poiLocation": "下西街三苏祠西门",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "美食",
+      "categoryL2": "地方菜",
+      "categoryL3": "川菜",
+      "subject": "肘子、软糯",
+      "avoid": [
+        "排队字样",
+        "催菜提示",
+        "店招文字"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_022",
+      "commentId": "sheet_meishan_7590763173083383834",
+      "sequence": 3,
+      "day": "2024:05:05",
+      "time": "11:40:00",
+      "commentText": "这家店还是很火爆的，排队排了四十多分钟，两人桌位置不是很大，那边串串儿的话食材是比较新鲜，啥子菜都有，它比较主打的是那个啥子耙鸡脚和香菜牛肉，点了个鸳鸯锅，素菜一般谈白锅嘛，荤菜烫红锅，火还热的比较快，整体吃的话感觉还不错，他家串串的话不光可以煮，还可以点起去嘞个给你油炸串，再给你放上来，这个之前没遇到过，确实还可以哈。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_1.jpeg",
+          "name": "sheet_meishan_7590763173083383834_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_2.jpeg",
+          "name": "sheet_meishan_7590763173083383834_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_3.jpeg",
+          "name": "sheet_meishan_7590763173083383834_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_4.jpeg",
+          "name": "sheet_meishan_7590763173083383834_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_5.jpeg",
+          "name": "sheet_meishan_7590763173083383834_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_6.jpeg",
+          "name": "sheet_meishan_7590763173083383834_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_7.jpeg",
+          "name": "sheet_meishan_7590763173083383834_7.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590763173083383834_8.jpeg",
+          "name": "sheet_meishan_7590763173083383834_8.jpeg"
+        }
+      ],
+      "canonicalName": "灶门签串串香(民和北路店)",
+      "shortName": "灶门签串串",
+      "poiName": "灶门签串串香(民和北路店)",
+      "poiLocation": "民和北街170号(凯凯烧烤对面)",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "美食",
+      "categoryL2": "火锅",
+      "categoryL3": "串串香",
+      "subject": "串串锅、热辣",
+      "avoid": [
+        "排队字样",
+        "菜单文字",
+        "取号标识"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_023",
+      "commentId": "sheet_meishan_7562737514940598323",
+      "sequence": 4,
+      "day": "2024:05:05",
+      "time": "12:57:00",
+      "commentText": "彭山区中心商业街的一家开了二十几年的老店，位置好找的。老板特别有眼力见，差不多能记住顾客点的东西，需要小碗和勺子也能观察到顾客需求主动咨询。米线是那种细的，煮的时长刚刚好，老少皆宜，红汤也不是很辣。绍子里会有酸萝卜、芹菜，这是之前没吃到过的，来个二两还是不错！",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562737514940598323_1.jpeg",
+          "name": "sheet_meishan_7562737514940598323_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562737514940598323_2.jpeg",
+          "name": "sheet_meishan_7562737514940598323_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562737514940598323_3.jpeg",
+          "name": "sheet_meishan_7562737514940598323_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562737514940598323_4.jpeg",
+          "name": "sheet_meishan_7562737514940598323_4.jpeg"
+        }
+      ],
+      "canonicalName": "蒋二姐米线(商业街总店)",
+      "shortName": "蒋二姐米线",
+      "poiName": "蒋二姐米线(商业街总店)",
+      "poiLocation": "商业街与北街交叉口东40米",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "快餐小吃",
+      "categoryL3": "米粉米线",
+      "subject": "米线、爽滑",
+      "avoid": [
+        "店招文字",
+        "价目表",
+        "门牌号码"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_024",
+      "commentId": "sheet_meishan_7421441998185318411",
+      "sequence": 5,
+      "day": "2024:05:05",
+      "time": "14:22:00",
+      "commentText": "免费直接进，不用预约，不用刷身份证，方便得很!博物馆共有三层，顺序循序渐进，一层世界泡菜，二层四川泡菜，三层眉山泡菜，主要是本土品牌介绍，一楼还有泡菜可以买，适合喜欢腌制品的盆友。欣赏得慢的话差不多半小时就能搞定。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_1.jpeg",
+          "name": "sheet_meishan_7421441998185318411_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_2.jpeg",
+          "name": "sheet_meishan_7421441998185318411_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_3.jpeg",
+          "name": "sheet_meishan_7421441998185318411_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_4.jpeg",
+          "name": "sheet_meishan_7421441998185318411_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_5.jpeg",
+          "name": "sheet_meishan_7421441998185318411_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_6.jpeg",
+          "name": "sheet_meishan_7421441998185318411_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_7.jpeg",
+          "name": "sheet_meishan_7421441998185318411_7.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421441998185318411_8.jpeg",
+          "name": "sheet_meishan_7421441998185318411_8.jpeg"
+        }
+      ],
+      "canonicalName": "中国泡菜博物馆",
+      "shortName": "泡菜博物馆",
+      "poiName": "中国泡菜博物馆",
+      "poiLocation": "顺江大道北段1号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "游玩",
+      "categoryL2": "展馆/展览",
+      "categoryL3": "博物馆",
+      "subject": "泡菜坛、鲜亮",
+      "avoid": [
+        "楼层标识",
+        "介绍文字",
+        "门票字样"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_025",
+      "commentId": "sheet_meishan_7562780230654511113",
+      "sequence": 6,
+      "day": "2024:05:05",
+      "time": "17:51:00",
+      "commentText": "公园山的百步梯对面的一家乐山老字号凉串串，到得太早了，没有吃凉串串，主要吃卤味炸土豆🥔嬢嬢很热情，不一会就做好了端上来。第一次这种炸过和卤过的土豆，外皮很舒脆，不过好像没有剃掉土豆皮，这点可以改良下，配的海椒面也挺好吃的。油也是真的油，重油爱好者可以试试。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562780230654511113_1.jpeg",
+          "name": "sheet_meishan_7562780230654511113_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562780230654511113_2.jpeg",
+          "name": "sheet_meishan_7562780230654511113_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562780230654511113_3.jpeg",
+          "name": "sheet_meishan_7562780230654511113_3.jpeg"
+        }
+      ],
+      "canonicalName": "公园山冯记凉串串",
+      "shortName": "冯记凉串串",
+      "poiName": "公园山冯记凉串串",
+      "poiLocation": "公园东路59号(公园百步梯对面)",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "火锅",
+      "categoryL3": "串串香",
+      "subject": "炸土豆、酥脆",
+      "avoid": [
+        "店招文字",
+        "价格字样",
+        "排队提示"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_026",
+      "commentId": "sheet_meishan_7590370458759956490",
+      "sequence": 7,
+      "day": "2024:05:05",
+      "time": "19:07:00",
+      "commentText": "彭山区小东街的一家夜宵小吃，店面还挺大，有两间屋，外头还摆了桌子，晚上八点过来人还是很多！点了经典的红油饺子🥟和牛肉豆腐脑，分量都挺多的，红油调的味道还可以，蘸起来麻辣得当，豆腐脑也要点个赞，牛肉给得还算多。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590370458759956490_1.jpeg",
+          "name": "sheet_meishan_7590370458759956490_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590370458759956490_2.jpeg",
+          "name": "sheet_meishan_7590370458759956490_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590370458759956490_3.jpeg",
+          "name": "sheet_meishan_7590370458759956490_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590370458759956490_4.jpeg",
+          "name": "sheet_meishan_7590370458759956490_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590370458759956490_5.jpeg",
+          "name": "sheet_meishan_7590370458759956490_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590370458759956490_6.jpeg",
+          "name": "sheet_meishan_7590370458759956490_6.jpeg"
+        }
+      ],
+      "canonicalName": "张三小吃(小东街店)",
+      "shortName": "张三小吃",
+      "poiName": "张三小吃(小东街店)",
+      "poiLocation": "一环北路33号龙腾商城",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "快餐小吃",
+      "categoryL3": "快餐",
+      "subject": "饺子、麻辣",
+      "avoid": [
+        "时间标识",
+        "店招文字",
+        "菜单文字"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_027",
+      "commentId": "sheet_meishan_7421508021962016779",
+      "sequence": 8,
+      "day": "2024:05:06",
+      "time": "14:03:00",
+      "commentText": "穿越盛世入口就是，好找得很。一眼看中了峨眉雪绵绵冰，尝尝当地独特的口味。点的是大份，大家一起分享的感觉不错。奥利奥碎恰到好处，整体冰感十足，回味十足，只是分量再大一点就好了",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421508021962016779_1.jpeg",
+          "name": "sheet_meishan_7421508021962016779_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421508021962016779_2.jpeg",
+          "name": "sheet_meishan_7421508021962016779_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421508021962016779_3.jpeg",
+          "name": "sheet_meishan_7421508021962016779_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7421508021962016779_4.jpeg",
+          "name": "sheet_meishan_7421508021962016779_4.jpeg"
+        }
+      ],
+      "canonicalName": "鞠婆婆绵绵冰(眉山穿越盛世店)",
+      "shortName": "鞠婆婆绵绵冰",
+      "poiName": "鞠婆婆绵绵冰(眉山穿越盛世店)",
+      "poiLocation": "东坡岛子瞻大道5号金府穿越盛世1栋1层20号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "美食",
+      "categoryL2": "面包甜点",
+      "categoryL3": "甜品",
+      "subject": "绵绵冰、冰爽",
+      "avoid": [
+        "店招文字",
+        "价格字样",
+        "分量标注"
+      ],
+      "authorName": "旅行者小夏"
+    }
+  ]
+}

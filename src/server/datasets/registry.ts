@@ -23,6 +23,17 @@ export const bamDatasetRegistry = {
       adapterVersion: "canonical-raw-v2",
     },
   },
+  meishan: {
+    ...demoConfig.datasets.meishan,
+    source: {
+      type: "sheet" as const,
+      spreadsheetToken: "L9BrskJM3hPcpwt3jeFcylSpnWh",
+      sheetId: "13mhdS",
+      sheetName: "【BAM规范】眉山市",
+      url: "https://bytedance.larkoffice.com/sheets/L9BrskJM3hPcpwt3jeFcylSpnWh?sheet=13mhdS",
+      adapterVersion: "canonical-raw-v2",
+    },
+  },
 } as const satisfies Record<DemoDatasetKey, unknown>;
 
 export type BamDatasetKey = keyof typeof bamDatasetRegistry;

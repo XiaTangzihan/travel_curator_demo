@@ -3,6 +3,7 @@ import {
   mapRecordSchema,
   runTraceSchema,
   type EventRecord,
+  type ImageModel,
   type Landmark,
   type MapRecord,
   type ParsedRoute,
@@ -11,6 +12,11 @@ import {
   type RunTrace,
 } from "@/src/contracts/domain";
 import { getDemoDataset } from "@/src/config/demo";
+import { resolveRequestedImageModel } from "@/src/config/image-models";
+import {
+  resolveRegenerateExecutionPlan,
+  type RegenerateMode,
+} from "@/src/features/confirm/regenerate-policy";
 import {
   buildEventVisualBriefPrompt,
   buildLandmarkPrompt,
@@ -19,8 +25,11 @@ import {
   getStylePreset,
   parseEventVisualBriefs,
 } from "@/src/engine/prompts";
-import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
-import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
+import { resolveShortName } from "@/src/lib/short-name";
+import {
+  buildRegenerateImagePublicPaths,
+  canUsePublicImageAsModelInput,
+} from "@/src/engine/pipelines/model-image-inputs";
 import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
@@ -89,10 +98,18 @@ function buildDatasetArtifactPaths(datasetKey: string) {
   };
 }
 
+function normalizeGenerateMapInput(input: GenerateMapInput): GenerateMapInput {
+  return {
+    ...input,
+    imageModel: resolveRequestedImageModel(input.imageModel),
+  };
+}
+
 function buildPosterVersion(params: {
   versionId: string;
   posterPath: string;
   runId: string;
+  imageModel?: ImageModel;
   createdAt: string;
   instruction?: string;
   basedOnExistingImage?: boolean;
@@ -101,6 +118,7 @@ function buildPosterVersion(params: {
     versionId: params.versionId,
     posterPath: params.posterPath,
     runId: params.runId,
+    imageModel: params.imageModel ?? "unknown",
     createdAt: params.createdAt,
     instruction: params.instruction,
     basedOnExistingImage: params.basedOnExistingImage,
@@ -117,6 +135,7 @@ function ensurePosterVersions(mapRecord: MapRecord): PosterVersion[] {
       versionId: mapRecord.currentRunId || "initial",
       posterPath: mapRecord.posterPath,
       runId: mapRecord.currentRunId || "initial",
+      imageModel: mapRecord.imageModel,
       createdAt: mapRecord.updatedAt || mapRecord.createdAt,
       instruction: mapRecord.lastInstruction,
     }),
@@ -157,7 +176,10 @@ function compareEventOrder(left: EventRecord, right: EventRecord) {
 function normalizeMapEvents(events: EventRecord[]) {
   return [...events].sort(compareEventOrder).map((event, index) => {
     const canonicalName = event.canonicalName?.trim() || event.poiName.trim();
-    const shortName = event.shortName?.trim() || buildMechanicalShortName(canonicalName);
+    const shortName = resolveShortName({
+      canonicalName,
+      candidate: event.shortName,
+    });
 
     return {
       ...event,
@@ -220,29 +242,52 @@ async function generateEventVisualBriefs(params: {
   events: EventRecord[];
 }) {
   const prompt = buildEventVisualBriefPrompt(params);
-  const content = await runDoubaoChat(
-    [
-      { role: "system", content: prompt.system },
-      { role: "user", content: prompt.user },
-    ],
-    0.2,
-  );
-  const briefs = parseEventVisualBriefs(content);
+  let lastError: Error | null = null;
 
-  if (briefs.length !== params.events.length) {
-    throw new Error("event visual brief 数量与输入事件数量不一致");
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const content = await runDoubaoChat(
+        [
+          { role: "system", content: prompt.system },
+          { role: "user", content: prompt.user },
+        ],
+        0.2,
+      );
+      const briefs = parseEventVisualBriefs(content);
+
+      if (briefs.length !== params.events.length) {
+        throw new Error("event visual brief 数量与输入事件数量不一致");
+      }
+
+      return params.events.map((event, index) => {
+        const canonicalName = event.canonicalName?.trim() || event.poiName.trim();
+
+        return {
+          ...event,
+          canonicalName,
+          shortName: resolveShortName({
+            canonicalName,
+            candidate: briefs[index].shortName,
+          }),
+          subject: briefs[index].subject,
+          avoid: briefs[index].avoid,
+        };
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(`${error}`);
+      if (attempt >= 2) {
+        break;
+      }
+    }
   }
 
-  return params.events.map((event, index) => ({
-    ...event,
-    subject: briefs[index].subject,
-    avoid: briefs[index].avoid,
-  }));
+  throw new Error(`P2 失败（已重试 1 次）：${lastError?.message ?? "未知错误"}`);
 }
 
 async function writePosterFile(params: {
   mapId: string;
   styleKey: string;
+  imageModel: ImageModel;
   referenceImagePaths: string[];
   parsedRoute: ParsedRoute;
   knowledge: Landmark[];
@@ -259,6 +304,7 @@ async function writePosterFile(params: {
   const image = await runSeedreamImage({
     prompt,
     images: params.referenceImagePaths,
+    imageModel: params.imageModel === "unknown" ? undefined : params.imageModel,
   });
   const outputPath = posterOutputPath(params.mapId, "png");
   await writeBinaryFile(outputPath, image);
@@ -269,6 +315,7 @@ async function writeRegeneratedPosterFile(params: {
   mapId: string;
   runId: string;
   styleKey: string;
+  imageModel: ImageModel;
   referenceImagePaths: string[];
   parsedRoute: ParsedRoute;
   knowledge: Landmark[];
@@ -285,6 +332,7 @@ async function writeRegeneratedPosterFile(params: {
   const image = await runSeedreamImage({
     prompt,
     images: params.referenceImagePaths,
+    imageModel: params.imageModel === "unknown" ? undefined : params.imageModel,
   });
   const outputPath = posterOutputPath(params.mapId, "png", params.runId);
   await writeBinaryFile(outputPath, image);
@@ -297,6 +345,7 @@ async function generateMapDraftCore(
 ) {
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
+  const imageModel = resolveRequestedImageModel(input.imageModel);
 
   const eventsSnapshot = await ensureEvents(input.datasetKey);
   const selectedEvents = normalizeMapEvents(
@@ -352,6 +401,7 @@ async function generateMapDraftCore(
     posterPath = await writePosterFile({
       mapId: context.mapId,
       styleKey: input.style,
+      imageModel,
       referenceImagePaths,
       parsedRoute,
       knowledge,
@@ -378,6 +428,7 @@ async function generateMapDraftCore(
     mapName: input.mapName,
     city: input.city,
     style: input.style,
+    imageModel,
     posterPath,
     routeMarkdown,
     events: selectedEventsWithVisualBriefs,
@@ -391,6 +442,7 @@ async function generateMapDraftCore(
     mapName: input.mapName,
     city: input.city,
     style: input.style,
+    imageModel,
     status: "draft",
     eventCount: selectedEvents.length,
     routePath,
@@ -402,6 +454,7 @@ async function generateMapDraftCore(
         versionId: context.runId,
         posterPath,
         runId: context.runId,
+        imageModel,
         createdAt: context.startedAt,
       }),
     ],
@@ -421,6 +474,7 @@ async function generateMapDraftCore(
     status: "completed",
     stage: "generate",
     progressStep: "finalizing",
+    imageModel,
     styleKey: input.style,
     promptVersion: stylePreset.promptVersion,
     referenceIds: [stylePreset.referenceId],
@@ -476,6 +530,7 @@ async function createInitialGenerateRunTrace(params: {
     status: "running",
     stage: "generate",
     progressStep: "preparing",
+    imageModel: resolveRequestedImageModel(params.input.imageModel),
     styleKey: params.input.style,
     previewImagePaths,
     generateInput: params.input,
@@ -540,11 +595,12 @@ async function executeGenerateMapRun(params: {
 }
 
 export async function startGenerateMapRun(input: GenerateMapInput) {
+  const normalizedInput = normalizeGenerateMapInput(input);
   const startedAt = new Date().toISOString();
   const runId = createRunId();
   const mapId = createMapId();
   await createInitialGenerateRunTrace({
-    input,
+    input: normalizedInput,
     runId,
     mapId,
     startedAt,
@@ -552,7 +608,7 @@ export async function startGenerateMapRun(input: GenerateMapInput) {
 
   setTimeout(() => {
     void executeGenerateMapRun({
-      input,
+      input: normalizedInput,
       runId,
       mapId,
     });
@@ -566,8 +622,9 @@ export async function startGenerateMapRun(input: GenerateMapInput) {
 }
 
 export async function generateMapDraft(input: GenerateMapInput) {
+  const normalizedInput = normalizeGenerateMapInput(input);
   const startedAt = new Date().toISOString();
-  const result = await generateMapDraftCore(input, {
+  const result = await generateMapDraftCore(normalizedInput, {
     runId: createRunId(),
     mapId: createMapId(),
     startedAt,
@@ -580,19 +637,23 @@ export async function generateMapDraft(input: GenerateMapInput) {
 export async function regenerateMapDraft(params: {
   mapRecord: MapRecord;
   events: EventRecord[];
+  mode: RegenerateMode;
   instruction: string;
-  basedOnExistingImage: boolean;
+  imageModel?: GenerateMapInput["imageModel"];
 }) {
   const startedAt = new Date().toISOString();
   const runId = createRunId();
   const warnings: string[] = [];
   let providerMode: RunTrace["providerMode"] = "live";
+  const imageModel = resolveRequestedImageModel(params.imageModel ?? params.mapRecord.imageModel);
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
-  const normalizedInstruction = params.instruction.trim();
-  const effectiveBasedOnExistingImage = normalizedInstruction
-    ? params.basedOnExistingImage
-    : false;
+  const executionPlan = resolveRegenerateExecutionPlan({
+    mode: params.mode,
+    instruction: params.instruction,
+  });
+  const normalizedInstruction = executionPlan.instruction;
+  const effectiveBasedOnExistingImage = executionPlan.basedOnExistingImage;
   const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
   let knowledge = cachedKnowledge;
   if (!knowledge.length) {
@@ -602,12 +663,20 @@ export async function regenerateMapDraft(params: {
     await saveKnowledge(params.mapRecord.mapId, knowledge);
   }
 
+  if (
+    executionPlan.mode === "edit" &&
+    !canUsePublicImageAsModelInput(params.mapRecord.posterPath)
+  ) {
+    throw new Error("当前选中版本图片不支持作为原图修改，请改用“再来一张”或切换到可用候选版本。");
+  }
+
   const referenceImagePublicPaths = buildRegenerateImagePublicPaths({
     styleReferencePublicPath: stylePreset.referencePublicPath,
     existingPosterPublicPath: params.mapRecord.posterPath,
     basedOnExistingImage: effectiveBasedOnExistingImage,
   });
   if (
+    executionPlan.mode !== "edit" &&
     effectiveBasedOnExistingImage &&
     !referenceImagePublicPaths.includes(params.mapRecord.posterPath)
   ) {
@@ -636,6 +705,7 @@ export async function regenerateMapDraft(params: {
       mapId: params.mapRecord.mapId,
       runId,
       styleKey: params.mapRecord.style,
+      imageModel,
       referenceImagePaths,
       parsedRoute,
       knowledge,
@@ -660,6 +730,7 @@ export async function regenerateMapDraft(params: {
     mapName: params.mapRecord.mapName,
     city: params.mapRecord.city,
     style: params.mapRecord.style,
+    imageModel,
     posterPath,
     routeMarkdown,
     events,
@@ -669,15 +740,17 @@ export async function regenerateMapDraft(params: {
 
   const updatedMap = mapRecordSchema.parse({
     ...params.mapRecord,
+    imageModel,
     posterVersions: [
       ...ensurePosterVersions(params.mapRecord),
       buildPosterVersion({
         versionId: runId,
         posterPath,
         runId,
+        imageModel,
         createdAt: startedAt,
         instruction: normalizedInstruction || undefined,
-        basedOnExistingImage: normalizedInstruction ? effectiveBasedOnExistingImage : undefined,
+        basedOnExistingImage: executionPlan.mode === "edit" ? true : undefined,
       }),
     ],
     selectedPosterVersionId: runId,
@@ -694,8 +767,9 @@ export async function regenerateMapDraft(params: {
     datasetKey: params.mapRecord.datasetKey,
     status: "completed",
     stage: "regenerate",
-    basedOnExistingImage: effectiveBasedOnExistingImage,
-    promptInstruction: normalizedInstruction,
+    imageModel,
+    basedOnExistingImage: executionPlan.mode === "edit" ? true : false,
+    promptInstruction: normalizedInstruction || undefined,
     styleKey: params.mapRecord.style,
     promptVersion: stylePreset.promptVersion,
     referenceIds: [stylePreset.referenceId],
@@ -738,12 +812,14 @@ export async function selectMapPosterVersion(params: { mapRecord: MapRecord; ver
     selectedPosterVersionId: selectedVersion.versionId,
     posterPath: selectedVersion.posterPath,
     currentRunId: selectedVersion.runId,
+    imageModel: selectedVersion.imageModel,
     updatedAt: new Date().toISOString(),
   });
   await saveMapRecord(nextMapRecord);
 
   const nextMapViewModel = {
     ...renderedMap,
+    imageModel: selectedVersion.imageModel,
     posterPath: selectedVersion.posterPath,
     generatedAt: new Date().toISOString(),
   };
@@ -780,6 +856,7 @@ export async function prunePosterVersionsForConfirm(params: { mapRecord: MapReco
     selectedPosterVersionId: selectedVersion.versionId,
     posterPath: selectedVersion.posterPath,
     currentRunId: selectedVersion.runId,
+    imageModel: selectedVersion.imageModel,
     updatedAt: new Date().toISOString(),
   });
   await saveMapRecord(nextMapRecord);
@@ -787,6 +864,7 @@ export async function prunePosterVersionsForConfirm(params: { mapRecord: MapReco
   if (renderedMap) {
     await saveRenderedMap(params.mapRecord.mapId, {
       ...renderedMap,
+      imageModel: selectedVersion.imageModel,
       posterPath: selectedVersion.posterPath,
       generatedAt: new Date().toISOString(),
     });

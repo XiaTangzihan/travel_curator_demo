@@ -19,6 +19,14 @@ export const demoConfig = {
       rawFileName: "hangzhou.raw.json",
       eventsFileName: "hangzhou.events.json",
     },
+    meishan: {
+      datasetId: "meishan-bam",
+      authorName: "旅行者小夏",
+      city: "眉山",
+      defaultMapName: "眉山一日漫游",
+      rawFileName: "meishan.raw.json",
+      eventsFileName: "meishan.events.json",
+    },
   },
 } as const;
 
