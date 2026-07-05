@@ -19,7 +19,7 @@ import {
   getStylePreset,
   parseEventVisualBriefs,
 } from "@/src/engine/prompts";
-import { buildMechanicalShortName } from "@/src/engine/prompts/shared";
+import { resolveShortName } from "@/src/lib/short-name";
 import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
 import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
@@ -157,7 +157,10 @@ function compareEventOrder(left: EventRecord, right: EventRecord) {
 function normalizeMapEvents(events: EventRecord[]) {
   return [...events].sort(compareEventOrder).map((event, index) => {
     const canonicalName = event.canonicalName?.trim() || event.poiName.trim();
-    const shortName = event.shortName?.trim() || buildMechanicalShortName(canonicalName);
+    const shortName = resolveShortName({
+      canonicalName,
+      candidate: event.shortName,
+    });
 
     return {
       ...event,
@@ -220,24 +223,46 @@ async function generateEventVisualBriefs(params: {
   events: EventRecord[];
 }) {
   const prompt = buildEventVisualBriefPrompt(params);
-  const content = await runDoubaoChat(
-    [
-      { role: "system", content: prompt.system },
-      { role: "user", content: prompt.user },
-    ],
-    0.2,
-  );
-  const briefs = parseEventVisualBriefs(content);
+  let lastError: Error | null = null;
 
-  if (briefs.length !== params.events.length) {
-    throw new Error("event visual brief 数量与输入事件数量不一致");
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const content = await runDoubaoChat(
+        [
+          { role: "system", content: prompt.system },
+          { role: "user", content: prompt.user },
+        ],
+        0.2,
+      );
+      const briefs = parseEventVisualBriefs(content);
+
+      if (briefs.length !== params.events.length) {
+        throw new Error("event visual brief 数量与输入事件数量不一致");
+      }
+
+      return params.events.map((event, index) => {
+        const canonicalName = event.canonicalName?.trim() || event.poiName.trim();
+
+        return {
+          ...event,
+          canonicalName,
+          shortName: resolveShortName({
+            canonicalName,
+            candidate: briefs[index].shortName,
+          }),
+          subject: briefs[index].subject,
+          avoid: briefs[index].avoid,
+        };
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(`${error}`);
+      if (attempt >= 2) {
+        break;
+      }
+    }
   }
 
-  return params.events.map((event, index) => ({
-    ...event,
-    subject: briefs[index].subject,
-    avoid: briefs[index].avoid,
-  }));
+  throw new Error(`P2 失败（已重试 1 次）：${lastError?.message ?? "未知错误"}`);
 }
 
 async function writePosterFile(params: {

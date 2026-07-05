@@ -59,6 +59,7 @@ export const eventPictureSchema = z.object({
 });
 
 export const eventVisualBriefSchema = z.object({
+  shortName: z.string().trim().min(1).max(32),
   subject: z.string().trim().min(1),
   avoid: z.array(z.string().trim().min(1)).min(3).max(5),
 });
