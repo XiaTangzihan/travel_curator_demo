@@ -21,6 +21,10 @@ type WorkspacePageProps = {
   }>;
 };
 
+export function shouldShowSelectionRiskWarning(selectedCount: number) {
+  return selectedCount > 8;
+}
+
 export function WorkspacePage(props: WorkspacePageProps) {
   const router = useRouter();
   const actionLockRef = useRef<"generate" | "preprocess" | null>(null);
@@ -58,6 +62,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
     [props.activeDatasetKey, props.datasetOptions],
   );
   const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
+  const showSelectionRiskWarning = shouldShowSelectionRiskWarning(selectedCommentIds.length);
   const hasSelectedStyle = currentStyle.trim().length > 0;
   const actionsLocked = submitting || syncing;
   const stylePreview = hasSelectedStyle
@@ -285,6 +290,12 @@ export function WorkspacePage(props: WorkspacePageProps) {
               已选 <span className="font-semibold text-[var(--text-strong)]">{selectedSummary}</span>
             </p>
           </div>
+
+          {showSelectionRiskWarning ? (
+            <div className="mb-5 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm leading-7 text-[var(--text-muted)]">
+              当前选中了 {selectedCommentIds.length} 条评论。超过 8 条后，静态图的编号稳定性和画面质量风险会明显升高；你仍然可以继续生成。
+            </div>
+          ) : null}
 
           <div className="max-h-[780px] overflow-y-auto pr-2">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
