@@ -155,7 +155,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
           </>
         }
       >
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <section className="overflow-hidden rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-5">
             <div className="overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
               <Image

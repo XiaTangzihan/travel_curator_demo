@@ -1,0 +1,34 @@
+{
+  "mapId": "map_gz_1783231440425",
+  "datasetKey": "hangzhou",
+  "mapName": "杭州1-0",
+  "city": "余杭",
+  "style": "watercolor",
+  "status": "confirmed",
+  "eventCount": 8,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783231440425.route.md",
+  "posterPath": "/mock/posters/map_gz_1783231440425.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783231440425.knowledge.json",
+  "currentRunId": "run_20260705140637_pkq8",
+  "posterVersions": [
+    {
+      "versionId": "run_20260705140400_yl0g",
+      "posterPath": "/mock/posters/map_gz_1783231440425.png",
+      "runId": "run_20260705140400_yl0g",
+      "createdAt": "2026-07-05T06:04:00.425Z"
+    }
+  ],
+  "selectedPosterVersionId": "run_20260705140400_yl0g",
+  "selectedCommentIds": [
+    "sheet_hangzhou_7441614964332169252",
+    "sheet_hangzhou_7442702742558083091",
+    "sheet_hangzhou_7443020777257043987",
+    "sheet_hangzhou_7443593968841361471",
+    "sheet_hangzhou_7456427367863437375",
+    "sheet_hangzhou_7457206519067707431",
+    "sheet_hangzhou_7499867497853454387",
+    "sheet_hangzhou_7524956900710959140"
+  ],
+  "createdAt": "2026-07-05T06:04:00.425Z",
+  "updatedAt": "2026-07-05T06:06:37.792Z"
+}

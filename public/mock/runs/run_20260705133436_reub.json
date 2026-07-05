@@ -1,0 +1,30 @@
+{
+  "runId": "run_20260705133436_reub",
+  "mapId": "map_gz_1783229459285",
+  "datasetKey": "hangzhou",
+  "status": "completed",
+  "stage": "regenerate",
+  "basedOnExistingImage": false,
+  "promptInstruction": "",
+  "styleKey": "young-cartoon",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_young_cartoon_20260702"
+  ],
+  "updatedAt": "2026-07-05T05:35:40.652Z",
+  "inputSummary": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州08a",
+    "city": "萧山",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1783229459285.route.md",
+    "posterPath": "/mock/posters/map_gz_1783229459285__run_20260705133436_reub.png",
+    "mapPath": "/mock/maps/map_gz_1783229459285.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T05:34:36.985Z",
+  "endedAt": "2026-07-05T05:35:40.652Z"
+}
