@@ -6,9 +6,18 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function RunsRoute() {
+type RunsRouteProps = {
+  searchParams: Promise<{ mapId?: string }>;
+};
+
+export default async function RunsRoute(props: RunsRouteProps) {
+  const searchParams = await props.searchParams;
   const overview = await getTraceOverviewViewModel();
-  const initialMapId = overview.mapItems[0]?.mapId;
+  const requestedMapId = searchParams.mapId?.trim();
+  const initialMapId =
+    requestedMapId && overview.mapItems.some((item) => item.mapId === requestedMapId)
+      ? requestedMapId
+      : overview.mapItems[0]?.mapId;
   const initialDetail = initialMapId
     ? await getTraceMapDetailViewModel(initialMapId)
     : null;
