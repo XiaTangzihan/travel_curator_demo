@@ -58,6 +58,11 @@ export const eventPictureSchema = z.object({
   name: z.string().optional(),
 });
 
+export const eventVisualBriefSchema = z.object({
+  subject: z.string().trim().min(1),
+  avoid: z.array(z.string().trim().min(1)).min(3).max(5),
+});
+
 export const eventRecordSchema = z.object({
   eventId: z.string(),
   commentId: z.string(),
@@ -76,6 +81,8 @@ export const eventRecordSchema = z.object({
   categoryL1: z.string(),
   categoryL2: z.string(),
   categoryL3: z.string(),
+  subject: z.string().trim().min(1).optional(),
+  avoid: z.array(z.string().trim().min(1)).min(3).max(5).optional(),
   authorName: z.string(),
 });
 
@@ -104,6 +111,60 @@ export const routeArtifactSchema = z.object({
   generatedAt: z.string(),
 });
 
+export const parsedRouteEventSchema = z.object({
+  dayIndex: z.number().int().positive(),
+  day: z.string().min(1),
+  sequence: z.number().int().positive(),
+  headingTitle: z.string().min(1),
+  poi: z.string().min(1),
+  shortName: z.string().min(1),
+  category: z.string().min(1),
+  commentText: z.string(),
+  imagePath: z.string().min(1),
+  subject: z.string().trim().min(1),
+  avoid: z.array(z.string().trim().min(1)).min(3).max(5),
+});
+
+export const parsedRouteSchema = z
+  .object({
+    mapName: z.string().min(1),
+    city: z.string().min(1),
+    styleLabel: z.string().min(1),
+    days: z.number().int().positive(),
+    eventCount: z.number().int().nonnegative(),
+    knowledgeCount: z.number().int().nonnegative(),
+    importantRules: z.array(z.string().trim().min(1)).min(1),
+    events: z.array(parsedRouteEventSchema),
+  })
+  .superRefine((value, ctx) => {
+    if (value.events.length !== value.eventCount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "route 事件数量与 event_count 不一致",
+      });
+    }
+
+    const sequenceSet = new Set<number>();
+    for (const event of value.events) {
+      if (sequenceSet.has(event.sequence)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `route 中存在重复 sequence: ${event.sequence}`,
+        });
+      }
+      sequenceSet.add(event.sequence);
+    }
+  });
+
+export const posterVersionSchema = z.object({
+  versionId: z.string(),
+  posterPath: z.string(),
+  runId: z.string(),
+  createdAt: z.string(),
+  instruction: z.string().optional(),
+  basedOnExistingImage: z.boolean().optional(),
+});
+
 export const mapRecordSchema = z.object({
   mapId: z.string(),
   datasetKey: datasetKeySchema.optional().default("guangzhou"),
@@ -116,6 +177,8 @@ export const mapRecordSchema = z.object({
   posterPath: z.string(),
   knowledgePath: z.string(),
   currentRunId: z.string(),
+  posterVersions: z.array(posterVersionSchema).optional().default([]),
+  selectedPosterVersionId: z.string().optional(),
   selectedCommentIds: z.array(z.string()),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -202,11 +265,15 @@ export const runTraceSchema = z.object({
 export type RawAttachment = z.infer<typeof rawAttachmentSchema>;
 export type RawReview = z.infer<typeof rawReviewSchema>;
 export type RawDatasetSnapshot = z.infer<typeof rawDatasetSnapshotSchema>;
+export type EventVisualBrief = z.infer<typeof eventVisualBriefSchema>;
 export type EventRecord = z.infer<typeof eventRecordSchema>;
 export type EventsSnapshot = z.infer<typeof eventsSnapshotSchema>;
 export type PreprocessReport = z.infer<typeof preprocessReportSchema>;
 export type Landmark = z.infer<typeof landmarkSchema>;
 export type RouteArtifact = z.infer<typeof routeArtifactSchema>;
+export type ParsedRouteEvent = z.infer<typeof parsedRouteEventSchema>;
+export type ParsedRoute = z.infer<typeof parsedRouteSchema>;
+export type PosterVersion = z.infer<typeof posterVersionSchema>;
 export type MapRecord = z.infer<typeof mapRecordSchema>;
 export type MapNode = z.infer<typeof mapNodeSchema>;
 export type MapViewModel = z.infer<typeof mapViewModelSchema>;

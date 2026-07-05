@@ -9,8 +9,8 @@ export type SupportedStyleKey = (typeof supportedStyleKeys)[number];
 
 export const stylePromptLibrary = {
   "young-cartoon": youngCartoonStylePreset,
-  watercolor: watercolorStylePreset,
-  storybook: storybookStylePreset,
+  "watercolor": watercolorStylePreset,
+  "storybook": storybookStylePreset,
 } as const;
 
 export function getStylePreset(styleKey: string) {

@@ -1,0 +1,60 @@
+{
+  "runId": "run_20260705112613_lzc6",
+  "mapId": "map_gz_1783221973905",
+  "datasetKey": "hangzhou",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "young-cartoon",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_young_cartoon_20260702"
+  ],
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-05T03:27:43.156Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_1.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_2.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_3.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_4.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_5.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_6.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7441614964332169252_7.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7443593968841361471_1.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7443593968841361471_2.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7443593968841361471_3.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7443593968841361471_4.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7443593968841361471_5.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州05",
+    "city": "萧山",
+    "style": "young-cartoon",
+    "selectedCommentIds": [
+      "sheet_hangzhou_7441614964332169252",
+      "sheet_hangzhou_7443593968841361471",
+      "sheet_hangzhou_7457206519067707431",
+      "sheet_hangzhou_7442702742558083091",
+      "sheet_hangzhou_7456427367863437375",
+      "sheet_hangzhou_7443020777257043987",
+      "sheet_hangzhou_7499867497853454387"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州05",
+    "city": "萧山",
+    "selectedCommentCount": 7
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/hangzhou.raw.json",
+    "eventsPath": "/mock/events/hangzhou.events.json",
+    "routePath": "/mock/routes/map_gz_1783221973905.route.md",
+    "posterPath": "/mock/posters/map_gz_1783221973905.png",
+    "mapPath": "/mock/maps/map_gz_1783221973905.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T03:26:13.905Z",
+  "endedAt": "2026-07-05T03:27:43.156Z"
+}

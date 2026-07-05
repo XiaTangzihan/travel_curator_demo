@@ -1,0 +1,16 @@
+{
+  "runId": "run_20260705133937_vwe7",
+  "mapId": "map_gz_1783229459285",
+  "datasetKey": "hangzhou",
+  "status": "completed",
+  "stage": "confirm",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1783229459285.route.md",
+    "posterPath": "/mock/posters/map_gz_1783229459285__run_20260705133436_reub.png",
+    "mapPath": "/mock/maps/map_gz_1783229459285.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T05:39:37.088Z",
+  "endedAt": "2026-07-05T05:39:37.088Z"
+}

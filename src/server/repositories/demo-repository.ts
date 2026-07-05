@@ -309,12 +309,19 @@ export async function deleteMapArtifacts(mapId: string) {
     artifactPathSet.add(fromPublicPath(mapRecord.posterPath));
   }
 
+  mapRecord?.posterVersions.forEach((version) => {
+    artifactPathSet.add(fromPublicPath(version.posterPath));
+  });
+
   if (renderedMap?.posterPath) {
     artifactPathSet.add(fromPublicPath(renderedMap.posterPath));
   }
 
   relatedRunTraces.forEach((trace) => {
     artifactPathSet.add(runFile(trace.runId));
+    if (trace.artifacts.posterPath) {
+      artifactPathSet.add(fromPublicPath(trace.artifacts.posterPath));
+    }
   });
 
   const deletedArtifactPaths = [...artifactPathSet];
@@ -345,10 +352,20 @@ export async function deleteMapArtifacts(mapId: string) {
   };
 }
 
-export function posterOutputPath(mapId: string, extension: "png" | "svg" = "png") {
-  return path.join(storagePaths.posters, `${mapId}.${extension}`);
+export function posterOutputPath(
+  mapId: string,
+  extension: "png" | "svg" = "png",
+  versionTag?: string,
+) {
+  const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
+  return path.join(storagePaths.posters, fileName);
 }
 
-export function posterPublicPath(mapId: string, extension: "png" | "svg" = "png") {
-  return `/mock/posters/${mapId}.${extension}`;
+export function posterPublicPath(
+  mapId: string,
+  extension: "png" | "svg" = "png",
+  versionTag?: string,
+) {
+  const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
+  return `/mock/posters/${fileName}`;
 }

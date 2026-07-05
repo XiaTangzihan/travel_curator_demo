@@ -16,6 +16,7 @@ export const commonPosterPrompt = [
   "用一条连续路线把各打卡点按顺序串联。",
   "每个打卡点必须呈现数字、名称和主体图标。",
   "全图视觉语言统一，信息可读，避免文字遮挡。",
+  "每个打卡点的图标（如：热气腾腾的鸡公煲）的直径应当小于1cm。",
 ].join("\n");
 
 export function buildMechanicalShortName(name: string) {

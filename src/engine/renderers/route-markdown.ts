@@ -1,4 +1,5 @@
 import type { EventRecord, Landmark } from "@/src/contracts/domain";
+import { p3PosterImportantRules } from "@/src/engine/prompts/p3-poster-important-rules";
 
 function cleanCategory(event: EventRecord) {
   return [event.categoryL1, event.categoryL2, event.categoryL3]
@@ -31,17 +32,19 @@ function shortName(event: EventRecord) {
   return event.shortName?.trim() || canonicalName(event);
 }
 
-function buildIconHint(event: EventRecord) {
-  const seeds = [
-    shortName(event),
-    event.categoryL3,
-    event.categoryL2,
-    event.commentText.slice(0, 18),
-  ]
-    .filter(Boolean)
-    .join(" / ");
+function ensureVisualBrief(event: EventRecord) {
+  if (!event.subject?.trim()) {
+    throw new Error(`事件 ${event.commentId} 缺少 subject，无法生成新 route.md`);
+  }
 
-  return seeds.slice(0, 20);
+  if (!event.avoid?.length || event.avoid.length < 3 || event.avoid.length > 5) {
+    throw new Error(`事件 ${event.commentId} 缺少有效 avoid，无法生成新 route.md`);
+  }
+
+  return {
+    subject: event.subject.trim(),
+    avoid: event.avoid.map((item) => item.trim()).filter(Boolean),
+  };
 }
 
 export function createDeterministicRouteMarkdown(params: {
@@ -70,6 +73,9 @@ export function createDeterministicRouteMarkdown(params: {
     `knowledge_count: ${params.knowledge.length}`,
     "---",
     "",
+    "## Important Rules",
+    ...p3PosterImportantRules.map((rule) => `- ${rule}`),
+    "",
   ];
 
   const body: string[] = [];
@@ -79,6 +85,7 @@ export function createDeterministicRouteMarkdown(params: {
 
     events.forEach((event, eventIndex) => {
       const sequence = event.sequence ?? eventIndex + 1;
+      const visualBrief = ensureVisualBrief(event);
       body.push(`## Event ${sequence} · ${shortName(event)}`);
       body.push(`- sequence: ${sequence}`);
       body.push(`- poi: ${canonicalName(event)}`);
@@ -86,7 +93,8 @@ export function createDeterministicRouteMarkdown(params: {
       body.push(`- 类目: ${cleanCategory(event)}`);
       body.push(`- 文案: ${event.commentText || "无文字评论"}`);
       body.push(`- 配图: ${pickImage(event)}`);
-      body.push(`- event标志生图提示: ${buildIconHint(event)}`);
+      body.push(`- subject: ${visualBrief.subject}`);
+      body.push(`- avoid: ${visualBrief.avoid.join(", ")}`);
       body.push("");
     });
   });

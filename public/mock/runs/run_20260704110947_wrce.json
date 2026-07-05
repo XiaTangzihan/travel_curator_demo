@@ -1,0 +1,55 @@
+{
+  "runId": "run_20260704110947_wrce",
+  "mapId": "map_gz_1783134587112",
+  "datasetKey": "hangzhou",
+  "status": "failed",
+  "stage": "generate",
+  "styleKey": "watercolor",
+  "progressStep": "preparing",
+  "updatedAt": "2026-07-04T03:10:26.388Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_1.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_2.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_3.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_4.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7554647459973089290_5.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_1.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_2.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_3.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_4.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_5.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_6.jpeg",
+    "/mock/files/comments/sheet_hangzhou_7524956900710959140_7.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州02",
+    "city": "杭州",
+    "style": "watercolor",
+    "selectedCommentIds": [
+      "sheet_hangzhou_7524956900710959140",
+      "sheet_hangzhou_7526548670943971374",
+      "sheet_hangzhou_7441616639822432297",
+      "sheet_hangzhou_7457145431231940620",
+      "sheet_hangzhou_7442702742558083091",
+      "sheet_hangzhou_7499867497853454387",
+      "sheet_hangzhou_7554647459973089290",
+      "sheet_hangzhou_7457205937569368103"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "hangzhou",
+    "mapName": "杭州02",
+    "city": "杭州",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/hangzhou.raw.json",
+    "eventsPath": "/mock/events/hangzhou.events.json"
+  },
+  "providerMode": "live",
+  "errorMessage": "[\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      0,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      0,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      1,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      1,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      2,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      2,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      3,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      3,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      4,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      4,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      5,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      5,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      6,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      6,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  },\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      7,\n      \"avoid\"\n    ],\n    \"message\": \"Invalid input: expected array, received string\"\n  },\n  {\n    \"origin\": \"string\",\n    \"code\": \"too_big\",\n    \"maximum\": 5,\n    \"inclusive\": true,\n    \"path\": [\n      7,\n      \"avoid\"\n    ],\n    \"message\": \"Too big: expected string to have <=5 characters\"\n  }\n]",
+  "startedAt": "2026-07-04T03:09:47.112Z",
+  "endedAt": "2026-07-04T03:10:26.388Z"
+}

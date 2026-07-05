@@ -1,0 +1,25 @@
+{
+  "mapId": "map_gz_1783174270880",
+  "datasetKey": "guangzhou",
+  "mapName": "广州06",
+  "city": "广州",
+  "style": "storybook",
+  "status": "confirmed",
+  "eventCount": 8,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783174270880.route.md",
+  "posterPath": "/mock/posters/map_gz_1783174270880.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783174270880.knowledge.json",
+  "currentRunId": "run_20260704221323_sete",
+  "selectedCommentIds": [
+    "sheet_guangzhou_7372159912745158667",
+    "sheet_guangzhou_7372191207356762147",
+    "sheet_guangzhou_7372154217059895331",
+    "sheet_guangzhou_7372591657847441447",
+    "sheet_guangzhou_7504663064977934345",
+    "sheet_guangzhou_7504217745764993062",
+    "sheet_guangzhou_7504994720712558630",
+    "sheet_guangzhou_7504992594020026419"
+  ],
+  "createdAt": "2026-07-04T14:11:10.880Z",
+  "updatedAt": "2026-07-04T14:13:23.814Z"
+}

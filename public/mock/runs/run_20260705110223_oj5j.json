@@ -1,0 +1,16 @@
+{
+  "runId": "run_20260705110223_oj5j",
+  "mapId": "map_gz_1783220296233",
+  "datasetKey": "guangzhou",
+  "status": "completed",
+  "stage": "confirm",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1783220296233.route.md",
+    "posterPath": "/mock/posters/map_gz_1783220296233.png",
+    "mapPath": "/mock/maps/map_gz_1783220296233.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T03:02:23.347Z",
+  "endedAt": "2026-07-05T03:02:23.347Z"
+}

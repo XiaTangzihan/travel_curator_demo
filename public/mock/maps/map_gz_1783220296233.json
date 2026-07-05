@@ -1,0 +1,25 @@
+{
+  "mapId": "map_gz_1783220296233",
+  "datasetKey": "guangzhou",
+  "mapName": "广州07",
+  "city": "广州白云",
+  "style": "storybook",
+  "status": "confirmed",
+  "eventCount": 8,
+  "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783220296233.route.md",
+  "posterPath": "/mock/posters/map_gz_1783220296233.png",
+  "knowledgePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783220296233.knowledge.json",
+  "currentRunId": "run_20260705110223_oj5j",
+  "selectedCommentIds": [
+    "sheet_guangzhou_7372154217059895331",
+    "sheet_guangzhou_7372082030185580544",
+    "sheet_guangzhou_7373235607771924519",
+    "sheet_guangzhou_7372591657847441447",
+    "sheet_guangzhou_7504663064977934345",
+    "sheet_guangzhou_7504217745764993062",
+    "sheet_guangzhou_7504994720712558630",
+    "sheet_guangzhou_7504909894051448841"
+  ],
+  "createdAt": "2026-07-05T02:58:16.233Z",
+  "updatedAt": "2026-07-05T03:02:23.339Z"
+}

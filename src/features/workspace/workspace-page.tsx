@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { stylePromptLibrary, type SupportedStyleKey } from "@/src/engine/prompts";
@@ -20,6 +20,10 @@ type WorkspacePageProps = {
     defaultMapName: string;
   }>;
 };
+
+export function shouldShowSelectionRiskWarning(selectedCount: number) {
+  return selectedCount > 8;
+}
 
 export function WorkspacePage(props: WorkspacePageProps) {
   const router = useRouter();
@@ -58,6 +62,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
     [props.activeDatasetKey, props.datasetOptions],
   );
   const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
+  const showSelectionRiskWarning = shouldShowSelectionRiskWarning(selectedCommentIds.length);
   const hasSelectedStyle = currentStyle.trim().length > 0;
   const actionsLocked = submitting || syncing;
   const stylePreview = hasSelectedStyle
@@ -285,6 +290,28 @@ export function WorkspacePage(props: WorkspacePageProps) {
               已选 <span className="font-semibold text-[var(--text-strong)]">{selectedSummary}</span>
             </p>
           </div>
+
+          {showSelectionRiskWarning ? (
+            <div className="mb-5 overflow-hidden rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--danger-tint)] shadow-[var(--shadow-soft)]">
+              <div className="flex">
+                <div className="w-1.5 shrink-0 bg-[var(--danger-ink)]" />
+                <div className="flex-1 px-4 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-surface)] text-[var(--danger-ink)] shadow-[var(--shadow-soft)]">
+                      <AlertTriangle className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--danger-ink)]">高风险提示</p>
+                      <p className="text-xs text-[var(--text-muted)]">当前素材量较大，建议先关注成图稳定性。</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-muted)]">
+                    当前选中了 {selectedCommentIds.length} 条评论。超过 8 条后，静态图的编号稳定性和画面质量风险会明显升高；你仍然可以继续生成。
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="max-h-[780px] overflow-y-auto pr-2">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

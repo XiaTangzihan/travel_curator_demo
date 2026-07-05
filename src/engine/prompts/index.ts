@@ -1,5 +1,10 @@
 export { buildLandmarkPrompt, p1LandmarksSystemPrompt } from "@/src/engine/prompts/p1-landmarks";
 export { buildRouteMarkdownPrompt, p2RouteSystemPrompt } from "@/src/engine/prompts/p2-route-md";
+export {
+  buildEventVisualBriefPrompt,
+  parseEventVisualBriefs,
+  p2EventVisualBriefSystemPrompt,
+} from "@/src/engine/prompts/p2-event-visual-brief";
 export { buildPosterPrompt, type PosterPromptInput } from "@/src/engine/prompts/p3-poster";
 export {
   buildRegeneratePosterPrompt,
