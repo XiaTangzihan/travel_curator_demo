@@ -4,6 +4,10 @@ import {
   persistedImageModelKeys,
   selectableImageModelKeys,
 } from "@/src/config/image-models";
+import {
+  persistedVideoModelKeys,
+  selectableVideoModelKeys,
+} from "@/src/config/video-models";
 
 export const mapStatusSchema = z.enum(["draft", "confirmed", "failed"]);
 export const runStatusSchema = z.enum([
@@ -15,6 +19,8 @@ export const runStatusSchema = z.enum([
 export const datasetKeySchema = z.enum(supportedDatasetKeys);
 export const imageModelSchema = z.enum(persistedImageModelKeys);
 export const selectableImageModelSchema = z.enum(selectableImageModelKeys);
+export const videoModelSchema = z.enum(persistedVideoModelKeys);
+export const selectableVideoModelSchema = z.enum(selectableVideoModelKeys);
 
 export const rawAttachmentSchema = z.object({
   sourceUrl: z.string(),
@@ -180,6 +186,11 @@ export const mapRecordSchema = z.object({
   city: z.string(),
   style: z.string(),
   imageModel: imageModelSchema.optional().default("unknown"),
+  currentVideoRunId: z.string().optional(),
+  videoPath: z.string().optional(),
+  videoDurationSeconds: z.number().int().positive().optional(),
+  videoUpdatedAt: z.string().optional(),
+  videoModel: videoModelSchema.optional().default("unknown"),
   status: mapStatusSchema,
   eventCount: z.number(),
   routePath: z.string(),
@@ -210,6 +221,11 @@ export const mapViewModelSchema = z.object({
   city: z.string(),
   style: z.string(),
   imageModel: imageModelSchema.optional().default("unknown"),
+  currentVideoRunId: z.string().optional(),
+  videoPath: z.string().optional(),
+  videoDurationSeconds: z.number().int().positive().optional(),
+  videoUpdatedAt: z.string().optional(),
+  videoModel: videoModelSchema.optional().default("unknown"),
   posterPath: z.string(),
   routeMarkdown: z.string(),
   selectedEventId: z.string(),
@@ -224,6 +240,7 @@ export const runArtifactPathsSchema = z.object({
   eventsPath: z.string().optional(),
   routePath: z.string().optional(),
   posterPath: z.string().optional(),
+  videoPath: z.string().optional(),
   mapPath: z.string().optional(),
 });
 
@@ -254,8 +271,11 @@ export const runTraceSchema = z.object({
   mapId: z.string(),
   datasetKey: datasetKeySchema.optional().default("guangzhou"),
   status: runStatusSchema,
-  stage: z.enum(["preprocess", "generate", "regenerate", "confirm"]),
+  stage: z.enum(["preprocess", "generate", "regenerate", "confirm", "video_generate"]),
   imageModel: imageModelSchema.optional().default("unknown"),
+  videoModel: videoModelSchema.optional().default("unknown"),
+  providerTaskId: z.string().optional(),
+  videoDurationSeconds: z.number().int().positive().optional(),
   basedOnExistingImage: z.boolean().optional(),
   promptInstruction: z.string().optional(),
   styleKey: z.string().optional(),
@@ -292,6 +312,8 @@ export type MapViewModel = z.infer<typeof mapViewModelSchema>;
 export type RunProgressStep = z.infer<typeof runProgressStepSchema>;
 export type ImageModel = z.infer<typeof imageModelSchema>;
 export type SelectableImageModel = z.infer<typeof selectableImageModelSchema>;
+export type VideoModel = z.infer<typeof videoModelSchema>;
+export type SelectableVideoModel = z.infer<typeof selectableVideoModelSchema>;
 export type GenerateRunInput = z.infer<typeof generateRunInputSchema>;
 export type RunInputSummary = z.infer<typeof runInputSummarySchema>;
 export type RunTrace = z.infer<typeof runTraceSchema>;

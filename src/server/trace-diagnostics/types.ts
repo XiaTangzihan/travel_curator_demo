@@ -87,6 +87,8 @@ export type TraceRunSummary = {
   status: RunTrace["status"];
   stage: RunTrace["stage"];
   providerMode: RunTrace["providerMode"];
+  videoModel?: RunTrace["videoModel"];
+  videoDurationSeconds?: RunTrace["videoDurationSeconds"];
   styleKey?: string;
   promptVersion?: string;
   referenceIds: string[];
@@ -145,6 +147,14 @@ export type TracePosterArtifactEntry = {
   selectedVersionId: string | null;
 };
 
+export type TraceVideoArtifactEntry = {
+  publicPath: string | null;
+  exists: boolean;
+  sourceRunId: string | null;
+  durationSeconds: number | null;
+  videoModel?: string;
+};
+
 export type TraceCurrentArtifacts = {
   raw: TraceDatasetArtifactEntry;
   events: TraceDatasetArtifactEntry;
@@ -152,6 +162,7 @@ export type TraceCurrentArtifacts = {
   knowledge: TraceKnowledgeArtifactEntry;
   mapView: TraceMapViewArtifactEntry;
   poster: TracePosterArtifactEntry;
+  video: TraceVideoArtifactEntry;
 };
 
 export type TraceAiContractEvent = {

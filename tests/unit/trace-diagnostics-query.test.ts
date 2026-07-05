@@ -108,7 +108,9 @@ async function seedTraceScenario(token: string) {
   const knowledgePath = await saveKnowledge(mapId, knowledge);
   const selectedPosterOutputPath = posterOutputPath(mapId, "png", regenerateRunId);
   const selectedPosterPublicPath = posterPublicPath(mapId, "png", regenerateRunId);
+  const selectedVideoPublicPath = `/mock/videos/${mapId}.mp4`;
   await writeBinaryFile(selectedPosterOutputPath, Buffer.from("selected-poster"));
+  await writeBinaryFile(path.join(storagePaths.videos, `${mapId}.mp4`), Buffer.from("selected-video"));
 
   const mapViewModel = buildMapViewModel({
     mapId,
@@ -136,6 +138,10 @@ async function seedTraceScenario(token: string) {
       posterPath: selectedPosterPublicPath,
       knowledgePath,
       currentRunId: confirmRunId,
+        currentVideoRunId: regenerateRunId,
+        videoPath: selectedVideoPublicPath,
+        videoDurationSeconds: 5,
+        videoModel: "seedance-1-5-pro",
       posterVersions: [
         {
           versionId: generateRunId,
@@ -198,6 +204,7 @@ async function seedTraceScenario(token: string) {
       artifacts: {
         routePath: `/mock/routes/${mapId}.route.md`,
         posterPath: selectedPosterPublicPath,
+        videoPath: selectedVideoPublicPath,
         mapPath: `/mock/maps/${mapId}.view.json`,
       },
       providerMode: "live",
@@ -261,6 +268,8 @@ describe.sequential("trace diagnostics queries", () => {
     expect(detail?.currentArtifacts.raw.source).toBe("dataset_inferred");
     expect(detail?.currentArtifacts.events.publicPath).toBe("/mock/events/hangzhou.events.json");
     expect(detail?.currentArtifacts.events.source).toBe("dataset_inferred");
+    expect(detail?.currentArtifacts.video.publicPath).toBe(`/mock/videos/${seeded.mapId}.mp4`);
+    expect(detail?.currentArtifacts.video.durationSeconds).toBe(5);
   });
 
   it("能输出结构化 AI Contract，并把被确认流程裁剪的旧候选版本识别为 pruned", async () => {

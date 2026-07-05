@@ -19,9 +19,11 @@ import {
   fromPublicPath,
   listJsonFiles,
   pathExists,
+  readBinaryFile,
   readJsonFile,
   readTextFile,
   storagePaths,
+  writeBinaryFile,
   writeJsonFile,
   writeTextFile,
 } from "@/src/server/utils/storage";
@@ -162,6 +164,11 @@ export async function saveMapViewModel(mapId: string, map: MapViewModel) {
     city: map.city,
     style: map.style,
     imageModel: map.imageModel,
+    currentVideoRunId: map.currentVideoRunId,
+    videoPath: map.videoPath,
+    videoDurationSeconds: map.videoDurationSeconds,
+    videoUpdatedAt: map.videoUpdatedAt,
+    videoModel: map.videoModel,
     status: "draft",
     eventCount: map.events.length,
     routePath: routeFile(mapId),
@@ -183,6 +190,11 @@ export async function writeMapViewModel(mapId: string, map: MapViewModel) {
     city: map.city,
     style: map.style,
     imageModel: map.imageModel,
+    currentVideoRunId: map.currentVideoRunId,
+    videoPath: map.videoPath,
+    videoDurationSeconds: map.videoDurationSeconds,
+    videoUpdatedAt: map.videoUpdatedAt,
+    videoModel: map.videoModel,
     status: "draft",
     eventCount: map.events.length,
     routePath: routeFile(mapId),
@@ -279,6 +291,7 @@ export async function deleteMapArtifacts(mapId: string) {
     knowledgeFile(mapId),
     posterOutputPath(mapId, "png"),
     posterOutputPath(mapId, "svg"),
+    videoOutputPath(mapId),
   ];
 
   const [mapRecord, renderedMap, runTraces] = await Promise.all([
@@ -311,6 +324,10 @@ export async function deleteMapArtifacts(mapId: string) {
     artifactPathSet.add(fromPublicPath(mapRecord.posterPath));
   }
 
+  if (mapRecord?.videoPath) {
+    artifactPathSet.add(fromPublicPath(mapRecord.videoPath));
+  }
+
   mapRecord?.posterVersions.forEach((version) => {
     artifactPathSet.add(fromPublicPath(version.posterPath));
   });
@@ -319,10 +336,17 @@ export async function deleteMapArtifacts(mapId: string) {
     artifactPathSet.add(fromPublicPath(renderedMap.posterPath));
   }
 
+  if (renderedMap?.videoPath) {
+    artifactPathSet.add(fromPublicPath(renderedMap.videoPath));
+  }
+
   relatedRunTraces.forEach((trace) => {
     artifactPathSet.add(runFile(trace.runId));
     if (trace.artifacts.posterPath) {
       artifactPathSet.add(fromPublicPath(trace.artifacts.posterPath));
+    }
+    if (trace.artifacts.videoPath) {
+      artifactPathSet.add(fromPublicPath(trace.artifacts.videoPath));
     }
   });
 
@@ -370,4 +394,24 @@ export function posterPublicPath(
 ) {
   const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
   return `/mock/posters/${fileName}`;
+}
+
+export function videoOutputPath(mapId: string) {
+  return path.join(storagePaths.videos, `${mapId}.mp4`);
+}
+
+export function videoPublicPath(mapId: string) {
+  return `/mock/videos/${mapId}.mp4`;
+}
+
+export async function saveVideoArtifact(mapId: string, video: Buffer) {
+  await ensureStorageDirectories();
+  const outputPath = videoOutputPath(mapId);
+  await writeBinaryFile(outputPath, video);
+  return videoPublicPath(mapId);
+}
+
+export async function getVideoArtifact(mapId: string) {
+  await ensureStorageDirectories();
+  return readBinaryFile(videoOutputPath(mapId));
 }

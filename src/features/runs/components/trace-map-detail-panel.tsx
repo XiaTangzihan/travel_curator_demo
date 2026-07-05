@@ -498,6 +498,24 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                   `来源 run：${detail.currentArtifacts.poster.sourceRunId ?? "缺失"}`,
                 ]}
               />
+              <CurrentArtifactCard
+                title="video"
+                subtitle="当前地图关联的视频产物"
+                publicPath={detail.currentArtifacts.video.publicPath}
+                exists={detail.currentArtifacts.video.exists}
+                defaultOpen={false}
+                error={
+                  detail.currentArtifacts.video.publicPath && !detail.currentArtifacts.video.exists
+                    ? "当前视频路径已记录，但文件缺失。"
+                    : undefined
+                }
+                detailLines={[
+                  `路径：${detail.currentArtifacts.video.publicPath ?? "未记录"}`,
+                  `来源 run：${detail.currentArtifacts.video.sourceRunId ?? "缺失"}`,
+                  `时长：${detail.currentArtifacts.video.durationSeconds ?? "未记录"}`,
+                  `模型：${detail.currentArtifacts.video.videoModel ?? "未记录"}`,
+                ]}
+              />
             </div>
           </article>
 
@@ -753,8 +771,11 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
               <div className="mt-4 grid gap-2 text-sm leading-6 text-[var(--text-muted)]">
                 <p>Style Key：{run.styleKey ?? "未记录"}</p>
                 <p>Prompt 版本：{run.promptVersion ?? "未记录"}</p>
+                {run.videoModel ? <p>Video Model：{run.videoModel}</p> : null}
+                {run.videoDurationSeconds ? <p>Video Duration：{run.videoDurationSeconds}s</p> : null}
                 <p>route：{run.artifacts.routePath ?? "未记录"}</p>
                 <p>poster：{run.artifacts.posterPath ?? "未记录"}</p>
+                {run.artifacts.videoPath ? <p>video：{run.artifacts.videoPath}</p> : null}
                 {run.posterAssetState ? (
                   <p>
                     产物状态：
