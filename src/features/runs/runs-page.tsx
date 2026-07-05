@@ -154,7 +154,7 @@ export function RunsPage(props: RunsPageProps) {
           datasetStats={props.overview.datasetStats}
         />
 
-        <div className="grid gap-6 xl:grid-cols-[400px_minmax(0,1fr)]">
+        <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
           <TraceMapListPanel
             mapItems={filteredMapItems}
             totalCount={props.overview.mapItems.length}

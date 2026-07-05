@@ -41,11 +41,19 @@ type CurrentArtifactCardProps = {
   publicPath?: string | null;
   exists?: boolean;
   error?: string;
+  defaultOpen?: boolean;
 };
 
 type RunSnapshotCardProps = {
   title: string;
   run: TraceRunSummary | null;
+};
+
+type CollapsibleSectionProps = {
+  title: string;
+  subtitle?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
 };
 
 function DetailActionButton(props: CopyButtonProps) {
@@ -60,50 +68,67 @@ function DetailActionButton(props: CopyButtonProps) {
   );
 }
 
+function CollapsibleSection(props: CollapsibleSectionProps) {
+  return (
+    <details
+      open={props.defaultOpen ?? true}
+      className="rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] p-4"
+    >
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[var(--text-strong)]">{props.title}</p>
+          {props.subtitle ? <p className="mt-1 text-xs text-[var(--text-muted)]">{props.subtitle}</p> : null}
+        </div>
+        <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1 text-xs text-[var(--text-muted)]">
+          展开 / 收起
+        </span>
+      </summary>
+
+      <div className="mt-4">{props.children}</div>
+    </details>
+  );
+}
+
 function CurrentArtifactCard(props: CurrentArtifactCardProps) {
   return (
-    <article className="rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">{props.title}</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{props.subtitle}</p>
+    <article className="rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4">
+      <CollapsibleSection title={props.title} subtitle={props.subtitle} defaultOpen={props.defaultOpen}>
+        <div className="space-y-2 text-sm leading-6 text-[var(--text-muted)]">
+          {typeof props.exists === "boolean" ? (
+            <span
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs ${
+                props.exists
+                  ? "border-transparent bg-[var(--success-tint)] text-[var(--success-ink)]"
+                  : "border-dashed border-[color:var(--line-subtle)] bg-[var(--bg-soft)] text-[var(--text-muted)]"
+              }`}
+            >
+              {props.exists ? "存在" : "缺失"}
+            </span>
+          ) : null}
+          {props.detailLines.map((line) => (
+            <p key={line} className="break-all">
+              {line}
+            </p>
+          ))}
+          {props.error ? (
+            <p className="rounded-[14px] bg-[var(--danger-tint)] px-3 py-2 text-[var(--danger-ink)]">
+              {props.error}
+            </p>
+          ) : null}
+          {props.publicPath && props.exists !== false ? (
+            <div className="pt-2">
+              <a
+                href={props.publicPath}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1 text-xs text-[var(--text-strong)]"
+              >
+                打开文件
+              </a>
+            </div>
+          ) : null}
         </div>
-        {typeof props.exists === "boolean" ? (
-          <span
-            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs ${
-              props.exists
-                ? "border-transparent bg-[var(--success-tint)] text-[var(--success-ink)]"
-                : "border-dashed border-[color:var(--line-subtle)] bg-[var(--bg-soft)] text-[var(--text-muted)]"
-            }`}
-          >
-            {props.exists ? "存在" : "缺失"}
-          </span>
-        ) : null}
-      </div>
-
-      <div className="mt-4 space-y-2 text-sm leading-6 text-[var(--text-muted)]">
-        {props.detailLines.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-        {props.error ? (
-          <p className="rounded-[14px] bg-[var(--danger-tint)] px-3 py-2 text-[var(--danger-ink)]">
-            {props.error}
-          </p>
-        ) : null}
-      </div>
-
-      {props.publicPath && props.exists !== false ? (
-        <div className="mt-4">
-          <a
-            href={props.publicPath}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-1 text-xs text-[var(--text-strong)]"
-          >
-            打开文件
-          </a>
-        </div>
-      ) : null}
+      </CollapsibleSection>
     </article>
   );
 }
@@ -419,29 +444,12 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
             <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">当前产物摘要</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <CurrentArtifactCard
-                title="raw"
-                subtitle={`来源：${detail.currentArtifacts.raw.source}`}
-                publicPath={detail.currentArtifacts.raw.publicPath}
-                detailLines={[
-                  `路径：${detail.currentArtifacts.raw.publicPath}`,
-                  `评论数：${detail.currentArtifacts.raw.count ?? "未记录"}`,
-                ]}
-              />
-              <CurrentArtifactCard
-                title="events"
-                subtitle={`来源：${detail.currentArtifacts.events.source}`}
-                publicPath={detail.currentArtifacts.events.publicPath}
-                detailLines={[
-                  `路径：${detail.currentArtifacts.events.publicPath}`,
-                  `事件数：${detail.currentArtifacts.events.count ?? "未记录"}`,
-                ]}
-              />
-              <CurrentArtifactCard
                 title="route.md"
                 subtitle={buildRouteSubtitle(detail.currentArtifacts.route)}
                 publicPath={detail.currentArtifacts.route.publicPath}
                 exists={detail.currentArtifacts.route.exists}
                 error={detail.currentArtifacts.route.error}
+                defaultOpen
                 detailLines={
                   detail.currentArtifacts.route.previewLines.length
                     ? detail.currentArtifacts.route.previewLines
@@ -454,6 +462,7 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                 publicPath={detail.currentArtifacts.knowledge.publicPath}
                 exists={detail.currentArtifacts.knowledge.exists}
                 error={detail.currentArtifacts.knowledge.error}
+                defaultOpen={false}
                 detailLines={[
                   `条目数：${detail.currentArtifacts.knowledge.count ?? "未记录"}`,
                   ...detail.currentArtifacts.knowledge.previewItems.map(
@@ -467,6 +476,7 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                 publicPath={detail.currentArtifacts.mapView.publicPath}
                 exists={detail.currentArtifacts.mapView.exists}
                 error={detail.currentArtifacts.mapView.error}
+                defaultOpen={false}
                 detailLines={[
                   `节点数：${detail.currentArtifacts.mapView.nodeCount ?? "未记录"}`,
                   `selectedEventId：${detail.currentArtifacts.mapView.selectedEventId ?? "未记录"}`,
@@ -477,6 +487,7 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                 subtitle="当前选中的海报版本"
                 publicPath={detail.currentArtifacts.poster.publicPath}
                 exists={detail.currentArtifacts.poster.exists}
+                defaultOpen={false}
                 error={
                   detail.currentArtifacts.poster.exists
                     ? undefined
@@ -503,7 +514,8 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
               </span>
             </div>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-4 max-h-[560px] overflow-y-auto pr-1">
+              <div className="grid gap-4 md:grid-cols-2">
               {detail.commentCards.map((card) => (
                 <article
                   key={card.eventId}
@@ -512,8 +524,11 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-[var(--text-strong)]">{card.poiName}</p>
-                      <p className="mt-1 text-xs text-[var(--text-muted)]">
-                        {card.commentId} · {card.eventId}
+                      <p className="mt-1 break-all text-xs text-[var(--text-muted)]">
+                        {card.commentId}
+                      </p>
+                      <p className="break-all text-xs text-[var(--text-muted)]">
+                        {card.eventId}
                       </p>
                     </div>
                     {card.thumbnail ? (
@@ -533,18 +548,50 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                   <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">{card.excerpt}</p>
 
                   {(card.subject || card.avoid?.length) ? (
-                    <div className="mt-3 rounded-[16px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-xs leading-6 text-[var(--text-muted)]">
-                      {card.subject ? <p>subject：{card.subject}</p> : null}
-                      {card.avoid?.length ? <p>avoid：{card.avoid.join("，")}</p> : null}
+                    <div className="mt-3 rounded-[16px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-3 text-xs leading-6 text-[var(--text-muted)]">
+                      {card.subject ? (
+                        <div>
+                          <p className="text-[10px] tracking-[0.12em] text-[var(--text-muted)]">subject</p>
+                          <p className="mt-1 text-[var(--text-strong)]">{card.subject}</p>
+                        </div>
+                      ) : null}
+                      {card.avoid?.length ? (
+                        <div className="mt-2">
+                          <p className="text-[10px] tracking-[0.12em] text-[var(--text-muted)]">avoid</p>
+                          <div className="mt-1 flex flex-wrap gap-2">
+                            {card.avoid.map((item) => (
+                              <span
+                                key={`${card.eventId}-${item}`}
+                                className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-2 py-1 text-[11px] text-[var(--text-strong)]"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <DetailActionButton text={card.commentId} label={`comment-${card.commentId}`} copiedKey={copiedKey} onCopy={handleCopy} />
-                    <DetailActionButton text={card.eventId} label={`event-${card.eventId}`} copiedKey={copiedKey} onCopy={handleCopy} />
+                    <button
+                      type="button"
+                      onClick={() => void handleCopy(`comment-${card.commentId}`, card.commentId)}
+                      className="inline-flex items-center rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1 text-xs text-[var(--text-strong)]"
+                    >
+                      {copiedKey === `comment-${card.commentId}` ? "已复制 commentId" : "复制 commentId"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleCopy(`event-${card.eventId}`, card.eventId)}
+                      className="inline-flex items-center rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1 text-xs text-[var(--text-strong)]"
+                    >
+                      {copiedKey === `event-${card.eventId}` ? "已复制 eventId" : "复制 eventId"}
+                    </button>
                   </div>
                 </article>
               ))}
+              </div>
             </div>
           </article>
         </section>
@@ -553,41 +600,41 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
           <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">AI Contract</p>
           {detail.aiContract.available ? (
             <div className="mt-4 grid gap-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                {detail.aiContract.frontMatter
-                  ? [
-                      ["mapName", detail.aiContract.frontMatter.mapName],
-                      ["city", detail.aiContract.frontMatter.city],
-                      ["style", detail.aiContract.frontMatter.styleLabel],
-                      ["days", String(detail.aiContract.frontMatter.days)],
-                      ["events", String(detail.aiContract.frontMatter.eventCount)],
-                      ["knowledge", String(detail.aiContract.frontMatter.knowledgeCount)],
-                    ].map(([label, value]) => (
-                      <div
-                        key={label}
-                        className="rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3"
-                      >
-                        <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">{label}</p>
-                        <p className="mt-2 text-sm font-medium text-[var(--text-strong)]">{value}</p>
-                      </div>
-                    ))
-                  : null}
-              </div>
+              <CollapsibleSection title="Front Matter" subtitle="当前 route 合同基础元数据" defaultOpen>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {detail.aiContract.frontMatter
+                    ? [
+                        ["mapName", detail.aiContract.frontMatter.mapName],
+                        ["city", detail.aiContract.frontMatter.city],
+                        ["style", detail.aiContract.frontMatter.styleLabel],
+                        ["days", String(detail.aiContract.frontMatter.days)],
+                        ["events", String(detail.aiContract.frontMatter.eventCount)],
+                        ["knowledge", String(detail.aiContract.frontMatter.knowledgeCount)],
+                      ].map(([label, value]) => (
+                        <div
+                          key={label}
+                          className="rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3"
+                        >
+                          <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">{label}</p>
+                          <p className="mt-2 text-sm font-medium text-[var(--text-strong)]">{value}</p>
+                        </div>
+                      ))
+                    : null}
+                </div>
+              </CollapsibleSection>
 
-              <div>
-                <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">Important Rules</p>
-                <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--text-muted)]">
+              <CollapsibleSection title="Important Rules" subtitle="当前真正送进 P3/P4 的全局规则" defaultOpen>
+                <ul className="space-y-2 text-sm leading-6 text-[var(--text-muted)]">
                   {detail.aiContract.importantRules.map((rule) => (
-                    <li key={rule} className="rounded-[16px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-2">
+                    <li key={rule} className="rounded-[16px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-2">
                       {rule}
                     </li>
                   ))}
                 </ul>
-              </div>
+              </CollapsibleSection>
 
-              <div>
-                <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">Event Contract</p>
-                <div className="mt-3 overflow-x-auto">
+              <CollapsibleSection title="Event Contract" subtitle="event 级 subject / avoid 合同" defaultOpen={false}>
+                <div className="overflow-x-auto">
                   <table className="min-w-full border-separate border-spacing-y-2 text-left text-sm">
                     <thead className="text-[var(--text-muted)]">
                       <tr>
@@ -600,17 +647,17 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                     <tbody>
                       {detail.aiContract.events.map((event) => (
                         <tr key={`${event.sequence}-${event.poi}`}>
-                          <td className="rounded-l-[16px] border border-r-0 border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-3 text-[var(--text-strong)]">
+                          <td className="rounded-l-[16px] border border-r-0 border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-3 text-[var(--text-strong)]">
                             {event.sequence}
                           </td>
-                          <td className="border-y border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-3 text-[var(--text-strong)]">
+                          <td className="border-y border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-3 text-[var(--text-strong)]">
                             <p className="font-medium">{event.shortName}</p>
                             <p className="mt-1 text-xs text-[var(--text-muted)]">{event.poi}</p>
                           </td>
-                          <td className="border-y border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-3 text-[var(--text-strong)]">
+                          <td className="border-y border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-3 text-[var(--text-strong)]">
                             {event.subject}
                           </td>
-                          <td className="rounded-r-[16px] border border-l-0 border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-3 text-[var(--text-strong)]">
+                          <td className="rounded-r-[16px] border border-l-0 border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-3 text-[var(--text-strong)]">
                             {event.avoid.join("，")}
                           </td>
                         </tr>
@@ -618,22 +665,21 @@ export function TraceMapDetailPanel(props: TraceMapDetailPanelProps) {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </CollapsibleSection>
 
-              <div>
-                <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">Knowledge 摘要</p>
-                <div className="mt-3 space-y-2 text-sm leading-6 text-[var(--text-muted)]">
+              <CollapsibleSection title="Knowledge 摘要" subtitle="当前知识补全的 landmark 摘要" defaultOpen={false}>
+                <div className="space-y-2 text-sm leading-6 text-[var(--text-muted)]">
                   {detail.aiContract.knowledge.map((item) => (
                     <div
                       key={item.name}
-                      className="rounded-[16px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-3 py-2"
+                      className="rounded-[16px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-2"
                     >
                       <p className="font-medium text-[var(--text-strong)]">{item.name}</p>
                       <p className="mt-1">{item.visual}</p>
                     </div>
                   ))}
                 </div>
-              </div>
+              </CollapsibleSection>
             </div>
           ) : (
             <div className="mt-4 grid gap-3">

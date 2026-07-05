@@ -46,7 +46,7 @@ export function TraceMapListPanel(props: TraceMapListPanelProps) {
     props.mapItems.find((item) => item.mapId === props.selectedMapId)?.issueCodes ?? [];
 
   return (
-    <aside className="grid gap-4">
+    <aside className="grid gap-4 xl:sticky xl:top-6 xl:max-h-[calc(100vh-140px)] xl:grid-rows-[auto_minmax(0,1fr)]">
       <section className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-soft)]">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -191,8 +191,8 @@ export function TraceMapListPanel(props: TraceMapListPanelProps) {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-soft)]">
-        <div className="grid gap-3">
+      <section className="min-h-0 overflow-hidden rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-soft)]">
+        <div className="max-h-[calc(100vh-520px)] overflow-y-auto pr-1 xl:max-h-full">
           {props.mapItems.length ? (
             props.mapItems.map((item) => {
               const isSelected = item.mapId === props.selectedMapId;
@@ -202,7 +202,7 @@ export function TraceMapListPanel(props: TraceMapListPanelProps) {
                   type="button"
                   key={item.mapId}
                   onClick={() => props.onSelectMap(item.mapId)}
-                  className={`rounded-[22px] border px-4 py-4 text-left transition ${
+                  className={`mb-3 w-full rounded-[20px] border px-3 py-3 text-left transition ${
                     isSelected
                       ? "border-[var(--accent-primary)] bg-[var(--accent-tint)]"
                       : "border-[color:var(--line-subtle)] bg-[var(--bg-soft)]"
@@ -210,8 +210,8 @@ export function TraceMapListPanel(props: TraceMapListPanelProps) {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-base font-semibold text-[var(--text-strong)]">{item.mapName}</p>
-                      <p className="mt-1 text-sm text-[var(--text-muted)]">
+                      <p className="text-sm font-semibold text-[var(--text-strong)]">{item.mapName}</p>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">
                         {item.city} · {item.datasetKey}
                       </p>
                     </div>
@@ -224,10 +224,10 @@ export function TraceMapListPanel(props: TraceMapListPanelProps) {
                     <TraceProviderModePill mode={item.selectedPosterSourceRunProviderMode} />
                   </div>
 
-                  <div className="mt-3 space-y-1 text-xs leading-6 text-[var(--text-muted)]">
-                    <p>当前版本：{item.selectedPosterVersionId ?? "未识别"}</p>
-                    <p>海报来源：{item.selectedPosterSourceRunId ?? "缺失"}</p>
-                    <p>Lifecycle：{item.latestLifecycleRunId ?? "缺失"}</p>
+                  <div className="mt-3 space-y-1 text-xs leading-5 text-[var(--text-muted)]">
+                    <p className="break-all">当前版本：{item.selectedPosterVersionId ?? "未识别"}</p>
+                    <p className="break-all">海报来源：{item.selectedPosterSourceRunId ?? "缺失"}</p>
+                    <p className="break-all">Lifecycle：{item.latestLifecycleRunId ?? "缺失"}</p>
                     <p>候选版本：{item.posterVersionCount}</p>
                   </div>
 
