@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { selectableImageModelSchema } from "@/src/contracts/domain";
 import { regenerateMapDraft } from "@/src/engine/pipelines/generate-map";
 import {
   getEventsDataset,
@@ -15,6 +16,7 @@ type RegenerateContext = {
 const requestSchema = z.object({
   instruction: z.string().default(""),
   basedOnExistingImage: z.boolean().default(true),
+  imageModel: selectableImageModelSchema.optional(),
 });
 
 export async function POST(request: Request, context: RegenerateContext) {
@@ -39,6 +41,7 @@ export async function POST(request: Request, context: RegenerateContext) {
       events,
       instruction: body.instruction,
       basedOnExistingImage: body.basedOnExistingImage,
+      imageModel: body.imageModel,
     });
 
     return NextResponse.json({

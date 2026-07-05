@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { SelectableImageModel } from "@/src/config/image-models";
+import { resolveSeedreamRuntimeConfig } from "@/src/engine/providers/seedream-model-registry";
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -18,6 +20,7 @@ type SeedreamImageOptions = {
   prompt: string;
   images?: string[];
   size?: string;
+  imageModel?: SelectableImageModel;
 };
 
 function requireEnv(name: string) {
@@ -96,6 +99,7 @@ async function imageFileToDataUri(filePath: string) {
 
 export async function runSeedreamImage(input: string | SeedreamImageOptions) {
   const options = typeof input === "string" ? { prompt: input } : input;
+  const runtimeConfig = resolveSeedreamRuntimeConfig(options.imageModel);
   const images = options.images?.length
     ? await Promise.all(
         options.images.map(async (image) =>
@@ -104,23 +108,20 @@ export async function runSeedreamImage(input: string | SeedreamImageOptions) {
       )
     : undefined;
 
-  const response = await fetch(
-    `${process.env.SEEDREAM_BASE_URL ?? requireEnv("SEEDREAM_BASE_URL")}/images/generations`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${requireEnv("SEEDREAM_API_KEY")}`,
-      },
-      body: JSON.stringify({
-        model: requireEnv("SEEDREAM_MODEL_ID"),
-        prompt: options.prompt,
-        ...(images?.length ? { images } : {}),
-        response_format: "b64_json",
-        size: options.size ?? "2560x1440",
-      }),
+  const response = await fetch(`${runtimeConfig.baseUrl}/images/generations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${runtimeConfig.apiKey}`,
     },
-  );
+    body: JSON.stringify({
+      model: runtimeConfig.modelId,
+      prompt: options.prompt,
+      ...(images?.length ? { images } : {}),
+      response_format: "b64_json",
+      size: options.size ?? "2560x1440",
+    }),
+  });
 
   if (!response.ok) {
     const detail = await parseJsonResponse(response);
