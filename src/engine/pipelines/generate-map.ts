@@ -14,6 +14,10 @@ import {
 import { getDemoDataset } from "@/src/config/demo";
 import { resolveRequestedImageModel } from "@/src/config/image-models";
 import {
+  resolveRegenerateExecutionPlan,
+  type RegenerateMode,
+} from "@/src/features/confirm/regenerate-policy";
+import {
   buildEventVisualBriefPrompt,
   buildLandmarkPrompt,
   buildPosterPrompt,
@@ -22,7 +26,10 @@ import {
   parseEventVisualBriefs,
 } from "@/src/engine/prompts";
 import { resolveShortName } from "@/src/lib/short-name";
-import { buildRegenerateImagePublicPaths } from "@/src/engine/pipelines/model-image-inputs";
+import {
+  buildRegenerateImagePublicPaths,
+  canUsePublicImageAsModelInput,
+} from "@/src/engine/pipelines/model-image-inputs";
 import { preprocessDataset } from "@/src/engine/preprocess/raw_to_events";
 import { runDoubaoChat, runSeedreamImage } from "@/src/engine/providers/ark-provider";
 import { buildMapViewModel } from "@/src/engine/renderers/build-map-view-model";
@@ -630,8 +637,8 @@ export async function generateMapDraft(input: GenerateMapInput) {
 export async function regenerateMapDraft(params: {
   mapRecord: MapRecord;
   events: EventRecord[];
+  mode: RegenerateMode;
   instruction: string;
-  basedOnExistingImage: boolean;
   imageModel?: GenerateMapInput["imageModel"];
 }) {
   const startedAt = new Date().toISOString();
@@ -641,10 +648,12 @@ export async function regenerateMapDraft(params: {
   const imageModel = resolveRequestedImageModel(params.imageModel ?? params.mapRecord.imageModel);
   const events = normalizeMapEvents(params.events);
   const stylePreset = getStylePreset(params.mapRecord.style);
-  const normalizedInstruction = params.instruction.trim();
-  const effectiveBasedOnExistingImage = normalizedInstruction
-    ? params.basedOnExistingImage
-    : false;
+  const executionPlan = resolveRegenerateExecutionPlan({
+    mode: params.mode,
+    instruction: params.instruction,
+  });
+  const normalizedInstruction = executionPlan.instruction;
+  const effectiveBasedOnExistingImage = executionPlan.basedOnExistingImage;
   const cachedKnowledge = await getKnowledge(params.mapRecord.mapId);
   let knowledge = cachedKnowledge;
   if (!knowledge.length) {
@@ -654,12 +663,20 @@ export async function regenerateMapDraft(params: {
     await saveKnowledge(params.mapRecord.mapId, knowledge);
   }
 
+  if (
+    executionPlan.mode === "edit" &&
+    !canUsePublicImageAsModelInput(params.mapRecord.posterPath)
+  ) {
+    throw new Error("当前选中版本图片不支持作为原图修改，请改用“再来一张”或切换到可用候选版本。");
+  }
+
   const referenceImagePublicPaths = buildRegenerateImagePublicPaths({
     styleReferencePublicPath: stylePreset.referencePublicPath,
     existingPosterPublicPath: params.mapRecord.posterPath,
     basedOnExistingImage: effectiveBasedOnExistingImage,
   });
   if (
+    executionPlan.mode !== "edit" &&
     effectiveBasedOnExistingImage &&
     !referenceImagePublicPaths.includes(params.mapRecord.posterPath)
   ) {
@@ -733,7 +750,7 @@ export async function regenerateMapDraft(params: {
         imageModel,
         createdAt: startedAt,
         instruction: normalizedInstruction || undefined,
-        basedOnExistingImage: normalizedInstruction ? effectiveBasedOnExistingImage : undefined,
+        basedOnExistingImage: executionPlan.mode === "edit" ? true : undefined,
       }),
     ],
     selectedPosterVersionId: runId,
@@ -751,8 +768,8 @@ export async function regenerateMapDraft(params: {
     status: "completed",
     stage: "regenerate",
     imageModel,
-    basedOnExistingImage: effectiveBasedOnExistingImage,
-    promptInstruction: normalizedInstruction,
+    basedOnExistingImage: executionPlan.mode === "edit" ? true : false,
+    promptInstruction: normalizedInstruction || undefined,
     styleKey: params.mapRecord.style,
     promptVersion: stylePreset.promptVersion,
     referenceIds: [stylePreset.referenceId],

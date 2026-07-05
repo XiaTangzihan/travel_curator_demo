@@ -4,10 +4,21 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LoaderCircle, RefreshCw, Save } from "lucide-react";
+import {
+  defaultImageModel,
+  imageModelLabels,
+  isSelectableImageModel,
+  selectableImageModelKeys,
+  type SelectableImageModel,
+} from "@/src/config/image-models";
 import type { MapRecord, MapViewModel } from "@/src/contracts/domain";
 import { EphemeralToast } from "@/src/components/ephemeral-toast";
 import { SiteShell } from "@/src/components/site-shell";
 import { StatusPill } from "@/src/components/status-pill";
+import {
+  isEditInstructionReady,
+  minimumEditInstructionLength,
+} from "@/src/features/confirm/regenerate-policy";
 import type { AiNotice } from "@/src/lib/ai-notice";
 import {
   consumeAiNotice,
@@ -24,8 +35,7 @@ type ConfirmPageProps = {
 export function ConfirmPage(props: ConfirmPageProps) {
   const router = useRouter();
   const [instruction, setInstruction] = useState("");
-  const [basedOnExistingImage, setBasedOnExistingImage] = useState(true);
-  const [pending, setPending] = useState<"regenerate" | "select" | "confirm" | null>(null);
+  const [pending, setPending] = useState<"variant" | "edit" | "select" | "confirm" | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState<AiNotice | null>(null);
   const actionsLocked = pending !== null;
@@ -36,12 +46,29 @@ export function ConfirmPage(props: ConfirmPageProps) {
           versionId: props.mapRecord.currentRunId || "initial",
           posterPath: props.mapRecord.posterPath,
           runId: props.mapRecord.currentRunId,
+          imageModel: props.mapRecord.imageModel,
           createdAt: props.mapRecord.updatedAt,
         },
       ];
   const selectedPosterVersionId =
     props.mapRecord.selectedPosterVersionId ?? posterVersions.at(-1)?.versionId ?? "";
-  const instructionReady = Boolean(instruction.trim());
+  const selectedPosterVersion =
+    posterVersions.find((version) => version.versionId === selectedPosterVersionId) ??
+    posterVersions.at(-1) ??
+    null;
+  const [selectedImageModel, setSelectedImageModel] = useState<SelectableImageModel>(() => {
+    if (selectedPosterVersion?.imageModel && isSelectableImageModel(selectedPosterVersion.imageModel)) {
+      return selectedPosterVersion.imageModel;
+    }
+
+    if (isSelectableImageModel(props.mapRecord.imageModel)) {
+      return props.mapRecord.imageModel;
+    }
+
+    return defaultImageModel;
+  });
+  const editInstructionLength = instruction.trim().length;
+  const editInstructionReady = isEditInstructionReady(instruction);
 
   useEffect(() => {
     const nextNotice = consumeAiNotice();
@@ -58,16 +85,21 @@ export function ConfirmPage(props: ConfirmPageProps) {
     };
   }, []);
 
-  async function handleRegenerate() {
+  async function handleRegenerate(mode: "variant" | "edit") {
     try {
-      setPending("regenerate");
+      if (mode === "edit" && !editInstructionReady) {
+        throw new Error(`修改原图时，修改 Prompt 至少需要 ${minimumEditInstructionLength} 个字。`);
+      }
+
+      setPending(mode);
       setError("");
       const response = await fetch(`/api/maps/${props.mapRecord.mapId}/regenerate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          mode,
           instruction,
-          basedOnExistingImage,
+          imageModel: selectedImageModel,
         }),
       });
       const payload = await response.json();
@@ -178,17 +210,10 @@ export function ConfirmPage(props: ConfirmPageProps) {
             </p>
 
             <div className="mt-5 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4">
-              <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">已选内容</p>
-              <p className="mt-2 text-lg font-semibold text-[var(--text-strong)]">
-                {props.mapRecord.eventCount} 个足迹
-              </p>
+              <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">候选版本</p>
               <p className="mt-2 text-sm text-[var(--text-muted)]">
                 当前共有 {posterVersions.length} 个候选版本，确认保存时仅保留你选中的版本。
               </p>
-            </div>
-
-            <div className="mt-4 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4">
-              <p className="text-xs tracking-[0.12em] text-[var(--text-muted)]">候选版本</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {posterVersions.map((version, index) => {
                   const selected = version.versionId === selectedPosterVersionId;
@@ -211,6 +236,24 @@ export function ConfirmPage(props: ConfirmPageProps) {
               </div>
             </div>
 
+            <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
+              生图模型
+              <select
+                value={selectedImageModel}
+                onChange={(event) =>
+                  setSelectedImageModel(event.target.value as SelectableImageModel)
+                }
+                disabled={actionsLocked}
+                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition disabled:opacity-60"
+              >
+                {selectableImageModelKeys.map((modelKey) => (
+                  <option key={modelKey} value={modelKey}>
+                    {imageModelLabels[modelKey]}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <label className="mt-6 block text-sm font-medium text-[var(--text-strong)]">
               修改 Prompt
               <textarea
@@ -222,21 +265,24 @@ export function ConfirmPage(props: ConfirmPageProps) {
               />
             </label>
 
-            <label className="mt-4 flex items-center gap-3 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm text-[var(--text-strong)]">
-              <input
-                type="checkbox"
-                checked={basedOnExistingImage}
-                onChange={(event) => setBasedOnExistingImage(event.target.checked)}
-                disabled={!instructionReady}
-                className="h-4 w-4 accent-[var(--accent-primary)]"
-              />
-              是否基于旧图修改
-            </label>
-            {!instructionReady ? (
-              <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">
-                不填额外提示词时，默认按第一次生成的原始输入重新采样，生成新的候选版本。
+            <div className="mt-3 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-4">
+              <p className="text-sm font-medium text-[var(--text-strong)]">重生成规则</p>
+              <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+                “再来一张”会忽略当前输入框内容，不参考旧图，直接生成新的候选版本。
               </p>
-            ) : null}
+              <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+                “修改原图”会参考当前选中版本，并要求修改 Prompt 至少 {minimumEditInstructionLength} 个字。
+              </p>
+              {!editInstructionReady ? (
+                <p className="mt-2 text-xs leading-6 text-[var(--danger-ink)]">
+                  {editInstructionLength === 0
+                    ? `修改原图前，请先输入至少 ${minimumEditInstructionLength} 个字的修改 Prompt。`
+                    : `当前已输入 ${editInstructionLength} 个字，距离“修改原图”还差 ${
+                        minimumEditInstructionLength - editInstructionLength
+                      } 个字。`}
+                </p>
+              ) : null}
+            </div>
 
             {error ? (
               <div className="mt-4 rounded-[20px] bg-[var(--danger-tint)] px-4 py-3 text-sm text-[var(--danger-ink)]">
@@ -247,16 +293,29 @@ export function ConfirmPage(props: ConfirmPageProps) {
             <div className="mt-6 grid gap-3">
               <button
                 type="button"
-                onClick={handleRegenerate}
+                onClick={() => handleRegenerate("variant")}
                 disabled={actionsLocked}
                 className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
               >
-                {pending === "regenerate" ? (
+                {pending === "variant" ? (
                   <LoaderCircle className="h-4 w-4 animate-spin" />
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                生成新版本
+                再来一张
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRegenerate("edit")}
+                disabled={actionsLocked || !editInstructionReady}
+                className="inline-flex items-center justify-center gap-2 rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
+              >
+                {pending === "edit" ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                修改原图
               </button>
               <button
                 type="button"
