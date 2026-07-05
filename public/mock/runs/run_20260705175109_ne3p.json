@@ -1,0 +1,61 @@
+{
+  "runId": "run_20260705175109_ne3p",
+  "mapId": "map_gz_1783245069736",
+  "datasetKey": "meishan",
+  "status": "completed",
+  "stage": "generate",
+  "styleKey": "storybook",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_storybook_20260702"
+  ],
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-05T09:53:35.107Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_meishan_7590699730691295270_1.jpeg",
+    "/mock/files/comments/sheet_meishan_7590699730691295270_2.jpeg",
+    "/mock/files/comments/sheet_meishan_7590699730691295270_3.jpeg",
+    "/mock/files/comments/sheet_meishan_7590699730691295270_4.jpeg",
+    "/mock/files/comments/sheet_meishan_7590699730691295270_5.jpeg",
+    "/mock/files/comments/sheet_meishan_7590699730691295270_6.jpeg",
+    "/mock/files/comments/sheet_meishan_7591124262744868905_1.jpeg",
+    "/mock/files/comments/sheet_meishan_7591124262744868905_2.jpeg",
+    "/mock/files/comments/sheet_meishan_7591124262744868905_3.jpeg",
+    "/mock/files/comments/sheet_meishan_7591124262744868905_4.jpeg",
+    "/mock/files/comments/sheet_meishan_7591124262744868905_5.jpeg",
+    "/mock/files/comments/sheet_meishan_7562784688855599114_1.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "meishan",
+    "mapName": "眉山-1-1",
+    "city": "眉山",
+    "style": "storybook",
+    "selectedCommentIds": [
+      "sheet_meishan_7590699730691295270",
+      "sheet_meishan_7591124262744868905",
+      "sheet_meishan_7562784688855599114",
+      "sheet_meishan_7575493849243371566",
+      "sheet_meishan_7575518337074382898",
+      "sheet_meishan_7575497971280316426",
+      "sheet_meishan_7590707291226982450",
+      "sheet_meishan_7644172679455639590"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "meishan",
+    "mapName": "眉山-1-1",
+    "city": "眉山",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/meishan.raw.json",
+    "eventsPath": "/mock/events/meishan.events.json",
+    "routePath": "/mock/routes/map_gz_1783245069736.route.md",
+    "posterPath": "/mock/posters/map_gz_1783245069736.png",
+    "mapPath": "/mock/maps/map_gz_1783245069736.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T09:51:09.736Z",
+  "endedAt": "2026-07-05T09:53:35.107Z"
+}

@@ -1,0 +1,465 @@
+{
+  "mapId": "map_gz_1783245069736",
+  "datasetKey": "meishan",
+  "mapName": "眉山-1-1",
+  "city": "眉山",
+  "style": "storybook",
+  "posterPath": "/mock/posters/map_gz_1783245069736.png",
+  "routeMarkdown": "---\nmap_name: 眉山-1-1\ncity: 眉山\nstyle: 治愈绘本插画风\ndays: 2\nevent_count: 8\nknowledge_count: 4\n---\n\n## Important Rules\n- 所有 event 配图统一服从给定 style，不得自行发散风格。\n- 背景地标只作为背景视觉参考，不给地标配文。\n- 所有 event 主体图标内部禁止出现任何可读文字、字母、数字、logo、水印、菜单、招牌或屏幕字幕。\n- 点位名称和编号只能作为节点外部标注，不能嵌入主体图标内部。\n- 若场景天然包含店招、路牌、菜单或电子屏，统一简化为无字形状，不保留可读字符。\n- 主路径必须从画面左侧起、向右侧结束，节点编号顺序必须与空间阅读顺序一致。\n- 节点中心点横向位置应随编号递增，只允许轻微上下起伏，不允许回头路、环形主路径或纵向堆叠成为主顺序。\n- 每个 event 的 subject 必须是 1 个简短中文名词和 1 个简短中文形容词，用顿号连接，顺序固定为“名词、形容词”。\n- 每个 event 的 avoid 必须是 3-5 个要避免的意象词。\n\n# Day 1 (2024:05:01)\n\n## Event 1 · 三苏祠\n- sequence: 1\n- poi: 三苏祠\n- short_name: 三苏祠\n- 类目: 游玩 / 景点 / 人文古迹\n- 文案: 来眉山必逛的景点top1三苏祠，门票🎫价格40，某音上用了券还稍微便宜点。位置在东坡区的纱縠行，元旦期间南大门还有快闪表演，记得按照时间表蹲着。景区深度游览差不多要2-3h左右，门口有拼团讲解的，小姐姐讲得还不错，夏天来这很避暑，冬天来的还是稍微有点严寒，整体体验还是不错的！\n- 配图: /mock/files/comments/sheet_meishan_7590699730691295270_1.jpeg\n- subject: 古祠、清幽\n- avoid: 价格字样, 时间表, 店招文字, 门牌标识\n\n## Event 2 · 无忧城\n- sequence: 2\n- poi: 无忧城\n- short_name: 无忧城\n- 类目: 游玩 / 泛主题乐园 / 其他主题乐园\n- 文案: 今年十一之后水街开始收费，有白天+夜晚场，也有夜晚场（18点后进），按需买票。白天场玩得东西更多，和npc互动更强，今天下了点小雨，晚上进来的，以为没表演了，不过还是表演依旧，但因为收门票，人气没之前那么旺了，冷冷清清的。表演也没有完全按节目单安排那样全部进行，有一点小失望吧。\n- 配图: /mock/files/comments/sheet_meishan_7591124262744868905_1.jpeg\n- subject: 水街、朦胧\n- avoid: 节目单字样, 价格标识, 时间提示牌, npc铭牌\n\n## Event 3 · 纵苇时令糖水\n- sequence: 3\n- poi: 纵苇时令糖水(彭山店)\n- short_name: 纵苇时令糖水\n- 类目: 美食 / 面包甜点 / 甜品\n- 文案: 宝藏小店挖掘到了！步行导航过来的沿周边走本以为店铺一般，没想到装修很实木风，有点子小资情调的。店员也很年轻，服务热情，最主要的是一直在播放林俊杰的歌曲，竟然还放了最新的《明日坐标》，太潮了哈哈。他家甜品也很不错，分量很大，选的是芋泥椰椰西米露，配料很丰富，常温五分糖不会太甜，两个人管够的哈哈。折耳根牛肉咔饼也很好吃，千层饼的外壳，包着四川特色牛肉折耳根，值得一试👌\n- 配图: /mock/files/comments/sheet_meishan_7562784688855599114_1.jpeg\n- subject: 糖水、润白\n- avoid: 歌单字幕, 菜单字样, 导航标识, 价格文字\n\n## Event 4 · 喜乐星量贩式KTV\n- sequence: 4\n- poi: 喜乐星量贩式KTV(彭山店)\n- short_name: 喜乐星量贩式KTV\n- 类目: 休闲娱乐 / 传统娱乐 / KTV\n- 文案: 临时想在附近找个ktv，选中了这家，有1-3层，面积还挺大的。提前打电话确认下还有小包/中包，立马前往。服务员很热情，唱到了18点很舒服。歌单比较新，实在机器上搜不到的可以手机上点，音响效果预期范围内，毕竟价格也不高🤔\n- 配图: /mock/files/comments/sheet_meishan_7575493849243371566_1.jpeg\n- subject: 包厢、暖亮\n- avoid: 楼层指示牌, 价格字样, 歌单字幕, 门牌号码\n\n## Event 5 · 牟记蛋烘糕\n- sequence: 5\n- poi: 牟记蛋烘糕\n- short_name: 牟记蛋烘糕\n- 类目: 美食 / 快餐小吃 / 小吃\n- 文案: 据说是师傅93年拜师学艺，开了很久的老店啦。从早开到晚，来来往往的人络绎不绝，说明味道是真好！基础款5元，可以双拼也可以只选一个口味，咸的甜的辣的都有，根据自己的喜好可以多尝试尝试 这次选了红豆奶油的，搭配起来很入味，几口就炫完了😘\n- 配图: /mock/files/comments/sheet_meishan_7575518337074382898_1.jpeg\n- subject: 蛋烘糕、金黄\n- avoid: 价格字样, 店招文字, 营业时间牌, 价目表\n\n## Event 6 · 燕群王铁人宵夜\n- sequence: 6\n- poi: 燕群王铁人宵夜\n- short_name: 燕群王铁人宵夜\n- 类目: 美食 / 快餐小吃 / 快餐\n- 文案: 一心堂药店对面的一家老店了，饺子是特色，10/12/15/20个四个选项，面条也有几种选择，价格还比较地道😛店里有岁月痕迹了，环境一般吧，主要想尝尝特色水饺如何。点了单需要等一会，馅料是韭菜猪肉，皮不是很厚，本身口感还不错，配上红油蘸料，味道更绝！\n- 配图: /mock/files/comments/sheet_meishan_7575497971280316426_1.jpeg\n- subject: 水饺、热乎\n- avoid: 价格数字, 药店招牌, 菜单字样, 门牌标识\n\n# Day 2 (2024:05:02)\n\n## Event 7 · 东坡城市湿地公园\n- sequence: 7\n- poi: 东坡城市湿地公园\n- short_name: 东坡城市湿地公园\n- 类目: 游玩 / 景点 / 自然景观\n- 文案: 来眉山水街附近必逛的公园，虽说是城市建的人工湿地公园，但设计感还是有的！公园占地面积很大，商业化还没咋开始，基本没啥店铺，不过里面会有竹林、草地、湖泊，还有一片全民健身场地，无论春夏秋冬来逛都很舒适！\n- 配图: /mock/files/comments/sheet_meishan_7590707291226982450_1.jpeg\n- subject: 湿地、清新\n- avoid: 路牌文字, 店铺招牌, 健身标识, 广告标语\n\n## Event 8 · 友盐味中餐火锅\n- sequence: 8\n- poi: 友盐味中餐火锅\n- short_name: 友盐味中餐火锅\n- 类目: 美食 / 火锅 / 特色火锅\n- 文案: 江口镇找了朋友推荐的一家中餐，位置不是很好找，不过旁边车还比较好停放。大中午的人还挺多的，点的藤椒鱼现杀，加了点凉拌鸡和炒苋菜，上菜还挺快的，鱼也比较入味，比较新鲜，一家人吃下来满意，性价比也挺高的。\n- 配图: /mock/files/comments/sheet_meishan_7644172679455639590_1.jpeg\n- subject: 鱼锅、鲜亮\n- avoid: 停车标识, 菜单字样, 价格文字, 导航路牌\n",
+  "selectedEventId": "evt_001",
+  "generatedAt": "2026-07-05T09:53:52.533Z",
+  "knowledge": [
+    {
+      "name": "三苏祠",
+      "visual": "典型川西中式古典园林建筑群，红墙竹影交相映衬，园内矗立三苏父子塑像，留存大量与苏洵、苏轼、苏辙相关的古碑刻、传世遗存，是眉山文化核心地标"
+    },
+    {
+      "name": "瓦屋山国家森林公园",
+      "visual": "国内少见的桌山景观，山顶平坦如台，原始森林覆盖率极高，春有万亩杜鹃、夏有飞瀑流泉、秋有漫山彩林、冬有厚积冰雪，云海日出景观辨识度极高"
+    },
+    {
+      "name": "东坡城市湿地公园（东坡水街）",
+      "visual": "以宋式风格打造的滨水休闲街区，水系穿街而过，廊桥、水榭、仿宋古建沿湖排布，夜间灯火齐明时建筑与水面倒影相映，是国内知名的宋风夜游打卡点"
+    },
+    {
+      "name": "黑龙滩风景区",
+      "visual": "有着“川西第一海”之称的人工湖泊，湖面散落近百座翠岛，沿岸林木葱郁，点缀有唐代摩崖造像等人文遗迹，湖光山色清幽开阔"
+    }
+  ],
+  "nodes": [
+    {
+      "eventId": "evt_001",
+      "day": "2024:05:01",
+      "time": "09:07:00",
+      "title": "三苏祠",
+      "excerpt": "来眉山必逛的景点top1三苏祠，门票🎫价格40，某音上用了券还稍微便宜点。位置在东坡区的纱縠行...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7590699730691295270_1.jpeg"
+    },
+    {
+      "eventId": "evt_002",
+      "day": "2024:05:01",
+      "time": "10:26:00",
+      "title": "无忧城",
+      "excerpt": "今年十一之后水街开始收费，有白天+夜晚场，也有夜晚场（18点后进），按需买票。白天场玩得东西更多...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7591124262744868905_1.jpeg"
+    },
+    {
+      "eventId": "evt_003",
+      "day": "2024:05:01",
+      "time": "14:15:00",
+      "title": "纵苇时令糖水(彭山店)",
+      "excerpt": "宝藏小店挖掘到了！步行导航过来的沿周边走本以为店铺一般，没想到装修很实木风，有点子小资情调的。店...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7562784688855599114_1.jpeg"
+    },
+    {
+      "eventId": "evt_004",
+      "day": "2024:05:01",
+      "time": "15:19:00",
+      "title": "喜乐星量贩式KTV(彭山店)",
+      "excerpt": "临时想在附近找个ktv，选中了这家，有1-3层，面积还挺大的。提前打电话确认下还有小包/中包，立...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7575493849243371566_1.jpeg"
+    },
+    {
+      "eventId": "evt_005",
+      "day": "2024:05:01",
+      "time": "17:54:00",
+      "title": "牟记蛋烘糕",
+      "excerpt": "据说是师傅93年拜师学艺，开了很久的老店啦。从早开到晚，来来往往的人络绎不绝，说明味道是真好！基...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7575518337074382898_1.jpeg"
+    },
+    {
+      "eventId": "evt_006",
+      "day": "2024:05:01",
+      "time": "19:05:00",
+      "title": "燕群王铁人宵夜",
+      "excerpt": "一心堂药店对面的一家老店了，饺子是特色，10/12/15/20个四个选项，面条也有几种选择，价格...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7575497971280316426_1.jpeg"
+    },
+    {
+      "eventId": "evt_007",
+      "day": "2024:05:02",
+      "time": "09:10:00",
+      "title": "东坡城市湿地公园",
+      "excerpt": "来眉山水街附近必逛的公园，虽说是城市建的人工湿地公园，但设计感还是有的！公园占地面积很大，商业化...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7590707291226982450_1.jpeg"
+    },
+    {
+      "eventId": "evt_008",
+      "day": "2024:05:02",
+      "time": "11:44:00",
+      "title": "友盐味中餐火锅",
+      "excerpt": "江口镇找了朋友推荐的一家中餐，位置不是很好找，不过旁边车还比较好停放。大中午的人还挺多的，点的藤...",
+      "thumbnail": "/mock/files/comments/sheet_meishan_7644172679455639590_1.jpeg"
+    }
+  ],
+  "events": [
+    {
+      "eventId": "evt_001",
+      "commentId": "sheet_meishan_7590699730691295270",
+      "sequence": 1,
+      "day": "2024:05:01",
+      "time": "09:07:00",
+      "commentText": "来眉山必逛的景点top1三苏祠，门票🎫价格40，某音上用了券还稍微便宜点。位置在东坡区的纱縠行，元旦期间南大门还有快闪表演，记得按照时间表蹲着。景区深度游览差不多要2-3h左右，门口有拼团讲解的，小姐姐讲得还不错，夏天来这很避暑，冬天来的还是稍微有点严寒，整体体验还是不错的！",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590699730691295270_1.jpeg",
+          "name": "sheet_meishan_7590699730691295270_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590699730691295270_2.jpeg",
+          "name": "sheet_meishan_7590699730691295270_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590699730691295270_3.jpeg",
+          "name": "sheet_meishan_7590699730691295270_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590699730691295270_4.jpeg",
+          "name": "sheet_meishan_7590699730691295270_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590699730691295270_5.jpeg",
+          "name": "sheet_meishan_7590699730691295270_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590699730691295270_6.jpeg",
+          "name": "sheet_meishan_7590699730691295270_6.jpeg"
+        }
+      ],
+      "canonicalName": "三苏祠",
+      "shortName": "三苏祠",
+      "poiName": "三苏祠",
+      "poiLocation": "纱縠巷南段72号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "游玩",
+      "categoryL2": "景点",
+      "categoryL3": "人文古迹",
+      "subject": "古祠、清幽",
+      "avoid": [
+        "价格字样",
+        "时间表",
+        "店招文字",
+        "门牌标识"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_002",
+      "commentId": "sheet_meishan_7591124262744868905",
+      "sequence": 2,
+      "day": "2024:05:01",
+      "time": "10:26:00",
+      "commentText": "今年十一之后水街开始收费，有白天+夜晚场，也有夜晚场（18点后进），按需买票。白天场玩得东西更多，和npc互动更强，今天下了点小雨，晚上进来的，以为没表演了，不过还是表演依旧，但因为收门票，人气没之前那么旺了，冷冷清清的。表演也没有完全按节目单安排那样全部进行，有一点小失望吧。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7591124262744868905_1.jpeg",
+          "name": "sheet_meishan_7591124262744868905_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7591124262744868905_2.jpeg",
+          "name": "sheet_meishan_7591124262744868905_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7591124262744868905_3.jpeg",
+          "name": "sheet_meishan_7591124262744868905_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7591124262744868905_4.jpeg",
+          "name": "sheet_meishan_7591124262744868905_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7591124262744868905_5.jpeg",
+          "name": "sheet_meishan_7591124262744868905_5.jpeg"
+        }
+      ],
+      "canonicalName": "无忧城",
+      "shortName": "无忧城",
+      "poiName": "无忧城",
+      "poiLocation": "大石桥街道子瞻大道与春晓街交汇处东北角金府穿越盛世7栋1楼16-17号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "游玩",
+      "categoryL2": "泛主题乐园",
+      "categoryL3": "其他主题乐园",
+      "subject": "水街、朦胧",
+      "avoid": [
+        "节目单字样",
+        "价格标识",
+        "时间提示牌",
+        "npc铭牌"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_003",
+      "commentId": "sheet_meishan_7562784688855599114",
+      "sequence": 3,
+      "day": "2024:05:01",
+      "time": "14:15:00",
+      "commentText": "宝藏小店挖掘到了！步行导航过来的沿周边走本以为店铺一般，没想到装修很实木风，有点子小资情调的。店员也很年轻，服务热情，最主要的是一直在播放林俊杰的歌曲，竟然还放了最新的《明日坐标》，太潮了哈哈。他家甜品也很不错，分量很大，选的是芋泥椰椰西米露，配料很丰富，常温五分糖不会太甜，两个人管够的哈哈。折耳根牛肉咔饼也很好吃，千层饼的外壳，包着四川特色牛肉折耳根，值得一试👌",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_1.jpeg",
+          "name": "sheet_meishan_7562784688855599114_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_2.jpeg",
+          "name": "sheet_meishan_7562784688855599114_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_3.jpeg",
+          "name": "sheet_meishan_7562784688855599114_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_4.jpeg",
+          "name": "sheet_meishan_7562784688855599114_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_5.jpeg",
+          "name": "sheet_meishan_7562784688855599114_5.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_6.jpeg",
+          "name": "sheet_meishan_7562784688855599114_6.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7562784688855599114_7.jpeg",
+          "name": "sheet_meishan_7562784688855599114_7.jpeg"
+        }
+      ],
+      "canonicalName": "纵苇时令糖水(彭山店)",
+      "shortName": "纵苇时令糖水",
+      "poiName": "纵苇时令糖水(彭山店)",
+      "poiLocation": "彭纲路西二巷1号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "面包甜点",
+      "categoryL3": "甜品",
+      "subject": "糖水、润白",
+      "avoid": [
+        "歌单字幕",
+        "菜单字样",
+        "导航标识",
+        "价格文字"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_004",
+      "commentId": "sheet_meishan_7575493849243371566",
+      "sequence": 4,
+      "day": "2024:05:01",
+      "time": "15:19:00",
+      "commentText": "临时想在附近找个ktv，选中了这家，有1-3层，面积还挺大的。提前打电话确认下还有小包/中包，立马前往。服务员很热情，唱到了18点很舒服。歌单比较新，实在机器上搜不到的可以手机上点，音响效果预期范围内，毕竟价格也不高🤔",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575493849243371566_1.jpeg",
+          "name": "sheet_meishan_7575493849243371566_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575493849243371566_2.jpeg",
+          "name": "sheet_meishan_7575493849243371566_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575493849243371566_3.jpeg",
+          "name": "sheet_meishan_7575493849243371566_3.jpeg"
+        }
+      ],
+      "canonicalName": "喜乐星量贩式KTV(彭山店)",
+      "shortName": "喜乐星量贩式KTV",
+      "poiName": "喜乐星量贩式KTV(彭山店)",
+      "poiLocation": "观音街道蔡山东路231号1-3层",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "休闲娱乐",
+      "categoryL2": "传统娱乐",
+      "categoryL3": "KTV",
+      "subject": "包厢、暖亮",
+      "avoid": [
+        "楼层指示牌",
+        "价格字样",
+        "歌单字幕",
+        "门牌号码"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_005",
+      "commentId": "sheet_meishan_7575518337074382898",
+      "sequence": 5,
+      "day": "2024:05:01",
+      "time": "17:54:00",
+      "commentText": "据说是师傅93年拜师学艺，开了很久的老店啦。从早开到晚，来来往往的人络绎不绝，说明味道是真好！基础款5元，可以双拼也可以只选一个口味，咸的甜的辣的都有，根据自己的喜好可以多尝试尝试 这次选了红豆奶油的，搭配起来很入味，几口就炫完了😘",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575518337074382898_1.jpeg",
+          "name": "sheet_meishan_7575518337074382898_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575518337074382898_2.jpeg",
+          "name": "sheet_meishan_7575518337074382898_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575518337074382898_3.jpeg",
+          "name": "sheet_meishan_7575518337074382898_3.jpeg"
+        }
+      ],
+      "canonicalName": "牟记蛋烘糕",
+      "shortName": "牟记蛋烘糕",
+      "poiName": "牟记蛋烘糕",
+      "poiLocation": "小南街43号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "快餐小吃",
+      "categoryL3": "小吃",
+      "subject": "蛋烘糕、金黄",
+      "avoid": [
+        "价格字样",
+        "店招文字",
+        "营业时间牌",
+        "价目表"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_006",
+      "commentId": "sheet_meishan_7575497971280316426",
+      "sequence": 6,
+      "day": "2024:05:01",
+      "time": "19:05:00",
+      "commentText": "一心堂药店对面的一家老店了，饺子是特色，10/12/15/20个四个选项，面条也有几种选择，价格还比较地道😛店里有岁月痕迹了，环境一般吧，主要想尝尝特色水饺如何。点了单需要等一会，馅料是韭菜猪肉，皮不是很厚，本身口感还不错，配上红油蘸料，味道更绝！",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575497971280316426_1.jpeg",
+          "name": "sheet_meishan_7575497971280316426_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575497971280316426_2.jpeg",
+          "name": "sheet_meishan_7575497971280316426_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7575497971280316426_3.jpeg",
+          "name": "sheet_meishan_7575497971280316426_3.jpeg"
+        }
+      ],
+      "canonicalName": "燕群王铁人宵夜",
+      "shortName": "燕群王铁人宵夜",
+      "poiName": "燕群王铁人宵夜",
+      "poiLocation": "古城北路与龙腾街交叉口西北约60米",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "快餐小吃",
+      "categoryL3": "快餐",
+      "subject": "水饺、热乎",
+      "avoid": [
+        "价格数字",
+        "药店招牌",
+        "菜单字样",
+        "门牌标识"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_007",
+      "commentId": "sheet_meishan_7590707291226982450",
+      "sequence": 7,
+      "day": "2024:05:02",
+      "time": "09:10:00",
+      "commentText": "来眉山水街附近必逛的公园，虽说是城市建的人工湿地公园，但设计感还是有的！公园占地面积很大，商业化还没咋开始，基本没啥店铺，不过里面会有竹林、草地、湖泊，还有一片全民健身场地，无论春夏秋冬来逛都很舒适！",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590707291226982450_1.jpeg",
+          "name": "sheet_meishan_7590707291226982450_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590707291226982450_2.jpeg",
+          "name": "sheet_meishan_7590707291226982450_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590707291226982450_3.jpeg",
+          "name": "sheet_meishan_7590707291226982450_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7590707291226982450_4.jpeg",
+          "name": "sheet_meishan_7590707291226982450_4.jpeg"
+        }
+      ],
+      "canonicalName": "东坡城市湿地公园",
+      "shortName": "东坡城市湿地公园",
+      "poiName": "东坡城市湿地公园",
+      "poiLocation": "滨湖路南二段140号",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "东坡区",
+      "categoryL1": "游玩",
+      "categoryL2": "景点",
+      "categoryL3": "自然景观",
+      "subject": "湿地、清新",
+      "avoid": [
+        "路牌文字",
+        "店铺招牌",
+        "健身标识",
+        "广告标语"
+      ],
+      "authorName": "旅行者小夏"
+    },
+    {
+      "eventId": "evt_008",
+      "commentId": "sheet_meishan_7644172679455639590",
+      "sequence": 8,
+      "day": "2024:05:02",
+      "time": "11:44:00",
+      "commentText": "江口镇找了朋友推荐的一家中餐，位置不是很好找，不过旁边车还比较好停放。大中午的人还挺多的，点的藤椒鱼现杀，加了点凉拌鸡和炒苋菜，上菜还挺快的，鱼也比较入味，比较新鲜，一家人吃下来满意，性价比也挺高的。",
+      "commentPictures": [
+        {
+          "url": "/mock/files/comments/sheet_meishan_7644172679455639590_1.jpeg",
+          "name": "sheet_meishan_7644172679455639590_1.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7644172679455639590_2.jpeg",
+          "name": "sheet_meishan_7644172679455639590_2.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7644172679455639590_3.jpeg",
+          "name": "sheet_meishan_7644172679455639590_3.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7644172679455639590_4.jpeg",
+          "name": "sheet_meishan_7644172679455639590_4.jpeg"
+        },
+        {
+          "url": "/mock/files/comments/sheet_meishan_7644172679455639590_5.jpeg",
+          "name": "sheet_meishan_7644172679455639590_5.jpeg"
+        }
+      ],
+      "canonicalName": "友盐味中餐火锅",
+      "shortName": "友盐味中餐火锅",
+      "poiName": "友盐味中餐火锅",
+      "poiLocation": "江口街道武阳小区商业街24栋",
+      "poiProvince": "四川省",
+      "poiCity": "眉山市",
+      "poiDistrict": "彭山区",
+      "categoryL1": "美食",
+      "categoryL2": "火锅",
+      "categoryL3": "特色火锅",
+      "subject": "鱼锅、鲜亮",
+      "avoid": [
+        "停车标识",
+        "菜单字样",
+        "价格文字",
+        "导航路牌"
+      ],
+      "authorName": "旅行者小夏"
+    }
+  ]
+}
