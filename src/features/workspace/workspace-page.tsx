@@ -4,7 +4,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, CheckCheck, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCheck,
+  LoaderCircle,
+  Maximize2,
+  Sparkles,
+  XCircle,
+} from "lucide-react";
+import {
+  defaultImageModel,
+  imageModelLabels,
+  selectableImageModelKeys,
+  type SelectableImageModel,
+} from "@/src/config/image-models";
 import type { RawDatasetSnapshot } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { stylePromptLibrary, type SupportedStyleKey } from "@/src/engine/prompts";
@@ -27,29 +40,48 @@ export function shouldShowSelectionRiskWarning(selectedCount: number) {
 
 export function WorkspacePage(props: WorkspacePageProps) {
   const router = useRouter();
-  const actionLockRef = useRef<"generate" | "preprocess" | null>(null);
+  const actionLockRef = useRef<"generate" | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [syncing, setSyncing] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [error, setError] = useState("");
   const mapName = useWorkspaceStore((state) => state.mapName);
   const currentCity = useWorkspaceStore((state) => state.city);
   const currentStyle = useWorkspaceStore((state) => state.style);
+  const currentImageModel = useWorkspaceStore((state) => state.imageModel);
+  const hydratedDatasetKey = useWorkspaceStore((state) => state.hydratedDatasetKey);
   const selectedCommentIds = useWorkspaceStore((state) => state.selectedCommentIds);
   const initialize = useWorkspaceStore((state) => state.initialize);
   const setMapName = useWorkspaceStore((state) => state.setMapName);
   const setCity = useWorkspaceStore((state) => state.setCity);
   const setStyle = useWorkspaceStore((state) => state.setStyle);
+  const setImageModel = useWorkspaceStore((state) => state.setImageModel);
   const toggleComment = useWorkspaceStore((state) => state.toggleComment);
   const selectAll = useWorkspaceStore((state) => state.selectAll);
+  const clearSelection = useWorkspaceStore((state) => state.clearSelection);
 
   useEffect(() => {
+    if (hydratedDatasetKey === props.activeDatasetKey) {
+      return;
+    }
+
     initialize({
-      mapName: "",
-      city: "",
-      style: "",
+      datasetKey: props.activeDatasetKey,
+      mapName,
+      city: currentCity,
+      style: currentStyle,
+      imageModel: currentImageModel || defaultImageModel,
       selectedCommentIds: props.rawDataset.reviews.map((review) => review.recordId),
     });
-  }, [initialize, props.rawDataset.reviews]);
+  }, [
+    currentCity,
+    currentImageModel,
+    currentStyle,
+    hydratedDatasetKey,
+    initialize,
+    mapName,
+    props.activeDatasetKey,
+    props.rawDataset.reviews,
+  ]);
 
   const totalPictures = useMemo(
     () => props.rawDataset.reviews.reduce((sum, review) => sum + review.attachments.length, 0),
@@ -64,7 +96,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
   const selectedSummary = `${selectedCommentIds.length}/${props.rawDataset.reviews.length}个`;
   const showSelectionRiskWarning = shouldShowSelectionRiskWarning(selectedCommentIds.length);
   const hasSelectedStyle = currentStyle.trim().length > 0;
-  const actionsLocked = submitting || syncing;
+  const actionsLocked = submitting;
   const stylePreview = hasSelectedStyle
     ? stylePromptLibrary[currentStyle as SupportedStyleKey]
     : null;
@@ -95,6 +127,7 @@ export function WorkspacePage(props: WorkspacePageProps) {
           mapName: trimmedMapName,
           city: trimmedCity,
           style: trimmedStyle,
+          imageModel: currentImageModel,
           selectedCommentIds,
         }),
       });
@@ -109,34 +142,6 @@ export function WorkspacePage(props: WorkspacePageProps) {
     } finally {
       actionLockRef.current = null;
       setSubmitting(false);
-    }
-  }
-
-  async function handlePreprocess() {
-    if (actionLockRef.current) {
-      return;
-    }
-
-    try {
-      actionLockRef.current = "preprocess";
-      setSyncing(true);
-      setError("");
-      const response = await fetch("/api/preprocess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          datasetKey: props.activeDatasetKey,
-        }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error ?? "预处理失败");
-      }
-    } catch (requestError) {
-      setError((requestError as Error).message);
-    } finally {
-      actionLockRef.current = null;
-      setSyncing(false);
     }
   }
 
@@ -210,6 +215,25 @@ export function WorkspacePage(props: WorkspacePageProps) {
                 ))}
               </select>
             </label>
+            <label className="mt-4 block text-sm font-medium text-[var(--text-strong)]">
+              生图模型
+              <select
+                value={currentImageModel}
+                onChange={(event) =>
+                  setImageModel(event.target.value as SelectableImageModel)
+                }
+                className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
+              >
+                {selectableImageModelKeys.map((modelKey) => (
+                  <option key={modelKey} value={modelKey}>
+                    {imageModelLabels[modelKey]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="mt-2 text-xs leading-6 text-[var(--text-muted)]">
+              当前生成将使用 {imageModelLabels[currentImageModel]}，风格参考图只影响画风，不改变实际调用模型。
+            </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -238,18 +262,34 @@ export function WorkspacePage(props: WorkspacePageProps) {
 
           <button
             type="button"
-            onClick={handlePreprocess}
-            disabled={actionsLocked}
+            onClick={clearSelection}
+            disabled={actionsLocked || !selectedCommentIds.length}
             className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft-strong)] disabled:opacity-60"
           >
-            {syncing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            更新素材列表
+            <XCircle className="h-4 w-4" />
+            清空评论选择
           </button>
 
           <div className="overflow-hidden rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)]">
-            <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-soft)]">
+            <div className="relative aspect-[16/9] overflow-hidden bg-[var(--bg-soft)]">
               {stylePreview ? (
-                <Image src={stylePreview.previewImage} alt={stylePreview.label} fill unoptimized className="object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setPreviewImage(stylePreview.previewImage)}
+                  className="h-full w-full"
+                >
+                  <Image
+                    src={stylePreview.previewImage}
+                    alt={stylePreview.label}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                  <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-[rgba(255,255,255,0.9)] px-3 py-1 text-xs font-medium text-[var(--text-strong)] shadow-[var(--shadow-soft)]">
+                    <Maximize2 className="h-3.5 w-3.5" />
+                    点击大屏查看
+                  </span>
+                </button>
               ) : (
                 <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-7 text-[var(--text-muted)]">
                   选择风格后，这里会显示对应的参考图预览。
@@ -290,28 +330,6 @@ export function WorkspacePage(props: WorkspacePageProps) {
               已选 <span className="font-semibold text-[var(--text-strong)]">{selectedSummary}</span>
             </p>
           </div>
-
-          {showSelectionRiskWarning ? (
-            <div className="mb-5 overflow-hidden rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--danger-tint)] shadow-[var(--shadow-soft)]">
-              <div className="flex">
-                <div className="w-1.5 shrink-0 bg-[var(--danger-ink)]" />
-                <div className="flex-1 px-4 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-surface)] text-[var(--danger-ink)] shadow-[var(--shadow-soft)]">
-                      <AlertTriangle className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[var(--danger-ink)]">高风险提示</p>
-                      <p className="text-xs text-[var(--text-muted)]">当前素材量较大，建议先关注成图稳定性。</p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-[var(--text-muted)]">
-                    当前选中了 {selectedCommentIds.length} 条评论。超过 8 条后，静态图的编号稳定性和画面质量风险会明显升高；你仍然可以继续生成。
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : null}
 
           <div className="max-h-[780px] overflow-y-auto pr-2">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -378,10 +396,38 @@ export function WorkspacePage(props: WorkspacePageProps) {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-4 border-t border-[color:var(--line-subtle)] pt-5 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-sm leading-7 text-[var(--text-muted)]">
-              选出最能代表这趟行程的片段，再生成整张地图。
-            </p>
+          <div className="mt-6 flex flex-col gap-4 border-t border-[color:var(--line-subtle)] pt-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex-1">
+              {showSelectionRiskWarning ? (
+                <div className="overflow-hidden rounded-[22px] border border-[color:var(--line-subtle)] bg-[var(--danger-tint)] shadow-[var(--shadow-soft)]">
+                  <div className="flex">
+                    <div className="w-1.5 shrink-0 bg-[var(--danger-ink)]" />
+                    <div className="flex-1 px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-surface)] text-[var(--danger-ink)] shadow-[var(--shadow-soft)]">
+                          <AlertTriangle className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--danger-ink)]">
+                            高风险提示
+                          </p>
+                          <p className="text-xs text-[var(--text-muted)]">
+                            当前素材量较大，建议先关注成图稳定性。
+                          </p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-[var(--text-muted)]">
+                        当前选中了 {selectedCommentIds.length} 条评论。超过 8 条后，静态图的编号稳定性和画面质量风险会明显升高；你仍然可以继续生成。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm leading-7 text-[var(--text-muted)]">
+                  选出最能代表这趟行程的片段，再用 {imageModelLabels[currentImageModel]} 生成整张地图。
+                </p>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleGenerate}
@@ -394,6 +440,28 @@ export function WorkspacePage(props: WorkspacePageProps) {
           </div>
         </section>
       </div>
+
+      {previewImage ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(26,20,17,0.72)] p-6">
+          <button
+            type="button"
+            onClick={() => setPreviewImage(null)}
+            className="absolute right-6 top-6 rounded-full bg-white/92 px-4 py-2 text-sm font-medium text-[var(--text-strong)]"
+          >
+            关闭
+          </button>
+          <div className="relative max-h-[90vh] max-w-[90vw] overflow-hidden rounded-[24px] bg-[var(--bg-surface)] p-4 shadow-2xl">
+            <Image
+              src={previewImage}
+              alt="风格参考图预览"
+              width={1600}
+              height={900}
+              unoptimized
+              className="max-h-[82vh] rounded-[18px] object-contain"
+            />
+          </div>
+        </div>
+      ) : null}
     </SiteShell>
   );
 }
