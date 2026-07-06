@@ -312,6 +312,54 @@ export const runTraceSchema = z.object({
   endedAt: z.string().optional(),
 });
 
+export const curatedMapImportModeSchema = z.enum(["favorite_preload", "manual"]);
+export const curatedMapImportAssetKindSchema = z.enum([
+  "map_record",
+  "rendered_map",
+  "route_markdown",
+  "knowledge",
+  "poster",
+  "video",
+  "run",
+]);
+
+export const curatedMapImportAssetSchema = z.object({
+  kind: curatedMapImportAssetKindSchema,
+  label: z.string(),
+  path: z.string(),
+  required: z.boolean(),
+  exists: z.boolean(),
+});
+
+export const curatedMapImportEntrySchema = z.object({
+  mapId: z.string(),
+  mapName: z.string().optional(),
+  datasetKey: datasetKeySchema.optional(),
+  selectionReason: z.enum(["favorite", "explicit"]),
+  hasVideo: z.boolean(),
+  ready: z.boolean(),
+  runIds: z.array(z.string()),
+  warnings: z.array(z.string()),
+  errors: z.array(z.string()),
+  assets: z.array(curatedMapImportAssetSchema),
+});
+
+export const curatedMapImportReportSchema = z.object({
+  mode: curatedMapImportModeSchema,
+  dryRun: z.boolean(),
+  targetRoot: z.string().optional(),
+  expectedCount: z.number().int().positive().optional(),
+  totalRequested: z.number().int().nonnegative(),
+  totalSelected: z.number().int().nonnegative(),
+  readyCount: z.number().int().nonnegative(),
+  mapsWithVideo: z.number().int().nonnegative(),
+  mapsWithoutVideo: z.number().int().nonnegative(),
+  warnings: z.array(z.string()),
+  errors: z.array(z.string()),
+  entries: z.array(curatedMapImportEntrySchema),
+  appliedAt: z.string().optional(),
+});
+
 export type RawAttachment = z.infer<typeof rawAttachmentSchema>;
 export type RawReview = z.infer<typeof rawReviewSchema>;
 export type RawDatasetSnapshot = z.infer<typeof rawDatasetSnapshotSchema>;
@@ -337,3 +385,8 @@ export type RegenerateRunInput = z.infer<typeof regenerateRunInputSchema>;
 export type RunInputSummary = z.infer<typeof runInputSummarySchema>;
 export type RunDriveState = z.infer<typeof runDriveStateSchema>;
 export type RunTrace = z.infer<typeof runTraceSchema>;
+export type CuratedMapImportMode = z.infer<typeof curatedMapImportModeSchema>;
+export type CuratedMapImportAssetKind = z.infer<typeof curatedMapImportAssetKindSchema>;
+export type CuratedMapImportAsset = z.infer<typeof curatedMapImportAssetSchema>;
+export type CuratedMapImportEntry = z.infer<typeof curatedMapImportEntrySchema>;
+export type CuratedMapImportReport = z.infer<typeof curatedMapImportReportSchema>;
