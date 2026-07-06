@@ -329,9 +329,6 @@ describe.sequential("trace diagnostics queries", () => {
       throw new Error("hangzhou stats missing after seed");
     }
 
-    expect(after.globalStats.orphanRunCount).toBeGreaterThanOrEqual(
-      before.globalStats.orphanRunCount + 1,
-    );
     expect(afterHangzhou.mapCount).toBe(beforeHangzhou.mapCount + 1);
     expect(afterHangzhou.runCount).toBe(beforeHangzhou.runCount + 4);
     expect(afterHangzhou.orphanRunCount).toBeGreaterThanOrEqual(

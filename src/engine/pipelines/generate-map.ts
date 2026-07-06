@@ -8,7 +8,10 @@ import {
   type MapRecord,
   type ParsedRoute,
   type PosterVersion,
+  type RegenerateRunInput,
   type RawDatasetSnapshot,
+  type RunDriveState,
+  type RunProgressStep,
   type RunTrace,
 } from "@/src/contracts/domain";
 import { getDemoDataset } from "@/src/config/demo";
@@ -39,6 +42,7 @@ import { createDeterministicRouteMarkdown } from "@/src/engine/renderers/route-m
 import { createMapId, createRunId } from "@/src/lib/ids";
 import {
   getEventsDataset,
+  getMapRecord,
   getKnowledge,
   getRawDataset,
   getRenderedMap,
@@ -57,6 +61,8 @@ import {
 import {
   deleteFilePaths,
   fromPublicPath,
+  pathExists,
+  runtimeAssetAbsolutePath,
   runtimeAssetPublicPath,
   writeBinaryFile,
   writeTextFile,
@@ -73,7 +79,7 @@ type GenerateMapExecutionContext = {
 };
 
 function buildRunInputSummary(params: {
-  datasetKey: string;
+  datasetKey: MapRecord["datasetKey"];
   mapName: string;
   city: string;
   selectedCommentCount: number;
@@ -187,6 +193,71 @@ function normalizeMapEvents(events: EventRecord[]) {
       sequence: index + 1,
       canonicalName,
       shortName,
+    };
+  });
+}
+
+const runDriveLeaseMs = 4 * 60 * 1000;
+
+function buildRunDriveState(phase: RunProgressStep, leaseExpiresAt?: string): RunDriveState {
+  return {
+    phase,
+    leaseExpiresAt,
+  };
+}
+
+function resolveRunDrivePhase(run: RunTrace): RunProgressStep {
+  return run.driveState?.phase ?? run.progressStep ?? "preparing";
+}
+
+function buildDriveLeaseExpiresAt() {
+  return new Date(Date.now() + runDriveLeaseMs).toISOString();
+}
+
+function hasActiveDriveLease(run: RunTrace) {
+  if (!run.driveState?.leaseExpiresAt) {
+    return false;
+  }
+
+  return Date.parse(run.driveState.leaseExpiresAt) > Date.now();
+}
+
+function buildRuntimeRoutePublicPath(mapId: string) {
+  return runtimeAssetPublicPath("routes", `${mapId}.route.md`);
+}
+
+function buildRuntimeMapPublicPath(mapId: string) {
+  return runtimeAssetPublicPath("maps", `${mapId}.view.json`);
+}
+
+function buildRuntimeRouteAbsolutePath(mapId: string) {
+  return runtimeAssetAbsolutePath("routes", `${mapId}.route.md`);
+}
+
+function buildRuntimeKnowledgeAbsolutePath(mapId: string) {
+  return runtimeAssetAbsolutePath("routes", `${mapId}.knowledge.json`);
+}
+
+function mergeRouteIntoEvents(params: {
+  baseEvents: EventRecord[];
+  parsedRoute: ParsedRoute;
+}) {
+  const normalizedEvents = normalizeMapEvents(params.baseEvents);
+  if (normalizedEvents.length !== params.parsedRoute.events.length) {
+    throw new Error("route 事件数量与当前选中评论数量不一致");
+  }
+
+  return normalizedEvents.map((event, index) => {
+    const routeEvent = params.parsedRoute.events[index];
+    return {
+      ...event,
+      sequence: routeEvent.sequence,
+      canonicalName: routeEvent.poi,
+      shortName: routeEvent.shortName,
+      poiName: routeEvent.poi,
+      commentText: routeEvent.commentText,
+      subject: routeEvent.subject,
+      avoid: routeEvent.avoid,
     };
   });
 }
@@ -536,6 +607,7 @@ async function createInitialGenerateRunTrace(params: {
     previewImagePaths,
     generateInput: params.input,
     inputSummary,
+    driveState: buildRunDriveState("preparing"),
     warnings: [],
     artifacts: {
       rawPath: datasetArtifacts.rawPath,
@@ -549,50 +621,511 @@ async function createInitialGenerateRunTrace(params: {
   return runTrace;
 }
 
-async function executeGenerateMapRun(params: {
-  input: GenerateMapInput;
+async function createInitialRegenerateRunTrace(params: {
+  input: RegenerateRunInput;
   runId: string;
   mapId: string;
+  datasetKey: MapRecord["datasetKey"];
+  styleKey: string;
+  imageModel: ImageModel;
+  mapName: string;
+  city: string;
+  startedAt: string;
 }) {
-  const initialRunTrace = await getRunTrace(params.runId);
-  if (!initialRunTrace) {
-    return;
+  const rawDataset = await getRawDataset(params.datasetKey);
+  const previewImagePaths = rawDataset
+    ? buildPreviewImagePaths({
+        rawDataset,
+        selectedCommentIds: params.input.selectedCommentIds,
+      })
+    : [];
+  const inputSummary = buildRunInputSummary({
+    datasetKey: params.datasetKey,
+    mapName: params.mapName,
+    city: params.city,
+    selectedCommentCount: params.input.selectedCommentIds.length,
+  });
+
+  const runTrace = runTraceSchema.parse({
+    runId: params.runId,
+    mapId: params.mapId,
+    datasetKey: params.datasetKey,
+    status: "running",
+    stage: "regenerate",
+    imageModel: params.imageModel,
+    styleKey: params.styleKey,
+    basedOnExistingImage: params.input.mode === "edit",
+    promptInstruction: params.input.instruction.trim() || undefined,
+    progressStep: "preparing",
+    previewImagePaths,
+    regenerateInput: params.input,
+    inputSummary,
+    driveState: buildRunDriveState("preparing"),
+    warnings: [],
+    artifacts: {
+      routePath: buildRuntimeRoutePublicPath(params.mapId),
+      mapPath: buildRuntimeMapPublicPath(params.mapId),
+    },
+    providerMode: "live",
+    startedAt: params.startedAt,
+    updatedAt: params.startedAt,
+  });
+  await saveRunTrace(runTrace);
+  return runTrace;
+}
+
+async function prepareGenerateRunStep(run: RunTrace) {
+  const input = run.generateInput;
+  if (!input) {
+    throw new Error("当前 generate run 缺少 generateInput");
   }
+
+  const existingRoute = await getRouteMarkdown(run.mapId);
+  const existingKnowledge = await getKnowledge(run.mapId);
+  if (existingRoute && existingKnowledge.length && run.artifacts.routePath) {
+    return updateRunTrace(run.runId, {
+      progressStep: "rendering",
+      driveState: buildRunDriveState("rendering"),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  const imageModel = resolveRequestedImageModel(run.imageModel ?? input.imageModel);
+  const eventsSnapshot = await ensureEvents(input.datasetKey);
+  const selectedEvents = normalizeMapEvents(
+    eventsSnapshot.events.filter((event) =>
+      input.selectedCommentIds.includes(event.commentId),
+    ),
+  );
+
+  if (!selectedEvents.length) {
+    throw new Error("没有可用于生成地图的事件");
+  }
+
+  const stylePreset = getStylePreset(input.style);
+  const selectedEventsWithVisualBriefs = await generateEventVisualBriefs({
+    styleLabel: stylePreset.label,
+    events: selectedEvents,
+  });
+  const inputSummary = buildRunInputSummary({
+    datasetKey: input.datasetKey,
+    mapName: input.mapName,
+    city: input.city,
+    selectedCommentCount: selectedEventsWithVisualBriefs.length,
+  });
+
+  let providerMode: RunTrace["providerMode"] = "live";
+  const warnings: string[] = [];
+  let knowledge: Landmark[];
+  try {
+    knowledge = await generateKnowledge(input.city);
+  } catch (error) {
+    providerMode = "fallback";
+    warnings.push(`P1 已回退：${(error as Error).message}`);
+    knowledge = getFallbackKnowledge(input.datasetKey);
+  }
+
+  const routeMarkdown = createDeterministicRouteMarkdown({
+    mapName: input.mapName,
+    city: input.city,
+    styleLabel: stylePreset.label,
+    events: selectedEventsWithVisualBriefs,
+    knowledge,
+  });
+  parseRouteMarkdown(routeMarkdown);
+
+  await saveRouteMarkdown(run.mapId, routeMarkdown);
+  await saveKnowledge(run.mapId, knowledge);
+
+  return updateRunTrace(run.runId, {
+    imageModel,
+    inputSummary,
+    providerMode,
+    warnings,
+    progressStep: "rendering",
+    driveState: buildRunDriveState("rendering"),
+    artifacts: {
+      routePath: buildRuntimeRoutePublicPath(run.mapId),
+    },
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+async function renderGenerateRunStep(run: RunTrace) {
+  const input = run.generateInput;
+  if (!input) {
+    throw new Error("当前 generate run 缺少 generateInput");
+  }
+
+  if (run.artifacts.posterPath && await pathExists(fromPublicPath(run.artifacts.posterPath))) {
+    return updateRunTrace(run.runId, {
+      progressStep: "finalizing",
+      driveState: buildRunDriveState("finalizing"),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  const routeMarkdown = await getRouteMarkdown(run.mapId);
+  if (!routeMarkdown) {
+    throw new Error("当前 run 缺少 route.md，无法继续生图");
+  }
+  const parsedRoute = parseRouteMarkdown(routeMarkdown);
+  const knowledge = await getKnowledge(run.mapId);
+  const stylePreset = getStylePreset(input.style);
+  const referenceImagePaths = [fromPublicPath(stylePreset.referencePublicPath)];
+  const imageModel = resolveRequestedImageModel(run.imageModel ?? input.imageModel);
+
+  let warnings = [...run.warnings];
+  let providerMode = run.providerMode;
+  let posterPath: string;
 
   try {
-    const result = await generateMapDraftCore(params.input, {
-      runId: params.runId,
-      mapId: params.mapId,
-      startedAt: initialRunTrace.startedAt,
-      onProgress: (patch) => updateRunTrace(params.runId, patch),
+    posterPath = await writePosterFile({
+      mapId: run.mapId,
+      styleKey: input.style,
+      imageModel,
+      referenceImagePaths,
+      parsedRoute,
+      knowledge,
     });
-
-    const completedRunTrace = runTraceSchema.parse({
-      ...initialRunTrace,
-      ...result.runTrace,
-      artifacts: {
-        ...initialRunTrace.artifacts,
-        ...result.runTrace.artifacts,
-      },
-    });
-    await saveRunTrace(completedRunTrace);
   } catch (error) {
-    const currentRunTrace = await getRunTrace(params.runId);
-    if (!currentRunTrace) {
-      return;
-    }
-
-    const failedAt = new Date().toISOString();
-    await saveRunTrace(
-      runTraceSchema.parse({
-        ...currentRunTrace,
-        status: "failed",
-        errorMessage: (error as Error).message || "生成失败",
-        updatedAt: failedAt,
-        endedAt: failedAt,
-      }),
+    providerMode = "fallback";
+    warnings = [...warnings, `P3 已回退：${(error as Error).message}`];
+    const eventsSnapshot = await ensureEvents(input.datasetKey);
+    const selectedEvents = eventsSnapshot.events.filter((event) =>
+      input.selectedCommentIds.includes(event.commentId),
     );
+    const events = mergeRouteIntoEvents({
+      baseEvents: selectedEvents,
+      parsedRoute,
+    });
+    const svg = createFallbackPosterSvg({
+      city: input.city,
+      styleLabel: stylePreset.label,
+      events,
+    });
+    await writeTextFile(posterOutputPath(run.mapId, "svg"), svg);
+    posterPath = posterPublicPath(run.mapId, "svg");
   }
+
+  return updateRunTrace(run.runId, {
+    providerMode,
+    warnings,
+    progressStep: "finalizing",
+    driveState: buildRunDriveState("finalizing"),
+    artifacts: {
+      posterPath,
+    },
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+async function finalizeGenerateRunStep(run: RunTrace) {
+  const input = run.generateInput;
+  if (!input) {
+    throw new Error("当前 generate run 缺少 generateInput");
+  }
+
+  const routeMarkdown = await getRouteMarkdown(run.mapId);
+  if (!routeMarkdown) {
+    throw new Error("当前 run 缺少 route.md，无法完成收尾");
+  }
+  const parsedRoute = parseRouteMarkdown(routeMarkdown);
+  const knowledge = await getKnowledge(run.mapId);
+  const eventsSnapshot = await ensureEvents(input.datasetKey);
+  const selectedEvents = eventsSnapshot.events.filter((event) =>
+    input.selectedCommentIds.includes(event.commentId),
+  );
+  const events = mergeRouteIntoEvents({
+    baseEvents: selectedEvents,
+    parsedRoute,
+  });
+  const posterPath = run.artifacts.posterPath;
+  if (!posterPath) {
+    throw new Error("当前 run 缺少 posterPath，无法完成收尾");
+  }
+
+  const imageModel = resolveRequestedImageModel(run.imageModel ?? input.imageModel);
+  const mapViewModel = buildMapViewModel({
+    mapId: run.mapId,
+    datasetKey: input.datasetKey,
+    mapName: input.mapName,
+    city: input.city,
+    style: input.style,
+    imageModel,
+    posterPath,
+    routeMarkdown,
+    events,
+    knowledge,
+  });
+  await saveRenderedMap(run.mapId, mapViewModel);
+
+  const finishedAt = new Date().toISOString();
+  const mapRecord: MapRecord = mapRecordSchema.parse({
+    mapId: run.mapId,
+    datasetKey: input.datasetKey,
+    mapName: input.mapName,
+    city: input.city,
+    style: input.style,
+    imageModel,
+    status: "draft",
+    eventCount: events.length,
+    routePath: buildRuntimeRouteAbsolutePath(run.mapId),
+    posterPath,
+    knowledgePath: buildRuntimeKnowledgeAbsolutePath(run.mapId),
+    currentRunId: run.runId,
+    posterVersions: [
+      buildPosterVersion({
+        versionId: run.runId,
+        posterPath,
+        runId: run.runId,
+        imageModel,
+        createdAt: run.startedAt,
+      }),
+    ],
+    selectedPosterVersionId: run.runId,
+    selectedCommentIds: input.selectedCommentIds,
+    createdAt: run.startedAt,
+    updatedAt: finishedAt,
+  });
+  await saveMapRecord(mapRecord);
+
+  const completedRun = runTraceSchema.parse({
+    ...run,
+    status: "completed",
+    progressStep: "finalizing",
+    driveState: buildRunDriveState("finalizing"),
+    artifacts: {
+      ...run.artifacts,
+      routePath: buildRuntimeRoutePublicPath(run.mapId),
+      posterPath,
+      mapPath: buildRuntimeMapPublicPath(run.mapId),
+    },
+    updatedAt: finishedAt,
+    endedAt: finishedAt,
+  });
+  await saveRunTrace(completedRun);
+  return completedRun;
+}
+
+async function prepareRegenerateRunStep(run: RunTrace) {
+  const input = run.regenerateInput;
+  if (!input) {
+    throw new Error("当前 regenerate run 缺少 regenerateInput");
+  }
+
+  const mapRecord = await getMapRecord(run.mapId);
+  if (!mapRecord) {
+    throw new Error("地图不存在");
+  }
+  const routeMarkdown = await getRouteMarkdown(run.mapId);
+  if (!routeMarkdown) {
+    throw new Error("当前地图缺少 route.md，无法执行 route-driven 重生成");
+  }
+  parseRouteMarkdown(routeMarkdown);
+
+  let providerMode: RunTrace["providerMode"] = "live";
+  const warnings: string[] = [];
+  const knowledge = await getKnowledge(run.mapId);
+  if (!knowledge.length) {
+    providerMode = "fallback";
+    warnings.push("P1 已回退：当前地图缺少已缓存的城市地标，已使用本地兜底数据。");
+    await saveKnowledge(run.mapId, getFallbackKnowledge(mapRecord.datasetKey));
+  }
+
+  if (input.mode === "edit" && !canUsePublicImageAsModelInput(input.selectedPosterPath)) {
+    throw new Error("当前选中版本图片不支持作为原图修改，请改用“再来一张”或切换到可用候选版本。");
+  }
+
+  return updateRunTrace(run.runId, {
+    providerMode,
+    warnings,
+    progressStep: "rendering",
+    driveState: buildRunDriveState("rendering"),
+    artifacts: {
+      routePath: buildRuntimeRoutePublicPath(run.mapId),
+      mapPath: buildRuntimeMapPublicPath(run.mapId),
+    },
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+async function renderRegenerateRunStep(run: RunTrace) {
+  const input = run.regenerateInput;
+  if (!input) {
+    throw new Error("当前 regenerate run 缺少 regenerateInput");
+  }
+
+  if (run.artifacts.posterPath && await pathExists(fromPublicPath(run.artifacts.posterPath))) {
+    return updateRunTrace(run.runId, {
+      progressStep: "finalizing",
+      driveState: buildRunDriveState("finalizing"),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  const mapRecord = await getMapRecord(run.mapId);
+  if (!mapRecord) {
+    throw new Error("地图不存在");
+  }
+  const routeMarkdown = await getRouteMarkdown(run.mapId);
+  if (!routeMarkdown) {
+    throw new Error("当前地图缺少 route.md，无法执行 route-driven 重生成");
+  }
+  const parsedRoute = parseRouteMarkdown(routeMarkdown);
+  const knowledge = await getKnowledge(run.mapId);
+  const stylePreset = getStylePreset(mapRecord.style);
+  const referenceImagePublicPaths = buildRegenerateImagePublicPaths({
+    styleReferencePublicPath: stylePreset.referencePublicPath,
+    existingPosterPublicPath: input.selectedPosterPath,
+    basedOnExistingImage: input.mode === "edit",
+  });
+
+  let warnings = [...run.warnings];
+  if (
+    input.mode !== "edit" &&
+    !referenceImagePublicPaths.includes(input.selectedPosterPath)
+  ) {
+    warnings = [...warnings, "P4 提示：当前旧底片不是 PNG/JPG/WebP，已仅使用风格参考图重绘。"];
+  }
+
+  const referenceImagePaths = referenceImagePublicPaths.map((publicPath) =>
+    fromPublicPath(publicPath),
+  );
+
+  let providerMode = run.providerMode;
+  let posterPath: string;
+  try {
+    posterPath = await writeRegeneratedPosterFile({
+      mapId: run.mapId,
+      runId: run.runId,
+      styleKey: mapRecord.style,
+      imageModel: resolveRequestedImageModel(input.imageModel ?? mapRecord.imageModel),
+      referenceImagePaths,
+      parsedRoute,
+      knowledge,
+      instruction: input.instruction.trim(),
+      basedOnExistingImage: input.mode === "edit",
+    });
+  } catch (error) {
+    providerMode = "fallback";
+    warnings = [...warnings, `P4 已回退：${(error as Error).message}`];
+    const eventsSnapshot = await ensureEvents(mapRecord.datasetKey);
+    const selectedEvents = eventsSnapshot.events.filter((event) =>
+      input.selectedCommentIds.includes(event.commentId),
+    );
+    const events = mergeRouteIntoEvents({
+      baseEvents: selectedEvents,
+      parsedRoute,
+    });
+    const svg = createFallbackPosterSvg({
+      city: mapRecord.city,
+      styleLabel: stylePreset.label,
+      events,
+    });
+    await writeTextFile(posterOutputPath(run.mapId, "svg"), svg);
+    posterPath = posterPublicPath(run.mapId, "svg");
+  }
+
+  return updateRunTrace(run.runId, {
+    providerMode,
+    warnings,
+    progressStep: "finalizing",
+    driveState: buildRunDriveState("finalizing"),
+    artifacts: {
+      posterPath,
+    },
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+async function finalizeRegenerateRunStep(run: RunTrace) {
+  const input = run.regenerateInput;
+  if (!input) {
+    throw new Error("当前 regenerate run 缺少 regenerateInput");
+  }
+
+  const mapRecord = await getMapRecord(run.mapId);
+  if (!mapRecord) {
+    throw new Error("地图不存在");
+  }
+  const routeMarkdown = await getRouteMarkdown(run.mapId);
+  if (!routeMarkdown) {
+    throw new Error("当前地图缺少 route.md，无法完成重生成收尾");
+  }
+  const parsedRoute = parseRouteMarkdown(routeMarkdown);
+  const knowledge = await getKnowledge(run.mapId);
+  const eventsSnapshot = await ensureEvents(mapRecord.datasetKey);
+  const selectedEvents = eventsSnapshot.events.filter((event) =>
+    input.selectedCommentIds.includes(event.commentId),
+  );
+  const events = mergeRouteIntoEvents({
+    baseEvents: selectedEvents,
+    parsedRoute,
+  });
+  const posterPath = run.artifacts.posterPath;
+  if (!posterPath) {
+    throw new Error("当前 regenerate run 缺少 posterPath，无法完成收尾");
+  }
+
+  const imageModel = resolveRequestedImageModel(input.imageModel ?? mapRecord.imageModel);
+  const mapViewModel = buildMapViewModel({
+    mapId: run.mapId,
+    datasetKey: mapRecord.datasetKey,
+    mapName: mapRecord.mapName,
+    city: mapRecord.city,
+    style: mapRecord.style,
+    imageModel,
+    posterPath,
+    routeMarkdown,
+    events,
+    knowledge,
+  });
+  await saveRenderedMap(run.mapId, mapViewModel);
+
+  const updatedMap = mapRecordSchema.parse({
+    ...mapRecord,
+    imageModel,
+    posterVersions: [
+      ...ensurePosterVersions(mapRecord),
+      buildPosterVersion({
+        versionId: run.runId,
+        posterPath,
+        runId: run.runId,
+        imageModel,
+        createdAt: run.startedAt,
+        instruction: input.instruction.trim() || undefined,
+        basedOnExistingImage: input.mode === "edit" ? true : undefined,
+      }),
+    ],
+    selectedPosterVersionId: run.runId,
+    posterPath,
+    currentRunId: run.runId,
+    lastInstruction: input.instruction.trim(),
+    updatedAt: new Date().toISOString(),
+  });
+  await saveMapRecord(updatedMap);
+
+  const finishedAt = new Date().toISOString();
+  const completedRun = runTraceSchema.parse({
+    ...run,
+    imageModel,
+    status: "completed",
+    basedOnExistingImage: input.mode === "edit",
+    promptInstruction: input.instruction.trim() || undefined,
+    progressStep: "finalizing",
+    driveState: buildRunDriveState("finalizing"),
+    artifacts: {
+      ...run.artifacts,
+      routePath: buildRuntimeRoutePublicPath(run.mapId),
+      posterPath,
+      mapPath: buildRuntimeMapPublicPath(run.mapId),
+    },
+    updatedAt: finishedAt,
+    endedAt: finishedAt,
+  });
+  await saveRunTrace(completedRun);
+  return completedRun;
 }
 
 export async function startGenerateMapRun(input: GenerateMapInput) {
@@ -607,19 +1140,106 @@ export async function startGenerateMapRun(input: GenerateMapInput) {
     startedAt,
   });
 
-  setTimeout(() => {
-    void executeGenerateMapRun({
-      input: normalizedInput,
-      runId,
-      mapId,
-    });
-  }, 0);
-
   return {
     runId,
     mapId,
     waitPath: buildWaitPath(runId),
   };
+}
+
+export async function startRegenerateMapRun(params: {
+  mapRecord: MapRecord;
+  mode: RegenerateMode;
+  instruction: string;
+  imageModel?: GenerateMapInput["imageModel"];
+}) {
+  const startedAt = new Date().toISOString();
+  const runId = createRunId();
+  const executionPlan = resolveRegenerateExecutionPlan({
+    mode: params.mode,
+    instruction: params.instruction,
+  });
+
+  await createInitialRegenerateRunTrace({
+    input: {
+      mapId: params.mapRecord.mapId,
+      mode: executionPlan.mode,
+      instruction: executionPlan.instruction,
+      imageModel: params.imageModel,
+      selectedPosterPath: params.mapRecord.posterPath,
+      selectedCommentIds: params.mapRecord.selectedCommentIds,
+    },
+    runId,
+    mapId: params.mapRecord.mapId,
+    datasetKey: params.mapRecord.datasetKey,
+    styleKey: params.mapRecord.style,
+    imageModel: resolveRequestedImageModel(params.imageModel ?? params.mapRecord.imageModel),
+    mapName: params.mapRecord.mapName,
+    city: params.mapRecord.city,
+    startedAt,
+  });
+
+  return {
+    runId,
+    mapId: params.mapRecord.mapId,
+    waitPath: buildWaitPath(runId),
+  };
+}
+
+export async function driveMapRun(runId: string) {
+  const currentRun = await getRunTrace(runId);
+  if (!currentRun) {
+    throw new Error(`run ${runId} 不存在`);
+  }
+
+  if (currentRun.status === "completed" || currentRun.status === "failed" || currentRun.status === "incomplete") {
+    return currentRun;
+  }
+
+  if (hasActiveDriveLease(currentRun)) {
+    return currentRun;
+  }
+
+  const leasedRun = await updateRunTrace(runId, {
+    driveState: buildRunDriveState(resolveRunDrivePhase(currentRun), buildDriveLeaseExpiresAt()),
+    updatedAt: new Date().toISOString(),
+  });
+
+  try {
+    if (leasedRun.stage === "generate") {
+      if (resolveRunDrivePhase(leasedRun) === "preparing") {
+        return await prepareGenerateRunStep(leasedRun);
+      }
+      if (resolveRunDrivePhase(leasedRun) === "rendering") {
+        return await renderGenerateRunStep(leasedRun);
+      }
+      return await finalizeGenerateRunStep(leasedRun);
+    }
+
+    if (leasedRun.stage === "regenerate") {
+      if (resolveRunDrivePhase(leasedRun) === "preparing") {
+        return await prepareRegenerateRunStep(leasedRun);
+      }
+      if (resolveRunDrivePhase(leasedRun) === "rendering") {
+        return await renderRegenerateRunStep(leasedRun);
+      }
+      return await finalizeRegenerateRunStep(leasedRun);
+    }
+
+    return leasedRun;
+  } catch (error) {
+    const failedAt = new Date().toISOString();
+    const failedRun = runTraceSchema.parse({
+      ...leasedRun,
+      status: "failed",
+      driveState: buildRunDriveState(resolveRunDrivePhase(leasedRun)),
+      errorMessage: (error as Error).message || "生成失败",
+      updatedAt: failedAt,
+      endedAt: failedAt,
+    });
+    await saveRunTrace(failedRun);
+    return failedRun;
+  }
 }
 
 export async function generateMapDraft(input: GenerateMapInput) {

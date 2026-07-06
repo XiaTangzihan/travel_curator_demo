@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const publicDir = path.join(/* turbopackIgnore: true */ process.cwd(), "public");
@@ -199,7 +199,7 @@ export async function ensureStorageDirectories() {
 
 export async function writeJsonFile(filePath: string, value: unknown) {
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await writeFileAtomically(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
 export async function readJsonFile<T>(filePath: string): Promise<T | null> {
@@ -216,7 +216,7 @@ export async function readJsonFile<T>(filePath: string): Promise<T | null> {
 
 export async function writeTextFile(filePath: string, value: string) {
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, value, "utf8");
+  await writeFileAtomically(filePath, value, "utf8");
 }
 
 export async function readTextFile(filePath: string): Promise<string | null> {
@@ -243,7 +243,22 @@ export async function readBinaryFile(filePath: string): Promise<Buffer | null> {
 
 export async function writeBinaryFile(filePath: string, value: Buffer) {
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, value);
+  await writeFileAtomically(filePath, value);
+}
+
+async function writeFileAtomically(
+  filePath: string,
+  value: string | Buffer,
+  encoding?: BufferEncoding,
+) {
+  const tempFilePath = `${filePath}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}.tmp`;
+  if (typeof value === "string") {
+    await writeFile(tempFilePath, value, encoding);
+  } else {
+    await writeFile(tempFilePath, value);
+  }
+  await rm(filePath, { force: true });
+  await rename(tempFilePath, filePath);
 }
 
 export async function pathExists(filePath: string) {

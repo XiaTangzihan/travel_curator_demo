@@ -252,12 +252,26 @@ export const runProgressStepSchema = z.enum([
   "finalizing",
 ]);
 
+export const runDriveStateSchema = z.object({
+  phase: runProgressStepSchema.optional().default("preparing"),
+  leaseExpiresAt: z.string().optional(),
+});
+
 export const generateRunInputSchema = z.object({
   datasetKey: datasetKeySchema.optional().default("guangzhou"),
   mapName: z.string(),
   city: z.string(),
   style: z.string(),
   imageModel: selectableImageModelSchema.optional(),
+  selectedCommentIds: z.array(z.string()).min(1),
+});
+
+export const regenerateRunInputSchema = z.object({
+  mapId: z.string(),
+  mode: z.enum(["variant", "edit"]),
+  instruction: z.string().default(""),
+  imageModel: selectableImageModelSchema.optional(),
+  selectedPosterPath: z.string(),
   selectedCommentIds: z.array(z.string()).min(1),
 });
 
@@ -287,7 +301,9 @@ export const runTraceSchema = z.object({
   updatedAt: z.string().optional(),
   previewImagePaths: z.array(z.string()).optional(),
   generateInput: generateRunInputSchema.optional(),
+  regenerateInput: regenerateRunInputSchema.optional(),
   inputSummary: runInputSummarySchema.optional(),
+  driveState: runDriveStateSchema.optional(),
   warnings: z.array(z.string()),
   artifacts: runArtifactPathsSchema,
   providerMode: z.enum(["live", "fallback"]).default("live"),
@@ -317,5 +333,7 @@ export type SelectableImageModel = z.infer<typeof selectableImageModelSchema>;
 export type VideoModel = z.infer<typeof videoModelSchema>;
 export type SelectableVideoModel = z.infer<typeof selectableVideoModelSchema>;
 export type GenerateRunInput = z.infer<typeof generateRunInputSchema>;
+export type RegenerateRunInput = z.infer<typeof regenerateRunInputSchema>;
 export type RunInputSummary = z.infer<typeof runInputSummarySchema>;
+export type RunDriveState = z.infer<typeof runDriveStateSchema>;
 export type RunTrace = z.infer<typeof runTraceSchema>;
