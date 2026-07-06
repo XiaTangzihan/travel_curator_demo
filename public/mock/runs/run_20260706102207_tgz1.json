@@ -1,0 +1,18 @@
+{
+  "runId": "run_20260706102207_tgz1",
+  "mapId": "map_gz_1783304355967",
+  "datasetKey": "meishan",
+  "status": "completed",
+  "stage": "confirm",
+  "imageModel": "unknown",
+  "videoModel": "unknown",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "/mock/routes/map_gz_1783304355967.route.md",
+    "posterPath": "/mock/posters/map_gz_1783304355967.png",
+    "mapPath": "/mock/maps/map_gz_1783304355967.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-06T02:22:07.162Z",
+  "endedAt": "2026-07-06T02:22:07.162Z"
+}

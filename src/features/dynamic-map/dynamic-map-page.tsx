@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   SearchCheck,
   Sparkles,
+  Star,
   Trash2,
 } from "lucide-react";
 import {
@@ -40,7 +41,9 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
   const [selectedEventId, setSelectedEventId] = useState(props.map.selectedEventId);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [favoriting, setFavoriting] = useState(false);
   const [generatingVideo, setGeneratingVideo] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(props.map.isFavorite);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"map" | "video">(props.initialTab);
   const [selectedDuration, setSelectedDuration] = useState<(typeof durationOptions)[number]>(
@@ -141,6 +144,31 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
     }
   }
 
+  async function handleToggleFavorite() {
+    const nextFavorite = !isFavorite;
+
+    try {
+      setFavoriting(true);
+      setError("");
+      const response = await fetch(`/api/maps/${props.map.mapId}/favorite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favorite: nextFavorite }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "更新收藏状态失败");
+      }
+
+      setIsFavorite(nextFavorite);
+    } catch (requestError) {
+      setError((requestError as Error).message);
+    } finally {
+      setFavoriting(false);
+    }
+  }
+
   return (
     <SiteShell
       title={props.map.mapName}
@@ -196,12 +224,24 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
             <SearchCheck className="h-4 w-4" />
             查看测试追踪
           </Link>
-          <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
-            {props.map.city}
-          </span>
-          <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
-            {props.map.nodes.length} 站
-          </span>
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            disabled={favoriting}
+            aria-pressed={isFavorite}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition disabled:opacity-60 ${
+              isFavorite
+                ? "border-[#d4af37] bg-[#fff8df] text-[#8a6a00]"
+                : "border-[color:var(--line-subtle)] bg-[var(--bg-surface)] text-[var(--text-strong)] hover:bg-[var(--bg-soft)]"
+            }`}
+          >
+            {favoriting ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <Star className={`h-4 w-4 ${isFavorite ? "fill-[#d4af37] text-[#d4af37]" : ""}`} />
+            )}
+            {isFavorite ? "已收藏" : "收藏"}
+          </button>
           {canDownloadPoster ? (
             <a
               href={props.map.posterPath}
@@ -209,7 +249,7 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
               className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
             >
               <Download className="h-4 w-4" />
-              下载图片
+              图片
             </a>
           ) : (
             <button
@@ -228,8 +268,13 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
             className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
           >
             {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            删除路线
           </button>
+          <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
+            {props.map.city}
+          </span>
+          <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-muted)]">
+            {props.map.nodes.length} 站
+          </span>
         </>
       }
     >

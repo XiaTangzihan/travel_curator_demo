@@ -163,6 +163,7 @@ export async function saveMapViewModel(mapId: string, map: MapViewModel) {
     mapName: map.mapName,
     city: map.city,
     style: map.style,
+    isFavorite: map.isFavorite,
     imageModel: map.imageModel,
     currentVideoRunId: map.currentVideoRunId,
     videoPath: map.videoPath,
@@ -189,6 +190,7 @@ export async function writeMapViewModel(mapId: string, map: MapViewModel) {
     mapName: map.mapName,
     city: map.city,
     style: map.style,
+    isFavorite: map.isFavorite,
     imageModel: map.imageModel,
     currentVideoRunId: map.currentVideoRunId,
     videoPath: map.videoPath,
@@ -215,6 +217,43 @@ export async function saveRenderedMap(mapId: string, map: MapViewModel) {
 export async function getRenderedMap(mapId: string) {
   const map = await readJsonFile<MapViewModel>(renderedMapFile(mapId));
   return map ? mapViewModelSchema.parse(map) : null;
+}
+
+export async function setMapFavoriteState(mapId: string, favorite: boolean) {
+  const [mapRecord, renderedMap] = await Promise.all([
+    getMapRecord(mapId),
+    getRenderedMap(mapId),
+  ]);
+
+  if (!mapRecord && !renderedMap) {
+    return null;
+  }
+
+  if (mapRecord) {
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        ...mapRecord,
+        isFavorite: favorite,
+      }),
+    );
+  }
+
+  if (renderedMap) {
+    await saveRenderedMap(
+      mapId,
+      mapViewModelSchema.parse({
+        ...renderedMap,
+        isFavorite: favorite,
+      }),
+    );
+  }
+
+  return {
+    mapId,
+    favorite,
+    updatedRecord: Boolean(mapRecord),
+    updatedRenderedMap: Boolean(renderedMap),
+  };
 }
 
 export async function saveRunTrace(trace: RunTrace) {

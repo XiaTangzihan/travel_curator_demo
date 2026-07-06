@@ -4,6 +4,7 @@
   "mapName": "广州01",
   "city": "广州",
   "style": "watercolor",
+  "isFavorite": true,
   "imageModel": "unknown",
   "currentVideoRunId": "run_20260706081802_qt2c",
   "videoPath": "/mock/videos/map_gz_1783131324445.mp4",

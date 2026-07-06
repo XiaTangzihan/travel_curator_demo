@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowRight, CheckSquare, LoaderCircle, Trash2, X } from "lucide-react";
+import { ArrowRight, CheckSquare, LoaderCircle, Star, Trash2, X } from "lucide-react";
 import type { MapRecord } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
 import { StatusPill } from "@/src/components/status-pill";
@@ -21,6 +21,7 @@ type ProfileHomeProps = {
   activeImageModel: ProfileImageModelFilter;
   activeStyle: ProfileStyleFilter;
   activeHasVideo: boolean;
+  activeFavorite: boolean;
   datasetOptions: Array<{
     key: string;
     city: string;
@@ -41,18 +42,21 @@ export function ProfileHome(props: ProfileHomeProps) {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMapIds, setSelectedMapIds] = useState<string[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [updatingFavorite, setUpdatingFavorite] = useState(false);
   const [error, setError] = useState("");
   const hasActiveCardFilters =
     props.activeDatasetKey !== "all" ||
     props.activeImageModel !== "all" ||
     props.activeStyle !== "all" ||
-    props.activeHasVideo;
+    props.activeHasVideo ||
+    props.activeFavorite;
 
   function replaceFilters(nextFilters: {
     datasetKey: ProfileDatasetFilter;
     imageModel: ProfileImageModelFilter;
     style: ProfileStyleFilter;
     hasVideo: boolean;
+    favorite: boolean;
   }) {
     const nextSearchParams = new URLSearchParams();
     if (nextFilters.datasetKey !== "all") {
@@ -71,6 +75,10 @@ export function ProfileHome(props: ProfileHomeProps) {
       nextSearchParams.set("hasVideo", "1");
     }
 
+    if (nextFilters.favorite) {
+      nextSearchParams.set("favorite", "1");
+    }
+
     const queryString = nextSearchParams.toString();
     router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
       scroll: false,
@@ -85,6 +93,11 @@ export function ProfileHome(props: ProfileHomeProps) {
 
   function exitSelectionMode() {
     setSelectionMode(false);
+    setSelectedMapIds([]);
+    setError("");
+  }
+
+  function resetSelectedMaps() {
     setSelectedMapIds([]);
     setError("");
   }
@@ -122,6 +135,46 @@ export function ProfileHome(props: ProfileHomeProps) {
     }
   }
 
+  async function handleBatchFavorite(favorite: boolean) {
+    if (!selectedMapIds.length) {
+      return;
+    }
+
+    try {
+      setUpdatingFavorite(true);
+      setError("");
+      const response = await fetch("/api/maps/favorite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mapIds: selectedMapIds, favorite }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "批量更新收藏状态失败");
+      }
+
+      resetSelectedMaps();
+      router.refresh();
+    } catch (requestError) {
+      setError((requestError as Error).message);
+    } finally {
+      setUpdatingFavorite(false);
+    }
+  }
+
+  function renderFavoriteBadge(map: MapRecord) {
+    if (!map.isFavorite) {
+      return null;
+    }
+
+    return (
+      <span className="absolute left-4 top-4 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 shadow-[var(--shadow-soft)]">
+        <Star className="h-4 w-4 fill-[#d4af37] text-[#d4af37]" />
+      </span>
+    );
+  }
+
   return (
     <SiteShell
       title="个人主页"
@@ -143,8 +196,26 @@ export function ProfileHome(props: ProfileHomeProps) {
               </button>
               <button
                 type="button"
+                onClick={() => handleBatchFavorite(true)}
+                disabled={deleting || updatingFavorite || !selectedMapIds.length}
+                className="inline-flex items-center gap-2 rounded-full border border-[#d4af37] bg-[#fff8df] px-5 py-3 text-sm font-medium text-[#8a6a00] transition hover:bg-[#f9f0c8] disabled:opacity-60"
+              >
+                {updatingFavorite ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Star className="h-4 w-4 fill-[#d4af37] text-[#d4af37]" />}
+                收藏选中
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBatchFavorite(false)}
+                disabled={deleting || updatingFavorite || !selectedMapIds.length}
+                className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
+              >
+                {updatingFavorite ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Star className="h-4 w-4" />}
+                取消收藏选中
+              </button>
+              <button
+                type="button"
                 onClick={handleDeleteSelected}
-                disabled={deleting || !selectedMapIds.length}
+                disabled={deleting || updatingFavorite || !selectedMapIds.length}
                 className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
               >
                 {deleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
@@ -158,7 +229,7 @@ export function ProfileHome(props: ProfileHomeProps) {
               className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)]"
             >
               <CheckSquare className="h-4 w-4" />
-              批量删除
+              批量操作
             </button>
           )}
           <Link
@@ -197,7 +268,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                   <p className="mt-3 max-w-[560px] text-sm leading-7 text-[var(--text-muted)]">
                     在这里保存去过的城市、停留过的时刻，以及那些值得反复回看的旅程片段。
                   </p>
-                  <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+                  <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto] xl:items-end">
                     <label className="block text-sm font-medium text-[var(--text-strong)]">
                       目的地
                       <select
@@ -208,6 +279,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                             imageModel: props.activeImageModel,
                             style: props.activeStyle,
                             hasVideo: props.activeHasVideo,
+                            favorite: props.activeFavorite,
                           })
                         }
                         className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
@@ -231,6 +303,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                             imageModel: event.target.value as ProfileImageModelFilter,
                             style: props.activeStyle,
                             hasVideo: props.activeHasVideo,
+                            favorite: props.activeFavorite,
                           })
                         }
                         className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
@@ -254,6 +327,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                             imageModel: props.activeImageModel,
                             style: event.target.value as ProfileStyleFilter,
                             hasVideo: props.activeHasVideo,
+                            favorite: props.activeFavorite,
                           })
                         }
                         className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
@@ -277,11 +351,30 @@ export function ProfileHome(props: ProfileHomeProps) {
                             imageModel: props.activeImageModel,
                             style: props.activeStyle,
                             hasVideo: event.target.checked,
+                            favorite: props.activeFavorite,
                           })
                         }
                         className="h-4 w-4 rounded border-[color:var(--line-subtle)] text-[var(--accent-primary)]"
                       />
                       有视频
+                    </label>
+
+                    <label className="inline-flex min-h-[54px] items-center gap-3 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)]">
+                      <input
+                        type="checkbox"
+                        checked={props.activeFavorite}
+                        onChange={(event) =>
+                          replaceFilters({
+                            datasetKey: props.activeDatasetKey,
+                            imageModel: props.activeImageModel,
+                            style: props.activeStyle,
+                            hasVideo: props.activeHasVideo,
+                            favorite: event.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 rounded border-[color:var(--line-subtle)] text-[var(--accent-primary)]"
+                      />
+                      收藏
                     </label>
                   </div>
                 </div>
@@ -315,7 +408,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                 按当前筛选结果浏览你的旅行地图
               </h2>
               <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
-                目的地、生图模型、地图风格和视频状态共用同一套筛选口径，顶部统计会同步变化。
+                目的地、生图模型、地图风格、视频状态和收藏状态共用同一套筛选口径，顶部统计会同步变化。
               </p>
             </div>
             <p className="text-sm text-[var(--text-muted)]">
@@ -338,6 +431,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                 }`}
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
+                  {renderFavoriteBadge(map)}
                   {map.posterPath ? (
                     <Image
                       src={map.posterPath}
@@ -354,7 +448,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                     </div>
                   )}
                   <span
-                    className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-medium ${
+                    className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-medium ${
                       selectedMapIds.includes(map.mapId)
                         ? "bg-[var(--accent-primary)] text-white"
                         : "bg-white/92 text-[var(--text-strong)]"
@@ -383,6 +477,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                 className="group overflow-hidden rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-soft)] transition hover:-translate-y-1"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-soft)]">
+                  {renderFavoriteBadge(map)}
                   {map.posterPath ? (
                     <Image
                       src={map.posterPath}

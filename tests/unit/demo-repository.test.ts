@@ -22,6 +22,7 @@ import {
   saveRenderedMap,
   saveRouteMarkdown,
   saveRunTrace,
+  setMapFavoriteState,
 } from "@/src/server/repositories/demo-repository";
 import { pathExists, writeBinaryFile } from "@/src/server/utils/storage";
 
@@ -355,5 +356,31 @@ describe("deleteMapArtifacts", () => {
     expect(result.posterVersions[0].versionId).toBe("run_regen_003");
     expect(await pathExists(selectedPosterOutputPath)).toBe(true);
     expect(await pathExists(stalePosterOutputPath)).toBe(false);
+  });
+
+  it("setMapFavoriteState 会同时更新 mapRecord 与 renderedMap 的收藏状态", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const mapId = `test_favorite_state_${token}`;
+    const runId = `run_favorite_state_${token}`;
+    createdMapIds.push(mapId);
+
+    await seedMapArtifacts(mapId, runId);
+
+    const result = await setMapFavoriteState(mapId, true);
+
+    expect(result).toMatchObject({
+      mapId,
+      favorite: true,
+      updatedRecord: true,
+      updatedRenderedMap: true,
+    });
+
+    const [mapRecord, renderedMap] = await Promise.all([
+      getMapRecord(mapId),
+      getRenderedMap(mapId),
+    ]);
+
+    expect(mapRecord?.isFavorite).toBe(true);
+    expect(renderedMap?.isFavorite).toBe(true);
   });
 });

@@ -17,6 +17,7 @@ type HomeProps = {
     imageModel?: string;
     style?: string;
     hasVideo?: string;
+    favorite?: string;
   }>;
 };
 
@@ -46,6 +47,7 @@ export default async function Home(props: HomeProps) {
       activeImageModel={filters.imageModel}
       activeStyle={filters.style}
       activeHasVideo={filters.hasVideo}
+      activeFavorite={filters.favorite}
       datasetOptions={supportedDatasetKeys.map((key) => getDemoDataset(key))}
       imageModelOptions={selectableImageModelKeys.map((key) => ({
         key,

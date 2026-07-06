@@ -4,6 +4,9 @@
   "mapName": "杭州1-0",
   "city": "余杭",
   "style": "watercolor",
+  "isFavorite": true,
+  "imageModel": "unknown",
+  "videoModel": "unknown",
   "status": "confirmed",
   "eventCount": 8,
   "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783231440425.route.md",
@@ -15,6 +18,7 @@
       "versionId": "run_20260705140400_yl0g",
       "posterPath": "/mock/posters/map_gz_1783231440425.png",
       "runId": "run_20260705140400_yl0g",
+      "imageModel": "unknown",
       "createdAt": "2026-07-05T06:04:00.425Z"
     }
   ],
