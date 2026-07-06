@@ -12,6 +12,7 @@ function createMapRecord(params: Partial<MapRecord> & Pick<MapRecord, "mapId">):
     mapName: params.mapName ?? `地图-${params.mapId}`,
     city: params.city ?? "广州",
     style: params.style ?? "young-cartoon",
+    isFavorite: params.isFavorite ?? false,
     imageModel: params.imageModel ?? "unknown",
     currentVideoRunId: params.currentVideoRunId,
     videoPath: params.videoPath,
@@ -47,6 +48,7 @@ describe("profile home filters", () => {
       imageModel: "all",
       style: "all",
       hasVideo: false,
+      favorite: false,
     });
   });
 
@@ -56,6 +58,7 @@ describe("profile home filters", () => {
       imageModel: "all",
       style: "all",
       hasVideo: false,
+      favorite: false,
     });
   });
 
@@ -65,6 +68,17 @@ describe("profile home filters", () => {
       imageModel: "all",
       style: "all",
       hasVideo: true,
+      favorite: false,
+    });
+  });
+
+  it("会把 favorite=1 解析为仅看收藏作品", () => {
+    expect(resolveProfileHomeFilters({ favorite: "1" })).toEqual({
+      datasetKey: "all",
+      imageModel: "all",
+      style: "all",
+      hasVideo: false,
+      favorite: true,
     });
   });
 
@@ -76,6 +90,7 @@ describe("profile home filters", () => {
         imageModel: "seedream-5-0",
         style: "young-cartoon",
         videoPath: "/mock/videos/map_gz_a.mp4",
+        isFavorite: true,
       }),
       createMapRecord({
         mapId: "map_gz_b",
@@ -103,6 +118,7 @@ describe("profile home filters", () => {
         imageModel: "all",
         style: "all",
         hasVideo: false,
+        favorite: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a", "map_gz_b", "map_gz_c"]);
 
@@ -112,6 +128,7 @@ describe("profile home filters", () => {
         imageModel: "all",
         style: "all",
         hasVideo: false,
+        favorite: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a", "map_gz_b", "map_gz_c", "map_hz_a"]);
 
@@ -121,6 +138,7 @@ describe("profile home filters", () => {
         imageModel: "seedream-5-0",
         style: "all",
         hasVideo: false,
+        favorite: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a"]);
 
@@ -130,6 +148,7 @@ describe("profile home filters", () => {
         imageModel: "seedream-4-5",
         style: "storybook",
         hasVideo: false,
+        favorite: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_c"]);
 
@@ -139,6 +158,17 @@ describe("profile home filters", () => {
         imageModel: "all",
         style: "all",
         hasVideo: true,
+        favorite: false,
+      }).map((map) => map.mapId),
+    ).toEqual(["map_gz_a"]);
+
+    expect(
+      filterProfileMaps(maps, {
+        datasetKey: "all",
+        imageModel: "all",
+        style: "all",
+        hasVideo: false,
+        favorite: true,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a"]);
   });

@@ -1,0 +1,64 @@
+{
+  "runId": "run_20260706101915_onmz",
+  "mapId": "map_gz_1783304355967",
+  "datasetKey": "meishan",
+  "status": "completed",
+  "stage": "generate",
+  "imageModel": "seedream-5-0",
+  "videoModel": "unknown",
+  "styleKey": "young-cartoon",
+  "promptVersion": "phase4_reference_v1",
+  "referenceIds": [
+    "style_ref_young_cartoon_20260702"
+  ],
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-06T02:21:35.271Z",
+  "previewImagePaths": [
+    "/mock/files/comments/sheet_meishan_7591069079969089562_1.jpeg",
+    "/mock/files/comments/sheet_meishan_7591069079969089562_2.jpeg",
+    "/mock/files/comments/sheet_meishan_7591069079969089562_3.jpeg",
+    "/mock/files/comments/sheet_meishan_7591069079969089562_4.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_1.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_2.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_3.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_4.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_5.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_6.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_7.jpeg",
+    "/mock/files/comments/sheet_meishan_7644176065811826739_8.jpeg"
+  ],
+  "generateInput": {
+    "datasetKey": "meishan",
+    "mapName": "眉山1-3",
+    "city": "眉山",
+    "style": "young-cartoon",
+    "imageModel": "seedream-5-0",
+    "selectedCommentIds": [
+      "sheet_meishan_7591069079969089562",
+      "sheet_meishan_7644176065811826739",
+      "sheet_meishan_7562746996168132654",
+      "sheet_meishan_7590701804305549362",
+      "sheet_meishan_7421422785244841984",
+      "sheet_meishan_7590763173083383834",
+      "sheet_meishan_7562737514940598323",
+      "sheet_meishan_7421441998185318411"
+    ]
+  },
+  "inputSummary": {
+    "datasetKey": "meishan",
+    "mapName": "眉山1-3",
+    "city": "眉山",
+    "selectedCommentCount": 8
+  },
+  "warnings": [],
+  "artifacts": {
+    "rawPath": "/mock/raw/meishan.raw.json",
+    "eventsPath": "/mock/events/meishan.events.json",
+    "routePath": "/mock/routes/map_gz_1783304355967.route.md",
+    "posterPath": "/mock/posters/map_gz_1783304355967.png",
+    "mapPath": "/mock/maps/map_gz_1783304355967.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-06T02:19:15.967Z",
+  "endedAt": "2026-07-06T02:21:35.271Z"
+}

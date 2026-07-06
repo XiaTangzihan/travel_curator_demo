@@ -16,12 +16,16 @@ import {
 import {
   deleteFilePaths,
   ensureStorageDirectories,
-  fromPublicPath,
+  fromPublicPathCandidates,
   listJsonFiles,
+  normalizeRuntimeAbsolutePath,
+  normalizeRuntimePublicPath,
   pathExists,
   readBinaryFile,
   readJsonFile,
   readTextFile,
+  runtimeAssetAbsolutePath,
+  runtimeAssetPublicPath,
   storagePaths,
   writeBinaryFile,
   writeJsonFile,
@@ -29,6 +33,41 @@ import {
 } from "@/src/server/utils/storage";
 
 const runStaleAfterMs = 5 * 60 * 1000;
+
+function normalizeRuntimeFileReferences(record: MapRecord) {
+  return mapRecordSchema.parse({
+    ...record,
+    routePath: normalizeRuntimeAbsolutePath(record.routePath),
+    knowledgePath: normalizeRuntimeAbsolutePath(record.knowledgePath),
+    posterPath: normalizeRuntimePublicPath(record.posterPath),
+    videoPath: record.videoPath ? normalizeRuntimePublicPath(record.videoPath) : undefined,
+    posterVersions: (record.posterVersions ?? []).map((version) => ({
+      ...version,
+      posterPath: normalizeRuntimePublicPath(version.posterPath),
+    })),
+  });
+}
+
+function normalizeRuntimeViewModelPaths(map: MapViewModel) {
+  return mapViewModelSchema.parse({
+    ...map,
+    posterPath: normalizeRuntimePublicPath(map.posterPath),
+    videoPath: map.videoPath ? normalizeRuntimePublicPath(map.videoPath) : undefined,
+  });
+}
+
+function normalizeRuntimeArtifactPaths(trace: RunTrace) {
+  return runTraceSchema.parse({
+    ...trace,
+    artifacts: {
+      ...trace.artifacts,
+      routePath: trace.artifacts.routePath ? normalizeRuntimePublicPath(trace.artifacts.routePath) : undefined,
+      posterPath: trace.artifacts.posterPath ? normalizeRuntimePublicPath(trace.artifacts.posterPath) : undefined,
+      videoPath: trace.artifacts.videoPath ? normalizeRuntimePublicPath(trace.artifacts.videoPath) : undefined,
+      mapPath: trace.artifacts.mapPath ? normalizeRuntimePublicPath(trace.artifacts.mapPath) : undefined,
+    },
+  });
+}
 
 function rawDatasetFile(datasetKey?: string) {
   const dataset = getDemoDataset(datasetKey);
@@ -45,11 +84,11 @@ function mapRecordFile(mapId: string) {
 }
 
 function routeFile(mapId: string) {
-  return path.join(storagePaths.routes, `${mapId}.route.md`);
+  return runtimeAssetPublicPath("routes", `${mapId}.route.md`);
 }
 
 function knowledgeFile(mapId: string) {
-  return path.join(storagePaths.routes, `${mapId}.knowledge.json`);
+  return runtimeAssetPublicPath("routes", `${mapId}.knowledge.json`);
 }
 
 function renderedMapFile(mapId: string) {
@@ -114,18 +153,20 @@ export async function saveMapRecord(record: MapRecord) {
 }
 
 export async function getMapRecord(mapId: string) {
+  await ensureStorageDirectories();
   const record = await readJsonFile<MapRecord>(mapRecordFile(mapId));
-  return record ? mapRecordSchema.parse(record) : null;
+  return record ? normalizeRuntimeFileReferences(record) : null;
 }
 
 export async function listMapRecords() {
+  await ensureStorageDirectories();
   const files = (await listJsonFiles(storagePaths.maps)).filter(
     (fileName) => !fileName.endsWith(".view.json"),
   );
   const records = await Promise.all(
     files.map(async (fileName) => {
       const record = await readJsonFile<MapRecord>(path.join(storagePaths.maps, fileName));
-      return record ? mapRecordSchema.parse(record) : null;
+      return record ? normalizeRuntimeFileReferences(record) : null;
     }),
   );
 
@@ -141,6 +182,7 @@ export async function saveRouteMarkdown(mapId: string, markdown: string) {
 }
 
 export async function getRouteMarkdown(mapId: string) {
+  await ensureStorageDirectories();
   return readTextFile(routeFile(mapId));
 }
 
@@ -151,6 +193,7 @@ export async function saveKnowledge(mapId: string, knowledge: Landmark[]) {
 }
 
 export async function getKnowledge(mapId: string) {
+  await ensureStorageDirectories();
   const content = await readJsonFile<Landmark[]>(knowledgeFile(mapId));
   return content ?? [];
 }
@@ -163,6 +206,7 @@ export async function saveMapViewModel(mapId: string, map: MapViewModel) {
     mapName: map.mapName,
     city: map.city,
     style: map.style,
+    isFavorite: map.isFavorite,
     imageModel: map.imageModel,
     currentVideoRunId: map.currentVideoRunId,
     videoPath: map.videoPath,
@@ -189,6 +233,7 @@ export async function writeMapViewModel(mapId: string, map: MapViewModel) {
     mapName: map.mapName,
     city: map.city,
     style: map.style,
+    isFavorite: map.isFavorite,
     imageModel: map.imageModel,
     currentVideoRunId: map.currentVideoRunId,
     videoPath: map.videoPath,
@@ -213,8 +258,46 @@ export async function saveRenderedMap(mapId: string, map: MapViewModel) {
 }
 
 export async function getRenderedMap(mapId: string) {
+  await ensureStorageDirectories();
   const map = await readJsonFile<MapViewModel>(renderedMapFile(mapId));
-  return map ? mapViewModelSchema.parse(map) : null;
+  return map ? normalizeRuntimeViewModelPaths(map) : null;
+}
+
+export async function setMapFavoriteState(mapId: string, favorite: boolean) {
+  const [mapRecord, renderedMap] = await Promise.all([
+    getMapRecord(mapId),
+    getRenderedMap(mapId),
+  ]);
+
+  if (!mapRecord && !renderedMap) {
+    return null;
+  }
+
+  if (mapRecord) {
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        ...mapRecord,
+        isFavorite: favorite,
+      }),
+    );
+  }
+
+  if (renderedMap) {
+    await saveRenderedMap(
+      mapId,
+      mapViewModelSchema.parse({
+        ...renderedMap,
+        isFavorite: favorite,
+      }),
+    );
+  }
+
+  return {
+    mapId,
+    favorite,
+    updatedRecord: Boolean(mapRecord),
+    updatedRenderedMap: Boolean(renderedMap),
+  };
 }
 
 export async function saveRunTrace(trace: RunTrace) {
@@ -223,8 +306,9 @@ export async function saveRunTrace(trace: RunTrace) {
 }
 
 export async function getRunTrace(runId: string) {
+  await ensureStorageDirectories();
   const trace = await readJsonFile<RunTrace>(runFile(runId));
-  return trace ? runTraceSchema.parse(trace) : null;
+  return trace ? normalizeRuntimeArtifactPaths(trace) : null;
 }
 
 export async function updateRunTrace(runId: string, patch: Partial<RunTrace>) {
@@ -269,11 +353,12 @@ export async function getRunTraceWithRecovery(runId: string) {
 }
 
 export async function listRunTraces() {
+  await ensureStorageDirectories();
   const files = await listJsonFiles(storagePaths.runs);
   const traces = await Promise.all(
     files.map(async (fileName) => {
       const trace = await readJsonFile<RunTrace>(path.join(storagePaths.runs, fileName));
-      return trace ? runTraceSchema.parse(trace) : null;
+      return trace ? normalizeRuntimeArtifactPaths(trace) : null;
     }),
   );
 
@@ -321,32 +406,32 @@ export async function deleteMapArtifacts(mapId: string) {
   }
 
   if (mapRecord?.posterPath) {
-    artifactPathSet.add(fromPublicPath(mapRecord.posterPath));
+    fromPublicPathCandidates(mapRecord.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   if (mapRecord?.videoPath) {
-    artifactPathSet.add(fromPublicPath(mapRecord.videoPath));
+    fromPublicPathCandidates(mapRecord.videoPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   mapRecord?.posterVersions.forEach((version) => {
-    artifactPathSet.add(fromPublicPath(version.posterPath));
+    fromPublicPathCandidates(version.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   });
 
   if (renderedMap?.posterPath) {
-    artifactPathSet.add(fromPublicPath(renderedMap.posterPath));
+    fromPublicPathCandidates(renderedMap.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   if (renderedMap?.videoPath) {
-    artifactPathSet.add(fromPublicPath(renderedMap.videoPath));
+    fromPublicPathCandidates(renderedMap.videoPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   relatedRunTraces.forEach((trace) => {
     artifactPathSet.add(runFile(trace.runId));
     if (trace.artifacts.posterPath) {
-      artifactPathSet.add(fromPublicPath(trace.artifacts.posterPath));
+      fromPublicPathCandidates(trace.artifacts.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
     }
     if (trace.artifacts.videoPath) {
-      artifactPathSet.add(fromPublicPath(trace.artifacts.videoPath));
+      fromPublicPathCandidates(trace.artifacts.videoPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
     }
   });
 
@@ -384,7 +469,7 @@ export function posterOutputPath(
   versionTag?: string,
 ) {
   const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
-  return path.join(storagePaths.posters, fileName);
+  return runtimeAssetAbsolutePath("posters", fileName);
 }
 
 export function posterPublicPath(
@@ -393,15 +478,15 @@ export function posterPublicPath(
   versionTag?: string,
 ) {
   const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
-  return `/mock/posters/${fileName}`;
+  return runtimeAssetPublicPath("posters", fileName);
 }
 
 export function videoOutputPath(mapId: string) {
-  return path.join(storagePaths.videos, `${mapId}.mp4`);
+  return runtimeAssetAbsolutePath("videos", `${mapId}.mp4`);
 }
 
 export function videoPublicPath(mapId: string) {
-  return `/mock/videos/${mapId}.mp4`;
+  return runtimeAssetPublicPath("videos", `${mapId}.mp4`);
 }
 
 export async function saveVideoArtifact(mapId: string, video: Buffer) {

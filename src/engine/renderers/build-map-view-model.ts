@@ -41,6 +41,7 @@ export function buildMapViewModel(params: {
     mapName: params.mapName,
     city: params.city,
     style: params.style,
+    isFavorite: false,
     imageModel: params.imageModel ?? "unknown",
     videoModel: "unknown",
     posterPath: params.posterPath,

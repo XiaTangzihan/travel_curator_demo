@@ -21,6 +21,10 @@ type GeneratingPageProps = {
   initialRun: RunTrace;
 };
 
+export const runStatusPollIntervalMs = 1_500;
+export const runDriveTickIntervalMs = 1_500;
+export const driveRequestTimeoutMs = 12_000;
+
 const progressSteps = [
   {
     key: "preparing",
@@ -63,14 +67,46 @@ function buildFilmStripFrames(previewImagePaths: string[]) {
   return [...repeated, ...repeated.slice(0, Math.min(4, repeated.length))];
 }
 
+function resolveRunStepKey(run: RunTrace) {
+  return run.driveState?.phase ?? run.progressStep ?? "preparing";
+}
+
+function hasActiveDriveLease(run: RunTrace) {
+  const leaseExpiresAt = run.driveState?.leaseExpiresAt;
+  if (!leaseExpiresAt) {
+    return false;
+  }
+
+  return Date.parse(leaseExpiresAt) > Date.now();
+}
+
+function isAbortError(error: unknown) {
+  if (error instanceof DOMException) {
+    return error.name === "AbortError";
+  }
+
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "name" in error &&
+      (error as { name?: string }).name === "AbortError",
+  );
+}
+
 export function GeneratingPage(props: GeneratingPageProps) {
   const router = useRouter();
   const redirectingRef = useRef(false);
+  const drivingRef = useRef(false);
+  const runRef = useRef(props.initialRun);
   const [run, setRun] = useState(props.initialRun);
   const [error, setError] = useState("");
   const [retrying, setRetrying] = useState(false);
 
-  const currentStepKey = run.progressStep ?? "preparing";
+  useEffect(() => {
+    runRef.current = run;
+  }, [run]);
+
+  const currentStepKey = resolveRunStepKey(run);
   const currentStepIndex = progressSteps.findIndex((step) => step.key === currentStepKey);
   const resolvedStepIndex =
     run.status === "completed"
@@ -105,16 +141,14 @@ export function GeneratingPage(props: GeneratingPageProps) {
   }, [router, run]);
 
   useEffect(() => {
-    if (isTerminalRunStatus(run.status)) {
-      return;
-    }
-
     let cancelled = false;
+    const pollRunStatus = async () => {
+      if (cancelled || isTerminalRunStatus(runRef.current.status)) {
+        return;
+      }
 
-    async function refreshRun() {
       try {
-        const response = await fetch(`/api/runs/${run.runId}`, {
-          method: "GET",
+        const response = await fetch(`/api/runs/${runRef.current.runId}`, {
           cache: "no-store",
         });
         const payload = await response.json();
@@ -122,40 +156,120 @@ export function GeneratingPage(props: GeneratingPageProps) {
           throw new Error(payload.error ?? "读取生成状态失败");
         }
 
-        if (!cancelled) {
-          setRun(payload.run as RunTrace);
-          setError("");
+        if (cancelled) {
+          return;
         }
+
+        const nextRun = payload.run as RunTrace;
+        setRun(nextRun);
+        setError("");
       } catch (requestError) {
         if (!cancelled) {
           setError((requestError as Error).message);
         }
       }
-    }
+    };
 
+    void pollRunStatus();
     const timer = window.setInterval(() => {
-      void refreshRun();
-    }, 1500);
+      void pollRunStatus();
+    }, runStatusPollIntervalMs);
 
     return () => {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [run.runId, run.status]);
+  }, [run.runId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const driveRun = async () => {
+      const currentRun = runRef.current;
+      if (
+        cancelled ||
+        drivingRef.current ||
+        isTerminalRunStatus(currentRun.status) ||
+        hasActiveDriveLease(currentRun)
+      ) {
+        return;
+      }
+
+      drivingRef.current = true;
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => {
+        controller.abort();
+      }, driveRequestTimeoutMs);
+
+      try {
+        const response = await fetch(`/api/runs/${currentRun.runId}/drive`, {
+          method: "POST",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "推进生成状态失败");
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        const nextRun = payload.run as RunTrace;
+        setRun(nextRun);
+        setError("");
+      } catch (requestError) {
+        if (!cancelled && !isAbortError(requestError)) {
+          setError((requestError as Error).message);
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+        drivingRef.current = false;
+      }
+    };
+
+    void driveRun();
+    const timer = window.setInterval(() => {
+      void driveRun();
+    }, runDriveTickIntervalMs);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [run.runId]);
 
   async function handleRetry() {
-    if (!run.generateInput || retrying) {
+    if (retrying) {
       return;
     }
 
     try {
       setRetrying(true);
       setError("");
-      const response = await fetch("/api/maps/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(run.generateInput),
-      });
+      let response: Response;
+
+      if (run.generateInput) {
+        response = await fetch("/api/maps/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(run.generateInput),
+        });
+      } else if (run.regenerateInput) {
+        response = await fetch(`/api/maps/${run.mapId}/regenerate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: run.regenerateInput.mode,
+            instruction: run.regenerateInput.instruction,
+            imageModel: run.regenerateInput.imageModel,
+          }),
+        });
+      } else {
+        throw new Error("当前 run 不支持重试");
+      }
+
       const payload = await response.json();
       if (!response.ok) {
         throw new Error(payload.error ?? "重新发起生成失败");
@@ -203,8 +317,11 @@ export function GeneratingPage(props: GeneratingPageProps) {
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[var(--bg-surface)] shadow-[var(--shadow-soft)]">
                           <LoaderCircle className="h-8 w-8 animate-spin text-[var(--accent-primary)]" />
                         </div>
-                        <div>
-                          <p className="text-[22px] font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
+                        <div aria-live="polite">
+                          <p
+                            data-testid="generating-active-step"
+                            className="text-[22px] font-semibold tracking-[-0.04em] text-[var(--text-strong)]"
+                          >
                             {run.status === "failed"
                               ? "生成失败"
                               : run.status === "incomplete"
@@ -310,24 +427,30 @@ export function GeneratingPage(props: GeneratingPageProps) {
                     <button
                       type="button"
                       onClick={handleRetry}
-                      disabled={!run.generateInput || retrying}
+                      disabled={(!run.generateInput && !run.regenerateInput) || retrying}
                       className="inline-flex items-center justify-center gap-2 rounded-[20px] bg-[var(--accent-primary)] px-4 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
                     >
                       {retrying ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                      重试本次输入
+                      {run.regenerateInput ? "重试本次重生成" : "重试本次输入"}
                     </button>
                     <button
                       type="button"
-                      onClick={() => router.push(`/workspace?dataset=${run.datasetKey}`)}
+                      onClick={() =>
+                        router.push(
+                          run.regenerateInput
+                            ? `/confirm/${run.mapId}`
+                            : `/workspace?dataset=${run.datasetKey}`,
+                        )
+                      }
                       disabled={retrying}
                       className="inline-flex items-center justify-center rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-page)] disabled:opacity-60"
                     >
-                      返回工作台
+                      {run.regenerateInput ? "返回确认页" : "返回工作台"}
                     </button>
                   </div>
                 ) : (
                   <p className="mt-5 text-sm leading-7 text-[var(--text-muted)]">
-                    生成会在后台继续执行。完成后将自动跳转，不需要再次点击。
+                    生成会在后台继续执行，页面会持续轮询最新状态。完成后会自动跳转，不需要再次点击。
                   </p>
                 )}
               </aside>

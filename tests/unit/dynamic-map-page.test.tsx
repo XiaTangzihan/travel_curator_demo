@@ -36,6 +36,7 @@ const map: MapViewModel = {
   mapName: "广州疗愈图",
   city: "广州",
   style: "young-cartoon",
+  isFavorite: false,
   imageModel: "seedream-5-0",
   videoModel: "unknown",
   posterPath: "/mock/posters/map_001.png",
@@ -154,6 +155,42 @@ describe("DynamicMapPage", () => {
 
     await waitFor(() => {
       expect(pushMock).toHaveBeenCalledWith("/maps/map_001/video/generating/run_video_new_001");
+    });
+  });
+
+  it("会在单地图页切换收藏状态", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        mapId: "map_001",
+        favorite: true,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <DynamicMapPage
+        map={map}
+        initialTab="map"
+        availableVideoModels={["seedance-1-5-pro"]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "收藏" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/api/maps/map_001/favorite", expect.objectContaining({
+        method: "POST",
+      }));
+    });
+
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+      favorite: true,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "已收藏" })).toBeInTheDocument();
     });
   });
 });

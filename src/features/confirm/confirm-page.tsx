@@ -22,8 +22,6 @@ import {
 import type { AiNotice } from "@/src/lib/ai-notice";
 import {
   consumeAiNotice,
-  persistAiNotice,
-  resolveAiNoticeFromWarnings,
 } from "@/src/lib/ai-notice";
 
 type ConfirmPageProps = {
@@ -106,16 +104,7 @@ export function ConfirmPage(props: ConfirmPageProps) {
       if (!response.ok) {
         throw new Error(payload.error ?? "重生成失败");
       }
-
-      const nextNotice = resolveAiNoticeFromWarnings({
-        warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
-        city: props.mapRecord.city,
-      });
-      if (nextNotice) {
-        persistAiNotice(nextNotice);
-      }
-
-      router.refresh();
+      router.push(payload.waitPath ?? `/workspace/generating/${payload.runId}`);
     } catch (requestError) {
       setError((requestError as Error).message);
     } finally {

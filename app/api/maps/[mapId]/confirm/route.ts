@@ -7,6 +7,7 @@ import {
   saveMapRecord,
   saveRunTrace,
 } from "@/src/server/repositories/demo-repository";
+import { runtimeAssetPublicPath } from "@/src/server/utils/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +44,9 @@ export async function POST(_request: Request, context: ConfirmContext) {
         stage: "confirm",
         warnings: [],
         artifacts: {
-          routePath: `/mock/routes/${mapId}.route.md`,
+          routePath: runtimeAssetPublicPath("routes", `${mapId}.route.md`),
           posterPath: confirmedRecord.posterPath,
-          mapPath: `/mock/maps/${mapId}.view.json`,
+          mapPath: runtimeAssetPublicPath("maps", `${mapId}.view.json`),
         },
         providerMode: "live",
         startedAt: new Date().toISOString(),

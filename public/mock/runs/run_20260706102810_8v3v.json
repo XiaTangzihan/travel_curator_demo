@@ -1,0 +1,26 @@
+{
+  "runId": "run_20260706102810_8v3v",
+  "mapId": "map_gz_1783304355967",
+  "datasetKey": "meishan",
+  "status": "completed",
+  "stage": "video_generate",
+  "imageModel": "seedream-5-0",
+  "videoModel": "seedance-1-5-pro",
+  "providerTaskId": "cgt-20260706102812-22k8j",
+  "videoDurationSeconds": 9,
+  "promptInstruction": "整体运动人格是轻快、明亮、灵动。\n路线的流动感可以稍微更明显，湖面波纹、云朵漂移、小船滑行、食物贴纸和地点圆牌可以有极轻微的呼吸感或弹性起伏，但必须克制、整洁、圆润。\n所有动态应像一张可爱的旅行贴纸地图被轻轻唤醒，不要出现幼稚夸张的跳动，不要让食物卡片或数字标记发生大幅位移。",
+  "styleKey": "young-cartoon",
+  "promptVersion": "p6_video_prompt_v1",
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-06T02:29:16.304Z",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783304355967.route.md",
+    "posterPath": "/mock/posters/map_gz_1783304355967.png",
+    "videoPath": "/mock/videos/map_gz_1783304355967.mp4",
+    "mapPath": "/mock/maps/map_gz_1783304355967.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-06T02:28:10.323Z",
+  "endedAt": "2026-07-06T02:29:16.304Z"
+}

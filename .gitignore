@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /out/
+/.runtime/
 
 # production
 /build
@@ -41,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local deployment helpers
+.iga-home/
+.phase4-staging/

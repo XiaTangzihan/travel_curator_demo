@@ -26,7 +26,7 @@ import {
   saveVideoArtifact,
   updateRunTrace,
 } from "@/src/server/repositories/demo-repository";
-import { fromPublicPath } from "@/src/server/utils/storage";
+import { fromPublicPath, runtimeAssetPublicPath } from "@/src/server/utils/storage";
 
 type StartGenerateVideoRunInput = {
   mapId: string;
@@ -195,7 +195,7 @@ async function runGenerateVideo(params: GenerateVideoExecutionContext) {
         routePath: params.mapRecord.routePath,
         posterPath: params.mapRecord.posterPath,
         videoPath,
-        mapPath: `/mock/maps/${params.mapRecord.mapId}.view.json`,
+        mapPath: runtimeAssetPublicPath("maps", `${params.mapRecord.mapId}.view.json`),
       },
       providerMode: "live",
       startedAt: params.startedAt,
@@ -257,7 +257,7 @@ export async function startGenerateVideoRun(input: StartGenerateVideoRunInput) {
       artifacts: {
         routePath: mapRecord.routePath,
         posterPath: mapRecord.posterPath,
-        mapPath: `/mock/maps/${mapRecord.mapId}.view.json`,
+        mapPath: runtimeAssetPublicPath("maps", `${mapRecord.mapId}.view.json`),
       },
       providerMode: "live",
       startedAt,

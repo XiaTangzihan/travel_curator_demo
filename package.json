@@ -12,6 +12,9 @@
     "check": "npm run lint && npm run test",
     "sync:dataset": "tsx scripts/sync-dataset.ts",
     "preprocess:dataset": "tsx scripts/preprocess-dataset.ts",
+    "bootstrap:favorite-preload": "tsx scripts/bootstrap-favorite-preload.ts",
+    "import:curated-maps": "tsx scripts/import-curated-maps.ts",
+    "build:judge-seed": "tsx scripts/bootstrap-favorite-preload.ts --expected-count 5",
     "sync:guangzhou": "tsx scripts/sync-dataset.ts guangzhou",
     "preprocess:guangzhou": "tsx scripts/preprocess-dataset.ts guangzhou",
     "sync:hangzhou": "tsx scripts/sync-dataset.ts hangzhou",
@@ -20,6 +23,7 @@
     "preprocess:meishan": "tsx scripts/preprocess-dataset.ts meishan"
   },
   "dependencies": {
+    "@volcengine/tos-sdk": "^2.9.1",
     "lucide-react": "^0.554.0",
     "next": "16.2.9",
     "react": "19.2.4",

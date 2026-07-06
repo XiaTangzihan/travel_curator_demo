@@ -4,9 +4,8 @@ import { selectableImageModelSchema } from "@/src/contracts/domain";
 import {
   resolveRegenerateExecutionPlan,
 } from "@/src/features/confirm/regenerate-policy";
-import { regenerateMapDraft } from "@/src/engine/pipelines/generate-map";
+import { startRegenerateMapRun } from "@/src/engine/pipelines/generate-map";
 import {
-  getEventsDataset,
   getMapRecord,
 } from "@/src/server/repositories/demo-repository";
 
@@ -26,12 +25,9 @@ export async function POST(request: Request, context: RegenerateContext) {
   try {
     const { mapId } = await context.params;
     const mapRecord = await getMapRecord(mapId);
-    const eventsSnapshot = mapRecord
-      ? await getEventsDataset(mapRecord.datasetKey)
-      : null;
 
-    if (!mapRecord || !eventsSnapshot) {
-      return NextResponse.json({ error: "地图或事件数据不存在" }, { status: 404 });
+    if (!mapRecord) {
+      return NextResponse.json({ error: "地图不存在" }, { status: 404 });
     }
 
     const body = requestSchema.parse(await request.json());
@@ -39,13 +35,8 @@ export async function POST(request: Request, context: RegenerateContext) {
       mode: body.mode,
       instruction: body.instruction,
     });
-    const events = eventsSnapshot.events.filter((event) =>
-      mapRecord.selectedCommentIds.includes(event.commentId),
-    );
-
-    const result = await regenerateMapDraft({
+    const result = await startRegenerateMapRun({
       mapRecord,
-      events,
       mode: executionPlan.mode,
       instruction: executionPlan.instruction,
       imageModel: body.imageModel,
@@ -54,8 +45,7 @@ export async function POST(request: Request, context: RegenerateContext) {
     return NextResponse.json({
       mapId,
       runId: result.runId,
-      providerMode: result.runTrace.providerMode,
-      warnings: result.runTrace.warnings,
+      waitPath: result.waitPath,
     });
   } catch (error) {
     return NextResponse.json(
