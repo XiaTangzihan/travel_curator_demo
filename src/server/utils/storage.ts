@@ -1,39 +1,162 @@
-import { access, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const publicDir = path.join(/* turbopackIgnore: true */ process.cwd(), "public");
-const mockDir = path.join(/* turbopackIgnore: true */ process.cwd(), "public", "mock");
+const publicMockDir = path.join(publicDir, "mock");
+const runtimeDir = path.join(/* turbopackIgnore: true */ process.cwd(), ".runtime");
+const runtimeMockDir = path.join(runtimeDir, "mock");
+
+const runtimeMockCategories = ["routes", "posters", "videos", "maps", "runs"] as const;
+
+type RuntimeMockCategory = (typeof runtimeMockCategories)[number];
+export type { RuntimeMockCategory };
+
+const runtimeMockCategorySet = new Set<string>(runtimeMockCategories);
 
 export const storagePaths = {
   publicDir,
-  mockDir,
-  raw: path.join(mockDir, "raw"),
-  events: path.join(mockDir, "events"),
-  routes: path.join(mockDir, "routes"),
-  posters: path.join(mockDir, "posters"),
-  videos: path.join(mockDir, "videos"),
-  maps: path.join(mockDir, "maps"),
-  runs: path.join(mockDir, "runs"),
-  files: path.join(mockDir, "files"),
-  comments: path.join(mockDir, "files", "comments"),
+  publicMockDir,
+  runtimeDir,
+  runtimeMockDir,
+  raw: path.join(publicMockDir, "raw"),
+  events: path.join(publicMockDir, "events"),
+  routes: path.join(runtimeMockDir, "routes"),
+  posters: path.join(runtimeMockDir, "posters"),
+  videos: path.join(runtimeMockDir, "videos"),
+  maps: path.join(runtimeMockDir, "maps"),
+  runs: path.join(runtimeMockDir, "runs"),
+  files: path.join(publicMockDir, "files"),
+  comments: path.join(publicMockDir, "files", "comments"),
 } as const;
 
+export const legacyRuntimeStoragePaths = {
+  routes: path.join(publicMockDir, "routes"),
+  posters: path.join(publicMockDir, "posters"),
+  videos: path.join(publicMockDir, "videos"),
+  maps: path.join(publicMockDir, "maps"),
+  runs: path.join(publicMockDir, "runs"),
+} as const satisfies Record<RuntimeMockCategory, string>;
+
+let runtimeMigrationPromise: Promise<void> | null = null;
+
+function toPosixPath(value: string) {
+  return value.split(path.sep).join("/");
+}
+
+function normalizePublicPath(publicPath: string) {
+  return `/${publicPath.replace(/^\/+/, "")}`;
+}
+
+function splitMockPublicPath(publicPath: string) {
+  const normalized = normalizePublicPath(publicPath);
+  if (!normalized.startsWith("/mock/")) {
+    return null;
+  }
+
+  const segments = normalized.split("/").filter(Boolean);
+  const [mock, category, ...restSegments] = segments;
+  if (mock !== "mock" || !category || restSegments.length === 0) {
+    return null;
+  }
+
+  return {
+    category,
+    relativePath: restSegments.join("/"),
+  };
+}
+
+function resolveRuntimeCategoryPath(category: RuntimeMockCategory, relativePath: string) {
+  return path.join(storagePaths[category], ...relativePath.split("/"));
+}
+
+function resolveLegacyRuntimeCategoryPath(category: RuntimeMockCategory, relativePath: string) {
+  return path.join(legacyRuntimeStoragePaths[category], ...relativePath.split("/"));
+}
+
 export function toPublicPath(filePath: string) {
-  const relative = path.relative(publicDir, filePath).split(path.sep).join("/");
+  if (filePath.startsWith(storagePaths.runtimeMockDir)) {
+    const relative = toPosixPath(path.relative(storagePaths.runtimeMockDir, filePath));
+    return `/mock/${relative}`;
+  }
+
+  const relative = toPosixPath(path.relative(publicDir, filePath));
   return `/${relative}`;
 }
 
 export function fromPublicPath(publicPath: string) {
-  const relative = publicPath.replace(/^\/+/, "");
-  return path.join(publicDir, relative);
+  const runtimeCandidates = fromPublicPathCandidates(publicPath);
+  return runtimeCandidates[0];
+}
+
+export function fromPublicPathCandidates(publicPath: string) {
+  const mockPath = splitMockPublicPath(publicPath);
+  if (mockPath && runtimeMockCategorySet.has(mockPath.category)) {
+    const category = mockPath.category as RuntimeMockCategory;
+    return [
+      resolveRuntimeCategoryPath(category, mockPath.relativePath),
+      resolveLegacyRuntimeCategoryPath(category, mockPath.relativePath),
+    ];
+  }
+
+  const relative = normalizePublicPath(publicPath).replace(/^\/+/, "");
+  return [path.join(publicDir, relative)];
+}
+
+export function runtimeAssetPublicPath(category: RuntimeMockCategory, fileName: string) {
+  return `/mock/${category}/${fileName}`;
+}
+
+export function runtimeAssetAbsolutePath(category: RuntimeMockCategory, fileName: string) {
+  return path.join(storagePaths[category], fileName);
+}
+
+async function migrateLegacyRuntimeStorage() {
+  await Promise.all(
+    runtimeMockCategories.map(async (category) => {
+      const legacyDirectory = legacyRuntimeStoragePaths[category];
+      const runtimeDirectory = storagePaths[category];
+      try {
+        const fileNames = await readdir(legacyDirectory);
+        await Promise.all(
+          fileNames.map(async (fileName) => {
+            const sourcePath = path.join(legacyDirectory, fileName);
+            const targetPath = path.join(runtimeDirectory, fileName);
+            if (await pathExists(targetPath)) {
+              return;
+            }
+            await cp(sourcePath, targetPath, { force: false, recursive: true });
+          }),
+        );
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+          return;
+        }
+        throw error;
+      }
+    }),
+  );
+}
+
+async function ensureRuntimeStorageMigrated() {
+  if (!runtimeMigrationPromise) {
+    runtimeMigrationPromise = migrateLegacyRuntimeStorage();
+  }
+  await runtimeMigrationPromise;
 }
 
 export async function ensureStorageDirectories() {
-  const directories = Object.values(storagePaths).filter((value) =>
-    value.startsWith(mockDir),
-  );
+  const directories = [
+    storagePaths.runtimeDir,
+    storagePaths.runtimeMockDir,
+    storagePaths.routes,
+    storagePaths.posters,
+    storagePaths.videos,
+    storagePaths.maps,
+    storagePaths.runs,
+  ];
 
   await Promise.all(directories.map((directory) => mkdir(directory, { recursive: true })));
+  await ensureRuntimeStorageMigrated();
 }
 
 export async function writeJsonFile(filePath: string, value: unknown) {

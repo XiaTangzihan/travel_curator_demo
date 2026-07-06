@@ -16,12 +16,14 @@ import {
 import {
   deleteFilePaths,
   ensureStorageDirectories,
-  fromPublicPath,
+  fromPublicPathCandidates,
   listJsonFiles,
   pathExists,
   readBinaryFile,
   readJsonFile,
   readTextFile,
+  runtimeAssetAbsolutePath,
+  runtimeAssetPublicPath,
   storagePaths,
   writeBinaryFile,
   writeJsonFile,
@@ -114,11 +116,13 @@ export async function saveMapRecord(record: MapRecord) {
 }
 
 export async function getMapRecord(mapId: string) {
+  await ensureStorageDirectories();
   const record = await readJsonFile<MapRecord>(mapRecordFile(mapId));
   return record ? mapRecordSchema.parse(record) : null;
 }
 
 export async function listMapRecords() {
+  await ensureStorageDirectories();
   const files = (await listJsonFiles(storagePaths.maps)).filter(
     (fileName) => !fileName.endsWith(".view.json"),
   );
@@ -141,6 +145,7 @@ export async function saveRouteMarkdown(mapId: string, markdown: string) {
 }
 
 export async function getRouteMarkdown(mapId: string) {
+  await ensureStorageDirectories();
   return readTextFile(routeFile(mapId));
 }
 
@@ -151,6 +156,7 @@ export async function saveKnowledge(mapId: string, knowledge: Landmark[]) {
 }
 
 export async function getKnowledge(mapId: string) {
+  await ensureStorageDirectories();
   const content = await readJsonFile<Landmark[]>(knowledgeFile(mapId));
   return content ?? [];
 }
@@ -215,6 +221,7 @@ export async function saveRenderedMap(mapId: string, map: MapViewModel) {
 }
 
 export async function getRenderedMap(mapId: string) {
+  await ensureStorageDirectories();
   const map = await readJsonFile<MapViewModel>(renderedMapFile(mapId));
   return map ? mapViewModelSchema.parse(map) : null;
 }
@@ -262,6 +269,7 @@ export async function saveRunTrace(trace: RunTrace) {
 }
 
 export async function getRunTrace(runId: string) {
+  await ensureStorageDirectories();
   const trace = await readJsonFile<RunTrace>(runFile(runId));
   return trace ? runTraceSchema.parse(trace) : null;
 }
@@ -308,6 +316,7 @@ export async function getRunTraceWithRecovery(runId: string) {
 }
 
 export async function listRunTraces() {
+  await ensureStorageDirectories();
   const files = await listJsonFiles(storagePaths.runs);
   const traces = await Promise.all(
     files.map(async (fileName) => {
@@ -360,32 +369,32 @@ export async function deleteMapArtifacts(mapId: string) {
   }
 
   if (mapRecord?.posterPath) {
-    artifactPathSet.add(fromPublicPath(mapRecord.posterPath));
+    fromPublicPathCandidates(mapRecord.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   if (mapRecord?.videoPath) {
-    artifactPathSet.add(fromPublicPath(mapRecord.videoPath));
+    fromPublicPathCandidates(mapRecord.videoPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   mapRecord?.posterVersions.forEach((version) => {
-    artifactPathSet.add(fromPublicPath(version.posterPath));
+    fromPublicPathCandidates(version.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   });
 
   if (renderedMap?.posterPath) {
-    artifactPathSet.add(fromPublicPath(renderedMap.posterPath));
+    fromPublicPathCandidates(renderedMap.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   if (renderedMap?.videoPath) {
-    artifactPathSet.add(fromPublicPath(renderedMap.videoPath));
+    fromPublicPathCandidates(renderedMap.videoPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
   }
 
   relatedRunTraces.forEach((trace) => {
     artifactPathSet.add(runFile(trace.runId));
     if (trace.artifacts.posterPath) {
-      artifactPathSet.add(fromPublicPath(trace.artifacts.posterPath));
+      fromPublicPathCandidates(trace.artifacts.posterPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
     }
     if (trace.artifacts.videoPath) {
-      artifactPathSet.add(fromPublicPath(trace.artifacts.videoPath));
+      fromPublicPathCandidates(trace.artifacts.videoPath).forEach((artifactPath) => artifactPathSet.add(artifactPath));
     }
   });
 
@@ -423,7 +432,7 @@ export function posterOutputPath(
   versionTag?: string,
 ) {
   const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
-  return path.join(storagePaths.posters, fileName);
+  return runtimeAssetAbsolutePath("posters", fileName);
 }
 
 export function posterPublicPath(
@@ -432,15 +441,15 @@ export function posterPublicPath(
   versionTag?: string,
 ) {
   const fileName = versionTag ? `${mapId}__${versionTag}.${extension}` : `${mapId}.${extension}`;
-  return `/mock/posters/${fileName}`;
+  return runtimeAssetPublicPath("posters", fileName);
 }
 
 export function videoOutputPath(mapId: string) {
-  return path.join(storagePaths.videos, `${mapId}.mp4`);
+  return runtimeAssetAbsolutePath("videos", `${mapId}.mp4`);
 }
 
 export function videoPublicPath(mapId: string) {
-  return `/mock/videos/${mapId}.mp4`;
+  return runtimeAssetPublicPath("videos", `${mapId}.mp4`);
 }
 
 export async function saveVideoArtifact(mapId: string, video: Buffer) {
