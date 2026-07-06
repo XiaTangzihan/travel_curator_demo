@@ -23,6 +23,7 @@ import {
 } from "@/src/server/trace-diagnostics/queries";
 import {
   deleteFilePaths,
+  runtimeAssetPublicPath,
   storagePaths,
   writeBinaryFile,
 } from "@/src/server/utils/storage";
@@ -108,7 +109,7 @@ async function seedTraceScenario(token: string) {
   const knowledgePath = await saveKnowledge(mapId, knowledge);
   const selectedPosterOutputPath = posterOutputPath(mapId, "png", regenerateRunId);
   const selectedPosterPublicPath = posterPublicPath(mapId, "png", regenerateRunId);
-  const selectedVideoPublicPath = `/mock/videos/${mapId}.mp4`;
+  const selectedVideoPublicPath = runtimeAssetPublicPath("videos", `${mapId}.mp4`);
   await writeBinaryFile(selectedPosterOutputPath, Buffer.from("selected-poster"));
   await writeBinaryFile(path.join(storagePaths.videos, `${mapId}.mp4`), Buffer.from("selected-video"));
 
@@ -178,9 +179,9 @@ async function seedTraceScenario(token: string) {
       artifacts: {
         rawPath: "/mock/raw/hangzhou.raw.json",
         eventsPath: "/mock/events/hangzhou.events.json",
-        routePath: `/mock/routes/${mapId}.route.md`,
+        routePath: runtimeAssetPublicPath("routes", `${mapId}.route.md`),
         posterPath: posterPublicPath(mapId, "png"),
-        mapPath: `/mock/maps/${mapId}.view.json`,
+        mapPath: runtimeAssetPublicPath("maps", `${mapId}.view.json`),
       },
       providerMode: "live",
       startedAt: "2026-07-05T05:30:59.285Z",
@@ -202,10 +203,10 @@ async function seedTraceScenario(token: string) {
       referenceIds: ["style_ref_young_cartoon_20260702"],
       warnings: [],
       artifacts: {
-        routePath: `/mock/routes/${mapId}.route.md`,
+        routePath: runtimeAssetPublicPath("routes", `${mapId}.route.md`),
         posterPath: selectedPosterPublicPath,
         videoPath: selectedVideoPublicPath,
-        mapPath: `/mock/maps/${mapId}.view.json`,
+        mapPath: runtimeAssetPublicPath("maps", `${mapId}.view.json`),
       },
       providerMode: "live",
       startedAt: "2026-07-05T05:34:36.985Z",
@@ -222,9 +223,9 @@ async function seedTraceScenario(token: string) {
       stage: "confirm",
       warnings: [],
       artifacts: {
-        routePath: `/mock/routes/${mapId}.route.md`,
+        routePath: runtimeAssetPublicPath("routes", `${mapId}.route.md`),
         posterPath: selectedPosterPublicPath,
-        mapPath: `/mock/maps/${mapId}.view.json`,
+        mapPath: runtimeAssetPublicPath("maps", `${mapId}.view.json`),
       },
       providerMode: "live",
       startedAt: "2026-07-05T05:39:37.088Z",
@@ -268,7 +269,9 @@ describe.sequential("trace diagnostics queries", () => {
     expect(detail?.currentArtifacts.raw.source).toBe("dataset_inferred");
     expect(detail?.currentArtifacts.events.publicPath).toBe("/mock/events/hangzhou.events.json");
     expect(detail?.currentArtifacts.events.source).toBe("dataset_inferred");
-    expect(detail?.currentArtifacts.video.publicPath).toBe(`/mock/videos/${seeded.mapId}.mp4`);
+    expect(detail?.currentArtifacts.video.publicPath).toBe(
+      runtimeAssetPublicPath("videos", `${seeded.mapId}.mp4`),
+    );
     expect(detail?.currentArtifacts.video.durationSeconds).toBe(5);
   });
 
@@ -406,9 +409,9 @@ knowledge_count: 1
         artifacts: {
           rawPath: "/mock/raw/hangzhou.raw.json",
           eventsPath: "/mock/events/hangzhou.events.json",
-          routePath: `/mock/routes/${mapId}.route.md`,
+          routePath: runtimeAssetPublicPath("routes", `${mapId}.route.md`),
           posterPath: currentPosterPath,
-          mapPath: `/mock/maps/${mapId}.view.json`,
+          mapPath: runtimeAssetPublicPath("maps", `${mapId}.view.json`),
         },
         providerMode: "live",
         startedAt: "2026-07-05T05:30:59.285Z",
@@ -452,13 +455,13 @@ knowledge_count: 1
         status: "draft",
         eventCount: 1,
         routePath,
-        posterPath: `/mock/posters/${mapId}__${missingRunId}.png`,
+        posterPath: runtimeAssetPublicPath("posters", `${mapId}__${missingRunId}.png`),
         knowledgePath,
         currentRunId: missingRunId,
         posterVersions: [
           {
             versionId: missingRunId,
-            posterPath: `/mock/posters/${mapId}__${missingRunId}.png`,
+            posterPath: runtimeAssetPublicPath("posters", `${mapId}__${missingRunId}.png`),
             runId: missingRunId,
             createdAt: "2026-07-05T05:30:59.285Z",
           },
@@ -494,8 +497,8 @@ knowledge_count: 1
         stage: "regenerate",
         warnings: [],
         artifacts: {
-          routePath: `/mock/routes/${seeded.mapId}.route.md`,
-          mapPath: `/mock/maps/${seeded.mapId}.view.json`,
+          routePath: runtimeAssetPublicPath("routes", `${seeded.mapId}.route.md`),
+          mapPath: runtimeAssetPublicPath("maps", `${seeded.mapId}.view.json`),
         },
         providerMode: "fallback",
         startedAt: "2026-07-05T06:10:00.000Z",

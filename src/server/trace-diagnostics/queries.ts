@@ -23,6 +23,7 @@ import {
   readTextFile,
   storagePaths,
   toPublicPath,
+  runtimeAssetPublicPath,
 } from "@/src/server/utils/storage";
 import {
   createPosterVersionInfo,
@@ -348,6 +349,7 @@ async function buildMapViewArtifactEntry(mapId: string): Promise<{
   error: string | null;
 }> {
   const mapViewFilePath = path.join(storagePaths.maps, `${mapId}.view.json`);
+  const publicPath = runtimeAssetPublicPath("maps", `${mapId}.view.json`);
 
   try {
     const mapView = await getRenderedMap(mapId);
@@ -355,7 +357,7 @@ async function buildMapViewArtifactEntry(mapId: string): Promise<{
       return {
         entry: {
           filePath: mapViewFilePath,
-          publicPath: `/mock/maps/${mapId}.view.json`,
+          publicPath,
           exists: false,
           nodeCount: null,
           selectedEventId: null,
@@ -368,7 +370,7 @@ async function buildMapViewArtifactEntry(mapId: string): Promise<{
     return {
       entry: {
         filePath: mapViewFilePath,
-        publicPath: `/mock/maps/${mapId}.view.json`,
+        publicPath,
         exists: true,
         nodeCount: mapView.nodes.length,
         selectedEventId: mapView.selectedEventId,
@@ -380,7 +382,7 @@ async function buildMapViewArtifactEntry(mapId: string): Promise<{
     return {
       entry: {
         filePath: mapViewFilePath,
-        publicPath: `/mock/maps/${mapId}.view.json`,
+        publicPath,
         exists: true,
         nodeCount: null,
         selectedEventId: null,

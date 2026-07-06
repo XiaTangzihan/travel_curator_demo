@@ -5,6 +5,7 @@ const publicDir = path.join(/* turbopackIgnore: true */ process.cwd(), "public")
 const publicMockDir = path.join(publicDir, "mock");
 const runtimeDir = path.join(/* turbopackIgnore: true */ process.cwd(), ".runtime");
 const runtimeMockDir = path.join(runtimeDir, "mock");
+const runtimePublicPrefix = "/runtime/mock";
 
 const runtimeMockCategories = ["routes", "posters", "videos", "maps", "runs"] as const;
 
@@ -47,22 +48,35 @@ function normalizePublicPath(publicPath: string) {
   return `/${publicPath.replace(/^\/+/, "")}`;
 }
 
-function splitMockPublicPath(publicPath: string) {
+function splitRuntimePublicPath(publicPath: string) {
   const normalized = normalizePublicPath(publicPath);
-  if (!normalized.startsWith("/mock/")) {
-    return null;
+  if (normalized.startsWith(`${runtimePublicPrefix}/`)) {
+    const relative = normalized.slice(`${runtimePublicPrefix}/`.length);
+    const [category, ...restSegments] = relative.split("/").filter(Boolean);
+    if (!category || restSegments.length === 0) {
+      return null;
+    }
+
+    return {
+      category,
+      relativePath: restSegments.join("/"),
+    };
   }
 
-  const segments = normalized.split("/").filter(Boolean);
-  const [mock, category, ...restSegments] = segments;
-  if (mock !== "mock" || !category || restSegments.length === 0) {
-    return null;
+  if (normalized.startsWith("/mock/")) {
+    const segments = normalized.split("/").filter(Boolean);
+    const [mock, category, ...restSegments] = segments;
+    if (mock !== "mock" || !category || restSegments.length === 0) {
+      return null;
+    }
+
+    return {
+      category,
+      relativePath: restSegments.join("/"),
+    };
   }
 
-  return {
-    category,
-    relativePath: restSegments.join("/"),
-  };
+  return null;
 }
 
 function resolveRuntimeCategoryPath(category: RuntimeMockCategory, relativePath: string) {
@@ -76,7 +90,7 @@ function resolveLegacyRuntimeCategoryPath(category: RuntimeMockCategory, relativ
 export function toPublicPath(filePath: string) {
   if (filePath.startsWith(storagePaths.runtimeMockDir)) {
     const relative = toPosixPath(path.relative(storagePaths.runtimeMockDir, filePath));
-    return `/mock/${relative}`;
+    return `${runtimePublicPrefix}/${relative}`;
   }
 
   const relative = toPosixPath(path.relative(publicDir, filePath));
@@ -89,7 +103,7 @@ export function fromPublicPath(publicPath: string) {
 }
 
 export function fromPublicPathCandidates(publicPath: string) {
-  const mockPath = splitMockPublicPath(publicPath);
+  const mockPath = splitRuntimePublicPath(publicPath);
   if (mockPath && runtimeMockCategorySet.has(mockPath.category)) {
     const category = mockPath.category as RuntimeMockCategory;
     return [
@@ -103,11 +117,35 @@ export function fromPublicPathCandidates(publicPath: string) {
 }
 
 export function runtimeAssetPublicPath(category: RuntimeMockCategory, fileName: string) {
-  return `/mock/${category}/${fileName}`;
+  const normalizedFileName = fileName.split(path.sep).join("/");
+  return `${runtimePublicPrefix}/${category}/${normalizedFileName}`;
 }
 
 export function runtimeAssetAbsolutePath(category: RuntimeMockCategory, fileName: string) {
   return path.join(storagePaths[category], fileName);
+}
+
+export function normalizeRuntimeAbsolutePath(filePath: string) {
+  for (const category of runtimeMockCategories) {
+    const legacyDirectory = legacyRuntimeStoragePaths[category];
+    if (!filePath.startsWith(legacyDirectory)) {
+      continue;
+    }
+
+    const relativePath = path.relative(legacyDirectory, filePath);
+    return path.join(storagePaths[category], relativePath);
+  }
+
+  return filePath;
+}
+
+export function normalizeRuntimePublicPath(publicPath: string) {
+  const runtimePath = splitRuntimePublicPath(publicPath);
+  if (!runtimePath || !runtimeMockCategorySet.has(runtimePath.category)) {
+    return publicPath;
+  }
+
+  return runtimeAssetPublicPath(runtimePath.category as RuntimeMockCategory, runtimePath.relativePath);
 }
 
 async function migrateLegacyRuntimeStorage() {

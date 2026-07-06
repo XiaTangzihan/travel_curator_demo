@@ -18,6 +18,8 @@ import {
   ensureStorageDirectories,
   fromPublicPathCandidates,
   listJsonFiles,
+  normalizeRuntimeAbsolutePath,
+  normalizeRuntimePublicPath,
   pathExists,
   readBinaryFile,
   readJsonFile,
@@ -31,6 +33,41 @@ import {
 } from "@/src/server/utils/storage";
 
 const runStaleAfterMs = 5 * 60 * 1000;
+
+function normalizeRuntimeFileReferences(record: MapRecord) {
+  return mapRecordSchema.parse({
+    ...record,
+    routePath: normalizeRuntimeAbsolutePath(record.routePath),
+    knowledgePath: normalizeRuntimeAbsolutePath(record.knowledgePath),
+    posterPath: normalizeRuntimePublicPath(record.posterPath),
+    videoPath: record.videoPath ? normalizeRuntimePublicPath(record.videoPath) : undefined,
+    posterVersions: (record.posterVersions ?? []).map((version) => ({
+      ...version,
+      posterPath: normalizeRuntimePublicPath(version.posterPath),
+    })),
+  });
+}
+
+function normalizeRuntimeViewModelPaths(map: MapViewModel) {
+  return mapViewModelSchema.parse({
+    ...map,
+    posterPath: normalizeRuntimePublicPath(map.posterPath),
+    videoPath: map.videoPath ? normalizeRuntimePublicPath(map.videoPath) : undefined,
+  });
+}
+
+function normalizeRuntimeArtifactPaths(trace: RunTrace) {
+  return runTraceSchema.parse({
+    ...trace,
+    artifacts: {
+      ...trace.artifacts,
+      routePath: trace.artifacts.routePath ? normalizeRuntimePublicPath(trace.artifacts.routePath) : undefined,
+      posterPath: trace.artifacts.posterPath ? normalizeRuntimePublicPath(trace.artifacts.posterPath) : undefined,
+      videoPath: trace.artifacts.videoPath ? normalizeRuntimePublicPath(trace.artifacts.videoPath) : undefined,
+      mapPath: trace.artifacts.mapPath ? normalizeRuntimePublicPath(trace.artifacts.mapPath) : undefined,
+    },
+  });
+}
 
 function rawDatasetFile(datasetKey?: string) {
   const dataset = getDemoDataset(datasetKey);
@@ -118,7 +155,7 @@ export async function saveMapRecord(record: MapRecord) {
 export async function getMapRecord(mapId: string) {
   await ensureStorageDirectories();
   const record = await readJsonFile<MapRecord>(mapRecordFile(mapId));
-  return record ? mapRecordSchema.parse(record) : null;
+  return record ? normalizeRuntimeFileReferences(record) : null;
 }
 
 export async function listMapRecords() {
@@ -129,7 +166,7 @@ export async function listMapRecords() {
   const records = await Promise.all(
     files.map(async (fileName) => {
       const record = await readJsonFile<MapRecord>(path.join(storagePaths.maps, fileName));
-      return record ? mapRecordSchema.parse(record) : null;
+      return record ? normalizeRuntimeFileReferences(record) : null;
     }),
   );
 
@@ -223,7 +260,7 @@ export async function saveRenderedMap(mapId: string, map: MapViewModel) {
 export async function getRenderedMap(mapId: string) {
   await ensureStorageDirectories();
   const map = await readJsonFile<MapViewModel>(renderedMapFile(mapId));
-  return map ? mapViewModelSchema.parse(map) : null;
+  return map ? normalizeRuntimeViewModelPaths(map) : null;
 }
 
 export async function setMapFavoriteState(mapId: string, favorite: boolean) {
@@ -271,7 +308,7 @@ export async function saveRunTrace(trace: RunTrace) {
 export async function getRunTrace(runId: string) {
   await ensureStorageDirectories();
   const trace = await readJsonFile<RunTrace>(runFile(runId));
-  return trace ? runTraceSchema.parse(trace) : null;
+  return trace ? normalizeRuntimeArtifactPaths(trace) : null;
 }
 
 export async function updateRunTrace(runId: string, patch: Partial<RunTrace>) {
@@ -321,7 +358,7 @@ export async function listRunTraces() {
   const traces = await Promise.all(
     files.map(async (fileName) => {
       const trace = await readJsonFile<RunTrace>(path.join(storagePaths.runs, fileName));
-      return trace ? runTraceSchema.parse(trace) : null;
+      return trace ? normalizeRuntimeArtifactPaths(trace) : null;
     }),
   );
 

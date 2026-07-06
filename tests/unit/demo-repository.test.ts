@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import path from "node:path";
 import {
   mapRecordSchema,
   runTraceSchema,
@@ -24,7 +25,7 @@ import {
   saveRunTrace,
   setMapFavoriteState,
 } from "@/src/server/repositories/demo-repository";
-import { pathExists, writeBinaryFile } from "@/src/server/utils/storage";
+import { pathExists, runtimeAssetPublicPath, writeBinaryFile } from "@/src/server/utils/storage";
 
 const createdMapIds: string[] = [];
 
@@ -94,9 +95,9 @@ async function seedMapArtifacts(mapId: string, runId: string) {
       stage: "generate",
       warnings: [],
       artifacts: {
-        routePath: `/mock/routes/${mapId}.route.md`,
+        routePath: runtimeAssetPublicPath("routes", `${mapId}.route.md`),
         posterPath: posterPublicPath(mapId, "png"),
-        mapPath: `/mock/maps/${mapId}.view.json`,
+        mapPath: runtimeAssetPublicPath("maps", `${mapId}.view.json`),
       },
       providerMode: "live",
       startedAt: new Date().toISOString(),
@@ -382,5 +383,37 @@ describe("deleteMapArtifacts", () => {
 
     expect(mapRecord?.isFavorite).toBe(true);
     expect(renderedMap?.isFavorite).toBe(true);
+  });
+
+  it("getMapRecord 会把旧 public/mock 绝对路径归一化为 runtime 路径", async () => {
+    const token = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const mapId = `test_runtime_path_normalization_${token}`;
+    const runId = `run_runtime_path_normalization_${token}`;
+    createdMapIds.push(mapId);
+
+    await seedMapArtifacts(mapId, runId);
+    const seededRecord = await getMapRecord(mapId);
+    if (!seededRecord) {
+      throw new Error("seed mapRecord failed");
+    }
+
+    const legacyRoutePath = path.join(process.cwd(), "public", "mock", "routes", `${mapId}.route.md`);
+    const legacyKnowledgePath = path.join(process.cwd(), "public", "mock", "routes", `${mapId}.knowledge.json`);
+
+    await saveMapRecord(
+      mapRecordSchema.parse({
+        ...seededRecord,
+        mapId,
+        routePath: legacyRoutePath,
+        knowledgePath: legacyKnowledgePath,
+      }),
+    );
+
+    const normalized = await getMapRecord(mapId);
+
+    expect(normalized?.routePath).toBe(path.join(process.cwd(), ".runtime", "mock", "routes", `${mapId}.route.md`));
+    expect(normalized?.knowledgePath).toBe(
+      path.join(process.cwd(), ".runtime", "mock", "routes", `${mapId}.knowledge.json`),
+    );
   });
 });

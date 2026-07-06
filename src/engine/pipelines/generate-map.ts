@@ -57,6 +57,7 @@ import {
 import {
   deleteFilePaths,
   fromPublicPath,
+  runtimeAssetPublicPath,
   writeBinaryFile,
   writeTextFile,
 } from "@/src/server/utils/storage";
@@ -483,9 +484,9 @@ async function generateMapDraftCore(
     artifacts: {
       rawPath: datasetArtifacts.rawPath,
       eventsPath: datasetArtifacts.eventsPath,
-      routePath: `/mock/routes/${context.mapId}.route.md`,
+      routePath: runtimeAssetPublicPath("routes", `${context.mapId}.route.md`),
       posterPath,
-      mapPath: `/mock/maps/${context.mapId}.view.json`,
+      mapPath: runtimeAssetPublicPath("maps", `${context.mapId}.view.json`),
     },
     providerMode,
     startedAt: context.startedAt,
@@ -776,9 +777,9 @@ export async function regenerateMapDraft(params: {
     inputSummary,
     warnings,
     artifacts: {
-      routePath: `/mock/routes/${params.mapRecord.mapId}.route.md`,
+      routePath: runtimeAssetPublicPath("routes", `${params.mapRecord.mapId}.route.md`),
       posterPath,
-      mapPath: `/mock/maps/${params.mapRecord.mapId}.view.json`,
+      mapPath: runtimeAssetPublicPath("maps", `${params.mapRecord.mapId}.view.json`),
     },
     providerMode,
     startedAt,
