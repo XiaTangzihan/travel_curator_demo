@@ -1,0 +1,24 @@
+{
+  "runId": "run_20260706075232_jiyv",
+  "mapId": "map_gz_1783223107323",
+  "datasetKey": "guangzhou",
+  "status": "completed",
+  "stage": "video_generate",
+  "imageModel": "unknown",
+  "videoModel": "seedance-1-0-pro-fast",
+  "providerTaskId": "cgt-20260706075234-9g6qp",
+  "videoDurationSeconds": 5,
+  "styleKey": "storybook",
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-05T23:53:04.777Z",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783223107323.route.md",
+    "posterPath": "/mock/posters/map_gz_1783223107323.png",
+    "videoPath": "/mock/videos/map_gz_1783223107323.mp4",
+    "mapPath": "/mock/maps/map_gz_1783223107323.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-05T23:52:32.644Z",
+  "endedAt": "2026-07-05T23:53:04.777Z"
+}
