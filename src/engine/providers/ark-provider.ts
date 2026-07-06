@@ -4,6 +4,7 @@ import type { SelectableImageModel } from "@/src/config/image-models";
 import type { SelectableVideoModel } from "@/src/config/video-models";
 import { resolveSeedreamRuntimeConfig } from "@/src/engine/providers/seedream-model-registry";
 import { resolveSeedanceRuntimeConfig } from "@/src/engine/providers/seedance-model-registry";
+import { readBinaryFile } from "@/src/server/utils/storage";
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -136,7 +137,7 @@ function imageMimeType(filePath: string) {
 }
 
 async function imageFileToDataUri(filePath: string) {
-  const buffer = await readFile(filePath);
+  const buffer = await readBinaryFile(filePath) ?? await readFile(filePath);
   return `data:${imageMimeType(filePath)};base64,${buffer.toString("base64")}`;
 }
 

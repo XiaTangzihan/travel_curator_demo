@@ -292,10 +292,8 @@ describe("curated map import", () => {
     const importedRenderedMap = await readJsonFile<MapViewModel>(importedRenderedMapPath);
     const importedRun = await readJsonFile<RunTrace>(importedRunPath);
 
-    expect(importedMapRecord?.routePath).toBe(path.join(targetRoot, "mock", "routes", `${targetMapId}.route.md`));
-    expect(importedMapRecord?.knowledgePath).toBe(
-      path.join(targetRoot, "mock", "routes", `${targetMapId}.knowledge.json`),
-    );
+    expect(importedMapRecord?.routePath).toBe(`/runtime/mock/routes/${targetMapId}.route.md`);
+    expect(importedMapRecord?.knowledgePath).toBe(`/runtime/mock/routes/${targetMapId}.knowledge.json`);
     expect(importedMapRecord?.posterPath).toBe(`/runtime/mock/posters/${targetMapId}.png`);
     expect(importedMapRecord?.videoPath).toBe(`/runtime/mock/videos/${targetMapId}.mp4`);
     expect(importedRenderedMap?.posterPath).toBe(`/runtime/mock/posters/${targetMapId}.png`);

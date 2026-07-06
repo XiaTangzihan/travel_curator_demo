@@ -62,7 +62,6 @@ import {
   deleteFilePaths,
   fromPublicPath,
   pathExists,
-  runtimeAssetAbsolutePath,
   runtimeAssetPublicPath,
   writeBinaryFile,
   writeTextFile,
@@ -231,11 +230,11 @@ function buildRuntimeMapPublicPath(mapId: string) {
 }
 
 function buildRuntimeRouteAbsolutePath(mapId: string) {
-  return runtimeAssetAbsolutePath("routes", `${mapId}.route.md`);
+  return runtimeAssetPublicPath("routes", `${mapId}.route.md`);
 }
 
 function buildRuntimeKnowledgeAbsolutePath(mapId: string) {
-  return runtimeAssetAbsolutePath("routes", `${mapId}.knowledge.json`);
+  return runtimeAssetPublicPath("routes", `${mapId}.knowledge.json`);
 }
 
 function mergeRouteIntoEvents(params: {

@@ -1,4 +1,4 @@
-import { cp, mkdir } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import {
   curatedMapImportEntrySchema,
@@ -26,8 +26,10 @@ import {
   fromPublicPathCandidates,
   pathExists,
   readJsonFile,
+  readBinaryFile,
   runtimeAssetPublicPath,
   storagePaths,
+  writeBinaryFile,
   writeJsonFile,
   writeTextFile,
 } from "@/src/server/utils/storage";
@@ -226,11 +228,11 @@ function rewriteRunForTarget(run: RunTrace) {
   });
 }
 
-function rewriteMapRecordForTarget(mapRecord: MapRecord, targetPaths: ImportRuntimePaths) {
+function rewriteMapRecordForTarget(mapRecord: MapRecord) {
   return mapRecordSchema.parse({
     ...mapRecord,
-    routePath: targetPaths.routeFile(mapRecord.mapId),
-    knowledgePath: targetPaths.knowledgeFile(mapRecord.mapId),
+    routePath: runtimeAssetPublicPath("routes", `${mapRecord.mapId}.route.md`),
+    knowledgePath: runtimeAssetPublicPath("routes", `${mapRecord.mapId}.knowledge.json`),
     posterPath: rewritePosterPublicPath(mapRecord.posterPath),
     videoPath: mapRecord.videoPath ? rewriteVideoPublicPath(mapRecord.videoPath) : undefined,
     posterVersions: (mapRecord.posterVersions ?? []).map((version) => ({
@@ -678,7 +680,13 @@ async function copyAssetFile(copyPlan: PreparedAssetCopy) {
   if (path.resolve(copyPlan.sourcePath) === path.resolve(copyPlan.targetPath)) {
     return;
   }
-  await cp(copyPlan.sourcePath, copyPlan.targetPath, { force: true });
+
+  const content = await readBinaryFile(copyPlan.sourcePath);
+  if (!content) {
+    throw new Error(`缺少待复制文件 ${copyPlan.sourcePath}`);
+  }
+
+  await writeBinaryFile(copyPlan.targetPath, content);
 }
 
 export async function applyCuratedMapImport(options: ApplyCuratedMapImportOptions) {
@@ -697,7 +705,7 @@ export async function applyCuratedMapImport(options: ApplyCuratedMapImportOption
   await ensureImportDirectories(targetPaths);
 
   for (const preparedEntry of prepared.preparedEntries) {
-    const rewrittenMapRecord = rewriteMapRecordForTarget(preparedEntry.mapRecord, targetPaths);
+    const rewrittenMapRecord = rewriteMapRecordForTarget(preparedEntry.mapRecord);
     const rewrittenRenderedMap = rewriteRenderedMapForTarget(preparedEntry.renderedMap);
     const rewrittenRuns = preparedEntry.runTraces.map((run) => rewriteRunForTarget(run));
 

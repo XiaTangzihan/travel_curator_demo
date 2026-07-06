@@ -84,11 +84,11 @@ function mapRecordFile(mapId: string) {
 }
 
 function routeFile(mapId: string) {
-  return path.join(storagePaths.routes, `${mapId}.route.md`);
+  return runtimeAssetPublicPath("routes", `${mapId}.route.md`);
 }
 
 function knowledgeFile(mapId: string) {
-  return path.join(storagePaths.routes, `${mapId}.knowledge.json`);
+  return runtimeAssetPublicPath("routes", `${mapId}.knowledge.json`);
 }
 
 function renderedMapFile(mapId: string) {

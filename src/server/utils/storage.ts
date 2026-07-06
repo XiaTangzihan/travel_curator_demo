@@ -1,5 +1,16 @@
 import { access, cp, mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  buildRuntimeVirtualPath,
+  ensureRuntimeStoreReady,
+  getRuntimeStoreMode,
+  listRuntimeStoreFiles,
+  parseRuntimeVirtualPath,
+  readRuntimeStoreBuffer,
+  runtimeStorePathExists,
+  writeRuntimeStoreBuffer,
+  deleteRuntimeStorePath,
+} from "@/src/server/runtime-store";
 
 const publicDir = path.join(/* turbopackIgnore: true */ process.cwd(), "public");
 const publicMockDir = path.join(publicDir, "mock");
@@ -79,6 +90,53 @@ function splitRuntimePublicPath(publicPath: string) {
   return null;
 }
 
+function splitRuntimeFileReference(filePath: string) {
+  const virtualPath = parseRuntimeVirtualPath(filePath);
+  if (virtualPath) {
+    return virtualPath;
+  }
+
+  const publicPath = splitRuntimePublicPath(filePath);
+  if (publicPath && runtimeMockCategorySet.has(publicPath.category)) {
+    return {
+      category: publicPath.category as RuntimeMockCategory,
+      relativePath: publicPath.relativePath,
+    };
+  }
+
+  for (const category of runtimeMockCategories) {
+    const runtimeDirectory = storagePaths[category];
+    if (filePath === runtimeDirectory) {
+      return {
+        category,
+        relativePath: "",
+      };
+    }
+    if (filePath.startsWith(`${runtimeDirectory}${path.sep}`)) {
+      return {
+        category,
+        relativePath: toPosixPath(path.relative(runtimeDirectory, filePath)),
+      };
+    }
+
+    const legacyDirectory = legacyRuntimeStoragePaths[category];
+    if (filePath === legacyDirectory) {
+      return {
+        category,
+        relativePath: "",
+      };
+    }
+    if (filePath.startsWith(`${legacyDirectory}${path.sep}`)) {
+      return {
+        category,
+        relativePath: toPosixPath(path.relative(legacyDirectory, filePath)),
+      };
+    }
+  }
+
+  return null;
+}
+
 function resolveRuntimeCategoryPath(category: RuntimeMockCategory, relativePath: string) {
   return path.join(storagePaths[category], ...relativePath.split("/"));
 }
@@ -88,6 +146,11 @@ function resolveLegacyRuntimeCategoryPath(category: RuntimeMockCategory, relativ
 }
 
 export function toPublicPath(filePath: string) {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    return runtimeAssetPublicPath(runtimeRef.category, runtimeRef.relativePath);
+  }
+
   if (filePath.startsWith(storagePaths.runtimeMockDir)) {
     const relative = toPosixPath(path.relative(storagePaths.runtimeMockDir, filePath));
     return `${runtimePublicPrefix}/${relative}`;
@@ -126,6 +189,11 @@ export function runtimeAssetAbsolutePath(category: RuntimeMockCategory, fileName
 }
 
 export function normalizeRuntimeAbsolutePath(filePath: string) {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    return runtimeAssetPublicPath(runtimeRef.category, runtimeRef.relativePath);
+  }
+
   for (const category of runtimeMockCategories) {
     const legacyDirectory = legacyRuntimeStoragePaths[category];
     if (!filePath.startsWith(legacyDirectory)) {
@@ -183,6 +251,12 @@ async function ensureRuntimeStorageMigrated() {
 }
 
 export async function ensureStorageDirectories() {
+  const runtimeMode = getRuntimeStoreMode();
+  if (runtimeMode === "tmp" || runtimeMode === "tos") {
+    await ensureRuntimeStoreReady();
+    return;
+  }
+
   const directories = [
     storagePaths.runtimeDir,
     storagePaths.runtimeMockDir,
@@ -198,11 +272,32 @@ export async function ensureStorageDirectories() {
 }
 
 export async function writeJsonFile(filePath: string, value: unknown) {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    await ensureRuntimeStoreReady();
+    await writeRuntimeStoreBuffer(
+      buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath),
+      Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8"),
+    );
+    return;
+  }
+
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFileAtomically(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
 export async function readJsonFile<T>(filePath: string): Promise<T | null> {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    const content = await readRuntimeStoreBuffer(
+      buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath),
+    );
+    if (!content) {
+      return null;
+    }
+    return JSON.parse(content.toString("utf8")) as T;
+  }
+
   try {
     const content = await readFile(filePath, "utf8");
     return JSON.parse(content) as T;
@@ -215,11 +310,29 @@ export async function readJsonFile<T>(filePath: string): Promise<T | null> {
 }
 
 export async function writeTextFile(filePath: string, value: string) {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    await ensureRuntimeStoreReady();
+    await writeRuntimeStoreBuffer(
+      buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath),
+      Buffer.from(value, "utf8"),
+    );
+    return;
+  }
+
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFileAtomically(filePath, value, "utf8");
 }
 
 export async function readTextFile(filePath: string): Promise<string | null> {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    const content = await readRuntimeStoreBuffer(
+      buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath),
+    );
+    return content ? content.toString("utf8") : null;
+  }
+
   try {
     return await readFile(filePath, "utf8");
   } catch (error) {
@@ -231,6 +344,11 @@ export async function readTextFile(filePath: string): Promise<string | null> {
 }
 
 export async function readBinaryFile(filePath: string): Promise<Buffer | null> {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    return readRuntimeStoreBuffer(buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath));
+  }
+
   try {
     return await readFile(filePath);
   } catch (error) {
@@ -242,6 +360,16 @@ export async function readBinaryFile(filePath: string): Promise<Buffer | null> {
 }
 
 export async function writeBinaryFile(filePath: string, value: Buffer) {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    await ensureRuntimeStoreReady();
+    await writeRuntimeStoreBuffer(
+      buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath),
+      value,
+    );
+    return;
+  }
+
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFileAtomically(filePath, value);
 }
@@ -262,6 +390,11 @@ async function writeFileAtomically(
 }
 
 export async function pathExists(filePath: string) {
+  const runtimeRef = splitRuntimeFileReference(filePath);
+  if (runtimeRef?.relativePath) {
+    return runtimeStorePathExists(buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath));
+  }
+
   try {
     await access(filePath);
     return true;
@@ -274,10 +407,26 @@ export async function pathExists(filePath: string) {
 }
 
 export async function deleteFilePaths(filePaths: string[]) {
-  await Promise.all(filePaths.map((filePath) => rm(filePath, { force: true })));
+  await Promise.all(filePaths.map(async (filePath) => {
+    const runtimeRef = splitRuntimeFileReference(filePath);
+    if (runtimeRef?.relativePath) {
+      await deleteRuntimeStorePath(buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath));
+      return;
+    }
+
+    await rm(filePath, { force: true });
+  }));
 }
 
 export async function listJsonFiles(directory: string) {
+  const runtimeRef = splitRuntimeFileReference(directory);
+  if (runtimeRef) {
+    return listRuntimeStoreFiles(
+      buildRuntimeVirtualPath(runtimeRef.category, runtimeRef.relativePath),
+      ".json",
+    );
+  }
+
   try {
     const files = await readdir(directory);
     return files.filter((fileName) => fileName.endsWith(".json"));

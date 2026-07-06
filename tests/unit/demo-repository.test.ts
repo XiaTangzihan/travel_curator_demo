@@ -411,9 +411,7 @@ describe("deleteMapArtifacts", () => {
 
     const normalized = await getMapRecord(mapId);
 
-    expect(normalized?.routePath).toBe(path.join(process.cwd(), ".runtime", "mock", "routes", `${mapId}.route.md`));
-    expect(normalized?.knowledgePath).toBe(
-      path.join(process.cwd(), ".runtime", "mock", "routes", `${mapId}.knowledge.json`),
-    );
+    expect(normalized?.routePath).toBe(`/runtime/mock/routes/${mapId}.route.md`);
+    expect(normalized?.knowledgePath).toBe(`/runtime/mock/routes/${mapId}.knowledge.json`);
   });
 });
