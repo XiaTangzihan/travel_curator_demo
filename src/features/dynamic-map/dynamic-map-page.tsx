@@ -19,18 +19,24 @@ import {
 } from "@/src/config/video-models";
 import type { MapViewModel } from "@/src/contracts/domain";
 import { SiteShell } from "@/src/components/site-shell";
+import { getVideoStylePreset } from "@/src/engine/prompts";
 import { canUsePublicImageAsModelInput } from "@/src/engine/pipelines/model-image-inputs";
 
 type DynamicMapPageProps = {
   map: MapViewModel;
   initialTab: "map" | "video";
   availableVideoModels: SelectableVideoModel[];
+  initialVideoPromptInstruction?: string;
 };
 
 const durationOptions = [5, 7, 9] as const;
 
 export function DynamicMapPage(props: DynamicMapPageProps) {
   const router = useRouter();
+  const defaultVideoPromptInstruction = useMemo(
+    () => getVideoStylePreset(props.map.style).prompt,
+    [props.map.style],
+  );
   const [selectedEventId, setSelectedEventId] = useState(props.map.selectedEventId);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -47,12 +53,16 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
       ? (props.map.videoModel as SelectableVideoModel)
       : props.availableVideoModels[0] ?? defaultVideoModel,
   );
+  const [videoPromptInstruction, setVideoPromptInstruction] = useState(
+    props.initialVideoPromptInstruction ?? defaultVideoPromptInstruction,
+  );
 
   const canDownloadPoster = props.map.posterPath.trim().length > 0;
   const canGenerateFromPoster = canUsePublicImageAsModelInput(props.map.posterPath);
   const hasAvailableVideoModels = props.availableVideoModels.length > 0;
   const canGenerateVideo = canGenerateFromPoster && hasAvailableVideoModels && !generatingVideo;
   const hasGeneratedVideo = Boolean(props.map.videoPath);
+  const isUsingDefaultVideoPrompt = videoPromptInstruction === defaultVideoPromptInstruction;
   const videoModelLabel = props.map.videoModel
     && props.availableVideoModels.includes(props.map.videoModel as SelectableVideoModel)
       ? videoModelLabels[props.map.videoModel as SelectableVideoModel]
@@ -116,6 +126,7 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
         body: JSON.stringify({
           durationSeconds: selectedDuration,
           videoModel: selectedVideoModel,
+          promptInstruction: videoPromptInstruction,
         }),
       });
       const payload = await response.json();
@@ -374,50 +385,31 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <section className="rounded-[30px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
-            {hasGeneratedVideo ? (
-              <div className="grid gap-5">
-                <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.12em] text-[var(--text-muted)]">
-                  {videoModelLabel ? (
-                    <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
-                      {videoModelLabel}
-                    </span>
-                  ) : null}
-                  {props.map.videoDurationSeconds ? (
-                    <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
-                      {props.map.videoDurationSeconds}s
-                    </span>
-                  ) : null}
+            <div className="grid gap-6">
+              {hasGeneratedVideo ? (
+                <div className="grid gap-5">
+                  <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.12em] text-[var(--text-muted)]">
+                    {videoModelLabel ? (
+                      <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
+                        {videoModelLabel}
+                      </span>
+                    ) : null}
+                    {props.map.videoDurationSeconds ? (
+                      <span className="rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-3 py-1">
+                        {props.map.videoDurationSeconds}s
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
+                    <video
+                      src={props.map.videoPath}
+                      controls
+                      preload="metadata"
+                      className="max-h-[680px] w-full"
+                    />
+                  </div>
                 </div>
-                <div className="overflow-hidden rounded-[24px] bg-[var(--bg-soft)]">
-                  <video
-                    src={props.map.videoPath}
-                    controls
-                    preload="metadata"
-                    className="max-h-[680px] w-full"
-                  />
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <a
-                    href={props.map.videoPath}
-                    download={videoDownloadFileName}
-                    className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
-                  >
-                    <Download className="h-4 w-4" />
-                    下载视频
-                  </a>
-                  <button
-                    type="button"
-                    onClick={handleGenerateVideo}
-                    disabled={!canGenerateVideo}
-                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
-                  >
-                    {generatingVideo ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    重新生成视频
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="grid gap-5">
+              ) : (
                 <div>
                   <p className="text-xs tracking-[0.14em] text-[var(--text-muted)]">视频生成</p>
                   <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--text-strong)]">
@@ -427,14 +419,16 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
                     视频会复用当前地图的风格，只对镜头和微动态进行扩展，不改变原图的主要信息结构。
                   </p>
                 </div>
+              )}
 
+              <div className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] p-5">
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="block text-sm font-medium text-[var(--text-strong)]">
                     视频时长
                     <select
                       value={selectedDuration}
                       onChange={(event) => setSelectedDuration(Number(event.target.value) as (typeof durationOptions)[number])}
-                      className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
+                      className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
                     >
                       {durationOptions.map((duration) => (
                         <option key={duration} value={duration}>
@@ -450,7 +444,7 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
                       value={selectedVideoModel}
                       onChange={(event) => setSelectedVideoModel(event.target.value as SelectableVideoModel)}
                       disabled={!hasAvailableVideoModels}
-                      className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition disabled:opacity-60"
+                      className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition disabled:opacity-60"
                     >
                       {props.availableVideoModels.map((videoModel) => (
                         <option key={videoModel} value={videoModel}>
@@ -461,7 +455,41 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
                   </label>
                 </div>
 
-                <div className="rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] p-5">
+                <div className="mt-4 rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-strong)]">风格提示词</p>
+                      <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+                        默认提供当前地图风格的系统提示词。你可以删掉后自己写；系统通用护栏仍会保留。
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setVideoPromptInstruction(defaultVideoPromptInstruction)}
+                      disabled={isUsingDefaultVideoPrompt}
+                      className="inline-flex items-center rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-strong)] transition hover:bg-[var(--bg-soft)] disabled:opacity-60"
+                    >
+                      恢复默认
+                    </button>
+                  </div>
+
+                  <textarea
+                    aria-label="风格提示词"
+                    value={videoPromptInstruction}
+                    onChange={(event) => setVideoPromptInstruction(event.target.value)}
+                    rows={8}
+                    spellCheck={false}
+                    className="mt-4 w-full rounded-[20px] border border-[color:var(--line-subtle)] bg-[var(--bg-soft)] px-4 py-3 text-sm leading-7 text-[var(--text-strong)] outline-none transition"
+                  />
+
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-muted)]">
+                    {isUsingDefaultVideoPrompt
+                      ? "当前使用系统默认风格提示词。"
+                      : "当前使用自定义风格提示词。"}
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-[24px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-5">
                   <p className="text-sm font-medium text-[var(--text-strong)]">当前生成规则</p>
                   {!hasAvailableVideoModels ? (
                     <p className="mt-3 text-sm leading-7 text-[var(--danger-ink)]">
@@ -478,19 +506,29 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {hasGeneratedVideo ? (
+                    <a
+                      href={props.map.videoPath}
+                      download={videoDownloadFileName}
+                      className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)]"
+                    >
+                      <Download className="h-4 w-4" />
+                      下载视频
+                    </a>
+                  ) : null}
                   <button
                     type="button"
                     onClick={handleGenerateVideo}
                     disabled={!canGenerateVideo}
-                    className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--accent-primary-strong)] disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-medium text-[var(--text-strong)] transition hover:bg-[var(--bg-page)] disabled:opacity-60"
                   >
                     {generatingVideo ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    生成视频
+                    {hasGeneratedVideo ? "重新生成视频" : "生成视频"}
                   </button>
                 </div>
               </div>
-            )}
+            </div>
           </section>
 
           <aside className="rounded-[28px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-soft)]">
@@ -498,6 +536,7 @@ export function DynamicMapPage(props: DynamicMapPageProps) {
             <div className="mt-4 space-y-3 text-sm leading-7 text-[var(--text-muted)]">
               <p>视频会基于当前海报生成，不会自动改变静态图版本。</p>
               <p>如果后续重新生成成功，当前地图只保留最新的视频产物路径。</p>
+              <p>输入框只控制风格提示词；系统通用约束和参考图约束仍会固定保留。</p>
               <p>图文 detab 仍处于占位状态，本轮不会提前实现。</p>
             </div>
           </aside>

@@ -6,6 +6,7 @@ import {
 import { resolveRequestedVideoModel, type SelectableVideoModel } from "@/src/config/video-models";
 import {
   buildVideoPrompt,
+  getVideoStylePreset,
   supportedVideoDurationSeconds,
   type SupportedVideoDurationSeconds,
 } from "@/src/engine/prompts";
@@ -31,12 +32,15 @@ type StartGenerateVideoRunInput = {
   mapId: string;
   durationSeconds: number;
   videoModel?: SelectableVideoModel;
+  promptInstruction?: string;
 };
 
 type GenerateVideoExecutionContext = {
   runId: string;
   mapRecord: MapRecord;
   startedAt: string;
+  promptInstruction?: string;
+  promptVersion: string;
 };
 
 const videoTaskPollIntervalMs = 2_000;
@@ -108,6 +112,7 @@ async function runGenerateVideo(params: GenerateVideoExecutionContext) {
   const prompt = buildVideoPrompt({
     styleKey: params.mapRecord.style,
     durationSeconds,
+    promptInstruction: params.promptInstruction,
   });
 
   await updateRunTrace(params.runId, {
@@ -182,7 +187,9 @@ async function runGenerateVideo(params: GenerateVideoExecutionContext) {
       videoModel,
       providerTaskId: createdTask.taskId,
       videoDurationSeconds: durationSeconds,
+      promptInstruction: params.promptInstruction,
       styleKey: params.mapRecord.style,
+      promptVersion: params.promptVersion,
       warnings: [],
       artifacts: {
         routePath: params.mapRecord.routePath,
@@ -207,6 +214,8 @@ export async function startGenerateVideoRun(input: StartGenerateVideoRunInput) {
   assertPosterCanGenerateVideo(mapRecord);
   const durationSeconds = assertSupportedVideoDurationSeconds(input.durationSeconds);
   const videoModel = resolveRequestedVideoModel(input.videoModel);
+  const promptInstruction = input.promptInstruction?.trim() ?? undefined;
+  const stylePreset = getVideoStylePreset(mapRecord.style);
   const runId = createRunId();
   const startedAt = new Date().toISOString();
 
@@ -241,7 +250,9 @@ export async function startGenerateVideoRun(input: StartGenerateVideoRunInput) {
       imageModel: mapRecord.imageModel,
       videoModel,
       videoDurationSeconds: durationSeconds,
+      promptInstruction,
       styleKey: mapRecord.style,
+      promptVersion: stylePreset.promptVersion,
       warnings: [],
       artifacts: {
         routePath: mapRecord.routePath,
@@ -259,6 +270,8 @@ export async function startGenerateVideoRun(input: StartGenerateVideoRunInput) {
       runId,
       mapRecord: nextMapRecord,
       startedAt,
+      promptInstruction,
+      promptVersion: stylePreset.promptVersion,
     }).catch(async (error) => {
       const failedAt = new Date().toISOString();
       await updateRunTrace(runId, {

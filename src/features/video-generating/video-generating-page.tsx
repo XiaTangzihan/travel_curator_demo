@@ -16,6 +16,8 @@ type VideoGeneratingPageProps = {
   initialRun: RunTrace;
 };
 
+export const minimumWaitingPageVisibleMs = 1200;
+
 const progressSteps = [
   {
     key: "preparing",
@@ -65,6 +67,7 @@ function resolveStatusDescription(run: RunTrace, activeStepDescription: string) 
 export function VideoGeneratingPage(props: VideoGeneratingPageProps) {
   const router = useRouter();
   const redirectingRef = useRef(false);
+  const enteredAtRef = useRef<number | null>(null);
   const [run, setRun] = useState(props.initialRun);
   const [error, setError] = useState("");
 
@@ -84,12 +87,27 @@ export function VideoGeneratingPage(props: VideoGeneratingPageProps) {
   const statusDescription = resolveStatusDescription(run, activeStep.description);
 
   useEffect(() => {
+    if (enteredAtRef.current === null) {
+      enteredAtRef.current = Date.now();
+    }
+  }, []);
+
+  useEffect(() => {
     if (run.status !== "completed" || redirectingRef.current) {
       return;
     }
 
     redirectingRef.current = true;
-    router.replace(`/maps/${run.mapId}?tab=video`);
+    const enteredAtMs = enteredAtRef.current ?? Date.now();
+    const elapsedMs = Date.now() - enteredAtMs;
+    const remainingMs = Math.max(0, minimumWaitingPageVisibleMs - elapsedMs);
+    const timer = window.setTimeout(() => {
+      router.replace(`/maps/${run.mapId}?tab=video`);
+    }, remainingMs);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [router, run]);
 
   useEffect(() => {

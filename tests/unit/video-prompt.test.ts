@@ -31,4 +31,16 @@ describe("buildVideoPrompt", () => {
     expect(prompt).toContain("基于输入的旅行地图插画生成一段 5 秒短视频。");
     expect(prompt).toContain("视频风格：年轻卡通风");
   });
+
+  it("允许用用户输入的风格提示词覆盖系统默认 style prompt", () => {
+    const prompt = buildVideoPrompt({
+      styleKey: "young-cartoon",
+      durationSeconds: 5,
+      promptInstruction: "只保留路线的微弱流动感，其他元素尽量静止。",
+    });
+
+    expect(prompt).toContain("只保留路线的微弱流动感，其他元素尽量静止。");
+    expect(prompt).not.toContain("整体运动人格是轻快、明亮、灵动。");
+    expect(prompt).toContain("所有文字必须保持清晰可读");
+  });
 });

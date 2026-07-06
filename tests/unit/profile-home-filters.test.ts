@@ -13,6 +13,11 @@ function createMapRecord(params: Partial<MapRecord> & Pick<MapRecord, "mapId">):
     city: params.city ?? "广州",
     style: params.style ?? "young-cartoon",
     imageModel: params.imageModel ?? "unknown",
+    currentVideoRunId: params.currentVideoRunId,
+    videoPath: params.videoPath,
+    videoDurationSeconds: params.videoDurationSeconds,
+    videoUpdatedAt: params.videoUpdatedAt,
+    videoModel: params.videoModel ?? "unknown",
     status: params.status ?? "draft",
     eventCount: params.eventCount ?? 3,
     routePath: params.routePath ?? `/mock/routes/${params.mapId}.route.md`,
@@ -41,6 +46,7 @@ describe("profile home filters", () => {
       datasetKey: "all",
       imageModel: "all",
       style: "all",
+      hasVideo: false,
     });
   });
 
@@ -49,16 +55,27 @@ describe("profile home filters", () => {
       datasetKey: "all",
       imageModel: "all",
       style: "all",
+      hasVideo: false,
     });
   });
 
-  it("会按 dataset、imageModel、style 三段过滤地图", () => {
+  it("会把 hasVideo=1 解析为仅看有视频的作品", () => {
+    expect(resolveProfileHomeFilters({ hasVideo: "1" })).toEqual({
+      datasetKey: "all",
+      imageModel: "all",
+      style: "all",
+      hasVideo: true,
+    });
+  });
+
+  it("会按 dataset、imageModel、style、hasVideo 四段过滤地图", () => {
     const maps = [
       createMapRecord({
         mapId: "map_gz_a",
         datasetKey: "guangzhou",
         imageModel: "seedream-5-0",
         style: "young-cartoon",
+        videoPath: "/mock/videos/map_gz_a.mp4",
       }),
       createMapRecord({
         mapId: "map_gz_b",
@@ -85,6 +102,7 @@ describe("profile home filters", () => {
         datasetKey: "guangzhou",
         imageModel: "all",
         style: "all",
+        hasVideo: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a", "map_gz_b", "map_gz_c"]);
 
@@ -93,6 +111,7 @@ describe("profile home filters", () => {
         datasetKey: "all",
         imageModel: "all",
         style: "all",
+        hasVideo: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a", "map_gz_b", "map_gz_c", "map_hz_a"]);
 
@@ -101,6 +120,7 @@ describe("profile home filters", () => {
         datasetKey: "guangzhou",
         imageModel: "seedream-5-0",
         style: "all",
+        hasVideo: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_a"]);
 
@@ -109,7 +129,17 @@ describe("profile home filters", () => {
         datasetKey: "guangzhou",
         imageModel: "seedream-4-5",
         style: "storybook",
+        hasVideo: false,
       }).map((map) => map.mapId),
     ).toEqual(["map_gz_c"]);
+
+    expect(
+      filterProfileMaps(maps, {
+        datasetKey: "all",
+        imageModel: "all",
+        style: "all",
+        hasVideo: true,
+      }).map((map) => map.mapId),
+    ).toEqual(["map_gz_a"]);
   });
 });

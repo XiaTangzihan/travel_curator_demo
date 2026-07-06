@@ -12,6 +12,7 @@ type VideoGenerateContext = {
 const requestSchema = z.object({
   durationSeconds: z.number().int().positive(),
   videoModel: z.enum(selectableVideoModelKeys).optional(),
+  promptInstruction: z.string().max(8000).optional(),
 });
 
 function resolveErrorStatus(error: unknown) {
@@ -42,6 +43,7 @@ export async function POST(request: Request, context: VideoGenerateContext) {
       mapId,
       durationSeconds: body.durationSeconds,
       videoModel: body.videoModel,
+      promptInstruction: body.promptInstruction,
     });
 
     return NextResponse.json({

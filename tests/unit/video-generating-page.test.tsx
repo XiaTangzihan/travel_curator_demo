@@ -1,6 +1,9 @@
-import { render, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { VideoGeneratingPage } from "@/src/features/video-generating/video-generating-page";
+import { render } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  minimumWaitingPageVisibleMs,
+  VideoGeneratingPage,
+} from "@/src/features/video-generating/video-generating-page";
 import type { RunTrace } from "@/src/contracts/domain";
 
 const replaceMock = vi.fn();
@@ -39,13 +42,22 @@ function createRun(overrides?: Partial<RunTrace>): RunTrace {
 describe("VideoGeneratingPage", () => {
   beforeEach(() => {
     replaceMock.mockReset();
+    vi.useFakeTimers();
   });
 
-  it("完成后会自动回跳到 ?tab=video", async () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("完成后会在最短停留时间后自动回跳到 ?tab=video", async () => {
     render(<VideoGeneratingPage initialRun={createRun()} />);
 
-    await waitFor(() => {
-      expect(replaceMock).toHaveBeenCalledWith("/maps/map_video_wait_001?tab=video");
-    });
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(minimumWaitingPageVisibleMs - 1);
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(replaceMock).toHaveBeenCalledWith("/maps/map_video_wait_001?tab=video");
   });
 });

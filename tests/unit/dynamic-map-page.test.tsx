@@ -1,9 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DynamicMapPage } from "@/src/features/dynamic-map/dynamic-map-page";
 import type { MapViewModel } from "@/src/contracts/domain";
+
+const pushMock = vi.fn();
+const replaceMock = vi.fn();
 
 vi.mock("next/image", () => ({
   default: (props: Record<string, unknown>) => {
@@ -21,7 +24,8 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: pushMock,
+    replace: replaceMock,
     refresh: vi.fn(),
   }),
 }));
@@ -33,6 +37,7 @@ const map: MapViewModel = {
   city: "广州",
   style: "young-cartoon",
   imageModel: "seedream-5-0",
+  videoModel: "unknown",
   posterPath: "/mock/posters/map_001.png",
   routeMarkdown: "# route",
   selectedEventId: "evt_001",
@@ -73,18 +78,82 @@ const map: MapViewModel = {
   ],
 };
 
+beforeEach(() => {
+  pushMock.mockReset();
+  replaceMock.mockReset();
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
 describe("DynamicMapPage", () => {
-  it("会渲染回主页、下载图片和灰态 detab", () => {
-    render(<DynamicMapPage map={map} />);
+  it("在视频页会默认展示当前风格的视频提示词", () => {
+    render(
+      <DynamicMapPage
+        map={map}
+        initialTab="video"
+        availableVideoModels={["seedance-1-5-pro"]}
+      />,
+    );
 
     expect(screen.getByRole("link", { name: "回到主页" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "下载图片" })).toHaveAttribute(
       "href",
       "/mock/posters/map_001.png",
     );
-
     expect(screen.getByRole("button", { name: "地图" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "视频" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "视频" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "图文" })).toBeDisabled();
+    expect(String(screen.getByLabelText("风格提示词").getAttribute("aria-label"))).toBe("风格提示词");
+    expect((screen.getByLabelText("风格提示词") as HTMLTextAreaElement).value).toContain(
+      "整体运动人格是轻快、明亮、灵动。",
+    );
+  });
+
+  it("会回显最近一次视频 run 的提示词，并在提交时带上用户修改后的内容", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        waitPath: "/maps/map_001/video/generating/run_video_new_001",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <DynamicMapPage
+        map={map}
+        initialTab="video"
+        availableVideoModels={["seedance-1-5-pro"]}
+        initialVideoPromptInstruction="先回显这条旧提示词"
+      />,
+    );
+
+    const textarea = screen.getByLabelText("风格提示词");
+    expect(textarea).toHaveValue("先回显这条旧提示词");
+
+    fireEvent.change(textarea, {
+      target: {
+        value: "只允许路线有轻微流动感，其他装饰元素尽量静止。",
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "生成视频" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+
+    const request = fetchMock.mock.calls[0];
+    expect(request[0]).toBe("/api/maps/map_001/video/generate");
+    expect(JSON.parse(String(request[1]?.body))).toMatchObject({
+      durationSeconds: 5,
+      videoModel: "seedance-1-5-pro",
+      promptInstruction: "只允许路线有轻微流动感，其他装饰元素尽量静止。",
+    });
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith("/maps/map_001/video/generating/run_video_new_001");
+    });
   });
 });
