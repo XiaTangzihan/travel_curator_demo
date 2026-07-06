@@ -17,3 +17,16 @@ export {
   supportedStyleKeys,
   type SupportedStyleKey,
 } from "@/src/engine/prompts/styles";
+export {
+  buildVideoPrompt,
+  buildCommonVideoPrompt,
+  getVideoStylePreset,
+  normalizeVideoDurationSeconds,
+  supportedVideoDurationSeconds,
+  supportedVideoStyleKeys,
+  videoStylePromptLibrary,
+  type SupportedVideoDurationSeconds,
+  type SupportedVideoStyleKey,
+  type VideoPromptInput,
+  type VideoStylePromptPreset,
+} from "@/src/engine/prompts/video";

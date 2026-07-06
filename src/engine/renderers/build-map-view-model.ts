@@ -42,6 +42,7 @@ export function buildMapViewModel(params: {
     city: params.city,
     style: params.style,
     imageModel: params.imageModel ?? "unknown",
+    videoModel: "unknown",
     posterPath: params.posterPath,
     routeMarkdown: params.routeMarkdown,
     selectedEventId,

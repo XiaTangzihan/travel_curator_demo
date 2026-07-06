@@ -18,6 +18,7 @@ export type ProfileHomeFilters = {
   datasetKey: ProfileDatasetFilter;
   imageModel: ProfileImageModelFilter;
   style: ProfileStyleFilter;
+  hasVideo: boolean;
 };
 
 function isSupportedStyleKey(value: string): value is SupportedStyleKey {
@@ -28,6 +29,7 @@ export function resolveProfileHomeFilters(params: {
   dataset?: string;
   imageModel?: string;
   style?: string;
+  hasVideo?: string;
 }): ProfileHomeFilters {
   const datasetKey =
     !params.dataset || params.dataset === "all"
@@ -39,19 +41,21 @@ export function resolveProfileHomeFilters(params: {
     params.imageModel === "all"
       ? "all"
       : isSelectableImageModel(params.imageModel ?? "")
-        ? params.imageModel
+        ? (params.imageModel as ProfileImageModelFilter)
         : "all";
   const style =
     params.style === "all"
       ? "all"
       : isSupportedStyleKey(params.style ?? "")
-        ? params.style
+        ? (params.style as ProfileStyleFilter)
         : "all";
+  const hasVideo = params.hasVideo === "1" || params.hasVideo === "true";
 
   return {
     datasetKey,
     imageModel,
     style,
+    hasVideo,
   };
 }
 
@@ -69,6 +73,10 @@ export function filterProfileMaps(
     }
 
     if (filters.style !== "all" && map.style !== filters.style) {
+      return false;
+    }
+
+    if (filters.hasVideo && !(map.videoPath?.trim().length)) {
       return false;
     }
 

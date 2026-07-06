@@ -101,6 +101,7 @@ function normalizePosterVersions(mapRecord: MapRecord): PosterVersion[] {
       versionId: mapRecord.selectedPosterVersionId ?? mapRecord.currentRunId ?? "current",
       posterPath: mapRecord.posterPath,
       runId: mapRecord.currentRunId || "current",
+      imageModel: mapRecord.imageModel ?? "unknown",
       createdAt: mapRecord.updatedAt || mapRecord.createdAt,
       instruction: mapRecord.lastInstruction,
     },
@@ -181,6 +182,8 @@ function buildRunSummary(params: {
     status: params.run.status,
     stage: params.run.stage,
     providerMode: params.run.providerMode,
+    videoModel: params.run.videoModel,
+    videoDurationSeconds: params.run.videoDurationSeconds,
     styleKey: params.run.styleKey,
     promptVersion: params.run.promptVersion,
     referenceIds: params.run.referenceIds ?? [],
@@ -744,6 +747,13 @@ export async function getTraceMapDetailViewModel(mapId: string): Promise<TraceMa
       exists: currentPosterExists,
       sourceRunId: selectedPosterSourceRun?.runId ?? null,
       selectedVersionId: selectedPosterVersion?.versionId ?? null,
+    },
+    video: {
+      publicPath: mapRecord.videoPath ?? null,
+      exists: mapRecord.videoPath ? await pathExists(fromPublicPath(mapRecord.videoPath)) : false,
+      sourceRunId: mapRecord.currentVideoRunId ?? null,
+      durationSeconds: mapRecord.videoDurationSeconds ?? null,
+      videoModel: mapRecord.videoModel,
     },
   };
 

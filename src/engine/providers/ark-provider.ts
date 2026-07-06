@@ -1,7 +1,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SelectableImageModel } from "@/src/config/image-models";
+import type { SelectableVideoModel } from "@/src/config/video-models";
 import { resolveSeedreamRuntimeConfig } from "@/src/engine/providers/seedream-model-registry";
+import { resolveSeedanceRuntimeConfig } from "@/src/engine/providers/seedance-model-registry";
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -21,6 +23,47 @@ type SeedreamImageOptions = {
   images?: string[];
   size?: string;
   imageModel?: SelectableImageModel;
+};
+
+type SeedanceVideoOptions = {
+  prompt: string;
+  imageUrl: string;
+  durationSeconds: number;
+  videoModel?: SelectableVideoModel;
+  ratio?: "16:9";
+  resolution?: "720p";
+  generateAudio?: boolean;
+};
+
+type SeedanceTaskStatus =
+  | "queued"
+  | "running"
+  | "succeeded"
+  | "failed"
+  | "canceled"
+  | "unknown";
+
+type SeedanceTaskPayload = {
+  id: string;
+  model?: string;
+  status?: string;
+  error?: {
+    code?: string;
+    message?: string;
+  } | null;
+  content?: {
+    video_url?: string;
+  } | null;
+  usage?: {
+    completion_tokens?: number;
+    total_tokens?: number;
+  } | null;
+  created_at?: number;
+  updated_at?: number;
+  duration?: number;
+  ratio?: string;
+  resolution?: string;
+  generate_audio?: boolean;
 };
 
 function requireEnv(name: string) {
@@ -138,4 +181,117 @@ export async function runSeedreamImage(input: string | SeedreamImageOptions) {
   }
 
   return Buffer.from(base64, "base64");
+}
+
+function normalizeSeedanceTaskStatus(status?: string): SeedanceTaskStatus {
+  if (!status) {
+    return "unknown";
+  }
+
+  switch (status) {
+    case "queued":
+    case "running":
+    case "succeeded":
+    case "failed":
+    case "canceled":
+      return status;
+    default:
+      return "unknown";
+  }
+}
+
+export async function createSeedanceVideoTask(options: SeedanceVideoOptions) {
+  const runtimeConfig = resolveSeedanceRuntimeConfig(options.videoModel);
+  const imageUrl =
+    options.imageUrl.startsWith("data:image/") || options.imageUrl.startsWith("http")
+      ? options.imageUrl
+      : await imageFileToDataUri(options.imageUrl);
+  const response = await fetch(`${runtimeConfig.baseUrl}/contents/generations/tasks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${runtimeConfig.apiKey}`,
+    },
+    body: JSON.stringify({
+      model: runtimeConfig.modelId,
+      content: [
+        {
+          type: "text",
+          text: options.prompt,
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: imageUrl,
+          },
+        },
+      ],
+      duration: options.durationSeconds,
+      ratio: options.ratio ?? "16:9",
+      resolution: options.resolution ?? "720p",
+      generate_audio: options.generateAudio ?? true,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await parseJsonResponse(response);
+    throw new Error(`生视频任务创建失败: ${JSON.stringify(detail)}`);
+  }
+
+  const payload = (await response.json()) as SeedanceTaskPayload;
+  if (!payload.id) {
+    throw new Error("生视频任务创建失败：未返回任务 ID");
+  }
+
+  return {
+    taskId: payload.id,
+    videoModel: runtimeConfig.videoModel,
+    modelId: runtimeConfig.modelId,
+    status: normalizeSeedanceTaskStatus(payload.status),
+    payload,
+  };
+}
+
+export async function getSeedanceVideoTask(params: {
+  taskId: string;
+  videoModel?: SelectableVideoModel;
+}) {
+  const runtimeConfig = resolveSeedanceRuntimeConfig(params.videoModel);
+  const response = await fetch(
+    `${runtimeConfig.baseUrl}/contents/generations/tasks/${params.taskId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${runtimeConfig.apiKey}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const detail = await parseJsonResponse(response);
+    throw new Error(`生视频任务查询失败: ${JSON.stringify(detail)}`);
+  }
+
+  const payload = (await response.json()) as SeedanceTaskPayload;
+  return {
+    taskId: payload.id || params.taskId,
+    videoModel: runtimeConfig.videoModel,
+    modelId: runtimeConfig.modelId,
+    status: normalizeSeedanceTaskStatus(payload.status),
+    videoUrl: payload.content?.video_url?.trim() || "",
+    errorCode: payload.error?.code?.trim() || "",
+    errorMessage: payload.error?.message?.trim() || "",
+    payload,
+  };
+}
+
+export async function downloadSeedanceVideo(url: string) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    const detail = await parseJsonResponse(response);
+    throw new Error(`视频下载失败: ${JSON.stringify(detail)}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }

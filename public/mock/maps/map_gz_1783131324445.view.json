@@ -4,10 +4,14 @@
   "mapName": "广州01",
   "city": "广州",
   "style": "watercolor",
+  "imageModel": "unknown",
+  "currentVideoRunId": "run_20260706081802_qt2c",
+  "videoDurationSeconds": 7,
+  "videoModel": "seedance-1-5-pro",
   "posterPath": "/mock/posters/map_gz_1783131324445.png",
   "routeMarkdown": "---\nmap_name: 广州01\ncity: 广州\nstyle: 清新水彩风\ndays: 2\nevent_count: 8\nknowledge_count: 4\n---\n\n# Day 1 (2024:06:01)\n\n## Event 1 · 粒上皇\n- sequence: 1\n- poi: 粒上皇(叠景路店)\n- short_name: 粒上皇\n- 类目: 购物 / 食品/滋补品 / 零食\n- 文案: 口味一般，不太好剥，最后超了几毛钱还让我补🌚\n- 配图: /mock/files/comments/sheet_guangzhou_7372159912745158667_1.jpeg\n- event标志生图提示: 粒上皇 / 零食 / 食品/滋补品 / \n\n## Event 2 · 财记炭炉鸡锅\n- sequence: 2\n- poi: 财记炭炉鸡锅(龙洞店)\n- short_name: 财记炭炉鸡锅\n- 类目: 美食 / 火锅 / 特色火锅\n- 文案: 味道还不错，尤其是方便面煮下去很入味!两个人吃不完，服务员会主动加汤，这家生意还不错，人很多……整体性价比很高🙊\n- 配图: /mock/files/comments/sheet_guangzhou_7372191207356762147_1.jpeg\n- event标志生图提示: 财记炭炉鸡锅 / 特色火锅 / 火锅 /\n\n## Event 3 · 幻境空间\n- sequence: 3\n- poi: 幻境空间·超级元宇宙(广州旗舰店)\n- short_name: 幻境空间\n- 类目: 休闲娱乐 / 新奇体验 / 新奇体验\n- 文案: 重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性价比一般吧\n- 配图: /mock/files/comments/sheet_guangzhou_7372154217059895331_1.jpeg\n- event标志生图提示: 幻境空间 / 新奇体验 / 新奇体验 /\n\n## Event 4 · 华记煲仔华\n- sequence: 4\n- poi: 华记煲仔华·煲仔饭(万胜围店)\n- short_name: 华记煲仔华\n- 类目: 美食 / 快餐小吃 / 快餐\n- 文案: 路边上位置很好找，整个店很大，宽敞明亮。选的是鲜沙姜鸡拼盐焗鸡肾煲仔饭+椰子汤，下雨天吃的感觉很不错，整体味道可以自己通过专用酱油加减调节\n- 配图: /mock/files/comments/sheet_guangzhou_7372082030185580544_1.jpeg\n- event标志生图提示: 华记煲仔华 / 快餐 / 快餐小吃 / \n\n# Day 2 (2024:06:02)\n\n## Event 5 · 金元泰\n- sequence: 5\n- poi: 金元泰·泰式按摩·SPA(丽影广场客村店)\n- short_name: 金元泰\n- 类目: 休闲娱乐 / 洗浴按摩 / 足疗/按摩\n- 文案: 电梯上三楼，过了一家桌游店就是这家泰式按摩了。团了99元爆品套餐，先换鞋-沐足，然后开始泰式按摩，整体按得很舒适，但技术会比想象中的略逊一筹。服务态度都挺好的，最后按完老板还给了一碗糖水。\n- 配图: /mock/files/comments/sheet_guangzhou_7373235607771924519_1.jpeg\n- event标志生图提示: 金元泰 / 足疗/按摩 / 洗浴按摩 /\n\n## Event 6 · 佳叽Jargee\n- sequence: 6\n- poi: 佳叽Jargee(广州嘉禾金铂天地店)\n- short_name: 佳叽Jargee\n- 类目: 休闲娱乐 / 传统娱乐 / 游戏厅\n- 文案: 小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体玩下来还是很开心的!这个1元团10个币也是很实惠啦\n- 配图: /mock/files/comments/sheet_guangzhou_7372591657847441447_1.jpeg\n- event标志生图提示: 佳叽Jargee / 游戏厅 / 传统娱\n\n## Event 7 · 彬媽糖水\n- sequence: 7\n- poi: 彬媽糖水(马场路店)\n- short_name: 彬媽糖水\n- 类目: 美食 / 面包甜点 / 甜品\n- 文案: 农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，味道适中，酒酿桃胶汤圆有点子酸酸甜甜的，然后姜撞奶姜味有点子重哈哈，如果喝不习惯的话可能会觉得怪吧，其它品类有机会可以尝尝。\n- 配图: /mock/files/comments/sheet_guangzhou_7504217745764993062_1.jpeg\n- event标志生图提示: 彬媽糖水 / 甜品 / 面包甜点 / 农\n\n## Event 8 · YOJO啤酒厂\n- sequence: 8\n- poi: YOJO啤酒厂(保利广场店)\n- short_name: YOJO啤酒厂\n- 类目: 休闲娱乐 / 酒吧 / 清吧\n- 文案: 晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几个选项，酸甜各有差异，按需选择。点的盐湖和金桔，盐湖里话梅口感还是有的，喝得还比较习惯，金桔味道适中，不酸不甜，另外推荐下粗薯条🍟。\n- 配图: /mock/files/comments/sheet_guangzhou_7504992594020026419_1.jpeg\n- event标志生图提示: YOJO啤酒厂 / 清吧 / 酒吧 / \n",
   "selectedEventId": "evt_001",
-  "generatedAt": "2026-07-04T02:24:37.929Z",
+  "generatedAt": "2026-07-06T00:19:27.611Z",
   "knowledge": [
     {
       "name": "广州塔",
@@ -96,6 +100,7 @@
     {
       "eventId": "evt_001",
       "commentId": "sheet_guangzhou_7372159912745158667",
+      "sequence": 1,
       "day": "2024:06:01",
       "time": "10:20:00",
       "commentText": "口味一般，不太好剥，最后超了几毛钱还让我补🌚",
@@ -105,6 +110,8 @@
           "name": "sheet_guangzhou_7372159912745158667_1.jpeg"
         }
       ],
+      "canonicalName": "粒上皇(叠景路店)",
+      "shortName": "粒上皇",
       "poiName": "粒上皇(叠景路店)",
       "poiLocation": "叠景路193号101铺之一",
       "poiProvince": "广东省",
@@ -113,14 +120,12 @@
       "categoryL1": "购物",
       "categoryL2": "食品/滋补品",
       "categoryL3": "零食",
-      "authorName": "旅行者小夏",
-      "sequence": 1,
-      "canonicalName": "粒上皇(叠景路店)",
-      "shortName": "粒上皇"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_002",
       "commentId": "sheet_guangzhou_7372191207356762147",
+      "sequence": 2,
       "day": "2024:06:01",
       "time": "11:48:00",
       "commentText": "味道还不错，尤其是方便面煮下去很入味!两个人吃不完，服务员会主动加汤，这家生意还不错，人很多……整体性价比很高🙊",
@@ -138,6 +143,8 @@
           "name": "sheet_guangzhou_7372191207356762147_3.jpeg"
         }
       ],
+      "canonicalName": "财记炭炉鸡锅(龙洞店)",
+      "shortName": "财记炭炉鸡锅",
       "poiName": "财记炭炉鸡锅(龙洞店)",
       "poiLocation": "迎龙路163号B5-4181号",
       "poiProvince": "广东省",
@@ -146,14 +153,12 @@
       "categoryL1": "美食",
       "categoryL2": "火锅",
       "categoryL3": "特色火锅",
-      "authorName": "旅行者小夏",
-      "sequence": 2,
-      "canonicalName": "财记炭炉鸡锅(龙洞店)",
-      "shortName": "财记炭炉鸡锅"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_003",
       "commentId": "sheet_guangzhou_7372154217059895331",
+      "sequence": 3,
       "day": "2024:06:01",
       "time": "12:50:00",
       "commentText": "重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性价比一般吧",
@@ -171,6 +176,8 @@
           "name": "sheet_guangzhou_7372154217059895331_3.jpeg"
         }
       ],
+      "canonicalName": "幻境空间·超级元宇宙(广州旗舰店)",
+      "shortName": "幻境空间",
       "poiName": "幻境空间·超级元宇宙(广州旗舰店)",
       "poiLocation": "体育西路54号北段星之光潮领地1A005铺(体育西路地铁站E出口北300米)",
       "poiProvince": "广东省",
@@ -179,14 +186,12 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "新奇体验",
       "categoryL3": "新奇体验",
-      "authorName": "旅行者小夏",
-      "sequence": 3,
-      "canonicalName": "幻境空间·超级元宇宙(广州旗舰店)",
-      "shortName": "幻境空间"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_004",
       "commentId": "sheet_guangzhou_7372082030185580544",
+      "sequence": 4,
       "day": "2024:06:01",
       "time": "17:44:00",
       "commentText": "路边上位置很好找，整个店很大，宽敞明亮。选的是鲜沙姜鸡拼盐焗鸡肾煲仔饭+椰子汤，下雨天吃的感觉很不错，整体味道可以自己通过专用酱油加减调节",
@@ -204,6 +209,8 @@
           "name": "sheet_guangzhou_7372082030185580544_3.jpeg"
         }
       ],
+      "canonicalName": "华记煲仔华·煲仔饭(万胜围店)",
+      "shortName": "华记煲仔华",
       "poiName": "华记煲仔华·煲仔饭(万胜围店)",
       "poiLocation": "暄悦西街8号1012铺1013铺1014铺",
       "poiProvince": "广东省",
@@ -212,14 +219,12 @@
       "categoryL1": "美食",
       "categoryL2": "快餐小吃",
       "categoryL3": "快餐",
-      "authorName": "旅行者小夏",
-      "sequence": 4,
-      "canonicalName": "华记煲仔华·煲仔饭(万胜围店)",
-      "shortName": "华记煲仔华"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_005",
       "commentId": "sheet_guangzhou_7373235607771924519",
+      "sequence": 5,
       "day": "2024:06:02",
       "time": "10:20:00",
       "commentText": "电梯上三楼，过了一家桌游店就是这家泰式按摩了。团了99元爆品套餐，先换鞋-沐足，然后开始泰式按摩，整体按得很舒适，但技术会比想象中的略逊一筹。服务态度都挺好的，最后按完老板还给了一碗糖水。",
@@ -237,6 +242,8 @@
           "name": "sheet_guangzhou_7373235607771924519_3.jpeg"
         }
       ],
+      "canonicalName": "金元泰·泰式按摩·SPA(丽影广场客村店)",
+      "shortName": "金元泰",
       "poiName": "金元泰·泰式按摩·SPA(丽影广场客村店)",
       "poiLocation": "艺苑南路13号大院13号302房",
       "poiProvince": "广东省",
@@ -245,14 +252,12 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "洗浴按摩",
       "categoryL3": "足疗/按摩",
-      "authorName": "旅行者小夏",
-      "sequence": 5,
-      "canonicalName": "金元泰·泰式按摩·SPA(丽影广场客村店)",
-      "shortName": "金元泰"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_006",
       "commentId": "sheet_guangzhou_7372591657847441447",
+      "sequence": 6,
       "day": "2024:06:02",
       "time": "11:22:00",
       "commentText": "小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体玩下来还是很开心的!这个1元团10个币也是很实惠啦",
@@ -266,6 +271,8 @@
           "name": "sheet_guangzhou_7372591657847441447_2.jpeg"
         }
       ],
+      "canonicalName": "佳叽Jargee(广州嘉禾金铂天地店)",
+      "shortName": "佳叽Jargee",
       "poiName": "佳叽Jargee(广州嘉禾金铂天地店)",
       "poiLocation": "鹤龙二路85号嘉禾金铂天地一层116号铺（1号门右手边手扶梯Nike对面）",
       "poiProvince": "广东省",
@@ -274,14 +281,12 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "传统娱乐",
       "categoryL3": "游戏厅",
-      "authorName": "旅行者小夏",
-      "sequence": 6,
-      "canonicalName": "佳叽Jargee(广州嘉禾金铂天地店)",
-      "shortName": "佳叽Jargee"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_008",
       "commentId": "sheet_guangzhou_7504217745764993062",
+      "sequence": 7,
       "day": "2024:06:02",
       "time": "14:06:00",
       "commentText": "农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，味道适中，酒酿桃胶汤圆有点子酸酸甜甜的，然后姜撞奶姜味有点子重哈哈，如果喝不习惯的话可能会觉得怪吧，其它品类有机会可以尝尝。",
@@ -303,6 +308,8 @@
           "name": "sheet_guangzhou_7504217745764993062_4.jpeg"
         }
       ],
+      "canonicalName": "彬媽糖水(马场路店)",
+      "shortName": "彬媽糖水",
       "poiName": "彬媽糖水(马场路店)",
       "poiLocation": "马场路珠光新城国际商务中心B座首层103（甲子路东北段）",
       "poiProvince": "广东省",
@@ -311,14 +318,12 @@
       "categoryL1": "美食",
       "categoryL2": "面包甜点",
       "categoryL3": "甜品",
-      "authorName": "旅行者小夏",
-      "sequence": 7,
-      "canonicalName": "彬媽糖水(马场路店)",
-      "shortName": "彬媽糖水"
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_011",
       "commentId": "sheet_guangzhou_7504992594020026419",
+      "sequence": 8,
       "day": "2024:06:02",
       "time": "20:06:00",
       "commentText": "晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几个选项，酸甜各有差异，按需选择。点的盐湖和金桔，盐湖里话梅口感还是有的，喝得还比较习惯，金桔味道适中，不酸不甜，另外推荐下粗薯条🍟。",
@@ -336,6 +341,8 @@
           "name": "sheet_guangzhou_7504992594020026419_3.jpeg"
         }
       ],
+      "canonicalName": "YOJO啤酒厂(保利广场店)",
+      "shortName": "YOJO啤酒厂",
       "poiName": "YOJO啤酒厂(保利广场店)",
       "poiLocation": "新港东路10号保利广场一层外广场",
       "poiProvince": "广东省",
@@ -344,10 +351,9 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "酒吧",
       "categoryL3": "清吧",
-      "authorName": "旅行者小夏",
-      "sequence": 8,
-      "canonicalName": "YOJO啤酒厂(保利广场店)",
-      "shortName": "YOJO啤酒厂"
+      "authorName": "旅行者小夏"
     }
-  ]
+  ],
+  "videoPath": "/mock/videos/map_gz_1783131324445.mp4",
+  "videoUpdatedAt": "2026-07-06T00:19:27.611Z"
 }

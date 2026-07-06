@@ -20,6 +20,7 @@ type ProfileHomeProps = {
   activeDatasetKey: ProfileDatasetFilter;
   activeImageModel: ProfileImageModelFilter;
   activeStyle: ProfileStyleFilter;
+  activeHasVideo: boolean;
   datasetOptions: Array<{
     key: string;
     city: string;
@@ -44,12 +45,14 @@ export function ProfileHome(props: ProfileHomeProps) {
   const hasActiveCardFilters =
     props.activeDatasetKey !== "all" ||
     props.activeImageModel !== "all" ||
-    props.activeStyle !== "all";
+    props.activeStyle !== "all" ||
+    props.activeHasVideo;
 
   function replaceFilters(nextFilters: {
     datasetKey: ProfileDatasetFilter;
     imageModel: ProfileImageModelFilter;
     style: ProfileStyleFilter;
+    hasVideo: boolean;
   }) {
     const nextSearchParams = new URLSearchParams();
     if (nextFilters.datasetKey !== "all") {
@@ -62,6 +65,10 @@ export function ProfileHome(props: ProfileHomeProps) {
 
     if (nextFilters.style !== "all") {
       nextSearchParams.set("style", nextFilters.style);
+    }
+
+    if (nextFilters.hasVideo) {
+      nextSearchParams.set("hasVideo", "1");
     }
 
     const queryString = nextSearchParams.toString();
@@ -190,7 +197,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                   <p className="mt-3 max-w-[560px] text-sm leading-7 text-[var(--text-muted)]">
                     在这里保存去过的城市、停留过的时刻，以及那些值得反复回看的旅程片段。
                   </p>
-                  <div className="mt-5 grid gap-3 xl:grid-cols-3">
+                  <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
                     <label className="block text-sm font-medium text-[var(--text-strong)]">
                       目的地
                       <select
@@ -200,6 +207,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                             datasetKey: event.target.value as ProfileDatasetFilter,
                             imageModel: props.activeImageModel,
                             style: props.activeStyle,
+                            hasVideo: props.activeHasVideo,
                           })
                         }
                         className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
@@ -222,6 +230,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                             datasetKey: props.activeDatasetKey,
                             imageModel: event.target.value as ProfileImageModelFilter,
                             style: props.activeStyle,
+                            hasVideo: props.activeHasVideo,
                           })
                         }
                         className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
@@ -244,6 +253,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                             datasetKey: props.activeDatasetKey,
                             imageModel: props.activeImageModel,
                             style: event.target.value as ProfileStyleFilter,
+                            hasVideo: props.activeHasVideo,
                           })
                         }
                         className="mt-2 w-full rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-[15px] text-[var(--text-strong)] outline-none transition"
@@ -255,6 +265,23 @@ export function ProfileHome(props: ProfileHomeProps) {
                           </option>
                         ))}
                       </select>
+                    </label>
+
+                    <label className="inline-flex min-h-[54px] items-center gap-3 rounded-[18px] border border-[color:var(--line-subtle)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-strong)]">
+                      <input
+                        type="checkbox"
+                        checked={props.activeHasVideo}
+                        onChange={(event) =>
+                          replaceFilters({
+                            datasetKey: props.activeDatasetKey,
+                            imageModel: props.activeImageModel,
+                            style: props.activeStyle,
+                            hasVideo: event.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 rounded border-[color:var(--line-subtle)] text-[var(--accent-primary)]"
+                      />
+                      有视频
                     </label>
                   </div>
                 </div>
@@ -288,7 +315,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                 按当前筛选结果浏览你的旅行地图
               </h2>
               <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
-                目的地、生图模型和地图风格共用同一套筛选口径，顶部统计会同步变化。
+                目的地、生图模型、地图风格和视频状态共用同一套筛选口径，顶部统计会同步变化。
               </p>
             </div>
             <p className="text-sm text-[var(--text-muted)]">
@@ -394,7 +421,7 @@ export function ProfileHome(props: ProfileHomeProps) {
                 </p>
                 <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
                   {hasActiveCardFilters
-                    ? "试试切换生图模型或地图风格，或者先回到全部筛选查看已有作品。"
+                    ? "试试切换筛选项，或者先回到全部筛选查看已有作品。"
                     : "先去工作台整理一次旅程，这里就会出现新的地图卡片。"}
                 </p>
               </article>

@@ -29,6 +29,7 @@ function createDetail(params: {
   lifecycleRunId: string;
   commentId: string;
 }): TraceMapDetailViewModel {
+  const videoRunId = `run_video_${params.mapId}`;
   return {
     mapId: params.mapId,
     mapName: params.mapName,
@@ -54,6 +55,8 @@ function createDetail(params: {
       status: "completed",
       stage: "regenerate",
       providerMode: "live",
+      videoModel: "seedance-1-5-pro",
+      videoDurationSeconds: 5,
       styleKey: "young-cartoon",
       promptVersion: "phase4_reference_v1",
       referenceIds: ["style_ref_young_cartoon_20260702"],
@@ -77,6 +80,8 @@ function createDetail(params: {
       status: "completed",
       stage: "confirm",
       providerMode: "live",
+      videoModel: "seedance-1-5-pro",
+      videoDurationSeconds: 5,
       styleKey: undefined,
       promptVersion: undefined,
       referenceIds: [],
@@ -131,6 +136,13 @@ function createDetail(params: {
         sourceRunId: params.sourceRunId,
         selectedVersionId: params.sourceRunId,
       },
+      video: {
+        publicPath: `/mock/videos/${params.mapId}.mp4`,
+        exists: true,
+        sourceRunId: videoRunId,
+        durationSeconds: 5,
+        videoModel: "seedance-1-5-pro",
+      },
     },
     aiContract: {
       available: true,
@@ -174,6 +186,8 @@ function createDetail(params: {
         status: "completed",
         stage: "regenerate",
         providerMode: "live",
+        videoModel: "seedance-1-5-pro",
+        videoDurationSeconds: 5,
         styleKey: "young-cartoon",
         promptVersion: "phase4_reference_v1",
         referenceIds: [],
@@ -184,11 +198,38 @@ function createDetail(params: {
         artifacts: {
           routePath: `/mock/routes/${params.mapId}.route.md`,
           posterPath: `/mock/posters/${params.mapId}__${params.sourceRunId}.png`,
+          videoPath: `/mock/videos/${params.mapId}.mp4`,
           mapPath: `/mock/maps/${params.mapId}.view.json`,
         },
         isSelectedPosterSource: true,
         isLatestLifecycle: false,
         posterAssetState: "present",
+      },
+      {
+        runId: videoRunId,
+        mapId: params.mapId,
+        datasetKey: "hangzhou",
+        status: "completed",
+        stage: "video_generate",
+        providerMode: "live",
+        videoModel: "seedance-1-5-pro",
+        videoDurationSeconds: 5,
+        styleKey: "young-cartoon",
+        promptVersion: "video_prompt_v1",
+        referenceIds: [],
+        warnings: [],
+        startedAt: "2026-07-05T05:36:00.000Z",
+        endedAt: "2026-07-05T05:36:05.000Z",
+        durationSeconds: 5,
+        artifacts: {
+          routePath: `/mock/routes/${params.mapId}.route.md`,
+          posterPath: `/mock/posters/${params.mapId}__${params.sourceRunId}.png`,
+          videoPath: `/mock/videos/${params.mapId}.mp4`,
+          mapPath: `/mock/maps/${params.mapId}.view.json`,
+        },
+        isSelectedPosterSource: false,
+        isLatestLifecycle: false,
+        posterAssetState: null,
       },
       {
         runId: params.lifecycleRunId,
@@ -197,6 +238,8 @@ function createDetail(params: {
         status: "completed",
         stage: "confirm",
         providerMode: "live",
+        videoModel: "seedance-1-5-pro",
+        videoDurationSeconds: 5,
         styleKey: undefined,
         promptVersion: undefined,
         referenceIds: [],
@@ -207,6 +250,7 @@ function createDetail(params: {
         artifacts: {
           routePath: `/mock/routes/${params.mapId}.route.md`,
           posterPath: `/mock/posters/${params.mapId}__${params.sourceRunId}.png`,
+          videoPath: `/mock/videos/${params.mapId}.mp4`,
           mapPath: `/mock/maps/${params.mapId}.view.json`,
         },
         isSelectedPosterSource: false,
@@ -339,6 +383,9 @@ describe("RunsPage", () => {
     expect(screen.getByText("当前选中海报来源 run")).toBeInTheDocument();
     expect(screen.getAllByText("杭州 A").length).toBeGreaterThan(0);
     expect(screen.getByText("AI Contract")).toBeInTheDocument();
+    expect(screen.getAllByText(/mock\/videos\/map_a\.mp4/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Video Duration：5s/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("视频生成").length).toBeGreaterThan(0);
   });
 
   it("支持按 commentId 搜索，并在切换作品时懒加载详情", async () => {

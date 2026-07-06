@@ -11,6 +11,7 @@ export const stageLabels: Record<RunTrace["stage"], string> = {
   generate: "首次生成",
   regenerate: "重新生成",
   confirm: "确认保存",
+  video_generate: "视频生成",
 };
 
 export const runStatusLabels: Record<TraceRunStatusValue, string> = {

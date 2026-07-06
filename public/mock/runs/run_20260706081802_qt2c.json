@@ -1,0 +1,26 @@
+{
+  "runId": "run_20260706081802_qt2c",
+  "mapId": "map_gz_1783131324445",
+  "datasetKey": "guangzhou",
+  "status": "completed",
+  "stage": "video_generate",
+  "imageModel": "unknown",
+  "videoModel": "seedance-1-5-pro",
+  "providerTaskId": "cgt-20260706081804-bp7ps",
+  "videoDurationSeconds": 7,
+  "promptInstruction": "整体运动人格是轻柔、湿润、缓慢。\n优先表现水面微波、远山雾气、柳树和芦苇的轻摆、空气中若有若无的流动感。\n所有动态都应更慢、更淡、更软，像水彩颜料在纸面上缓缓洇开。不要出现清晰硬边的运动轨迹，不要出现卡通弹跳，不要让画面节奏变快或颜色变亮。",
+  "styleKey": "watercolor",
+  "promptVersion": "p6_video_prompt_v1",
+  "progressStep": "finalizing",
+  "updatedAt": "2026-07-06T00:19:27.611Z",
+  "warnings": [],
+  "artifacts": {
+    "routePath": "C:\\Users\\Admin\\Desktop\\旅行策展人-备用\\public\\mock\\routes\\map_gz_1783131324445.route.md",
+    "posterPath": "/mock/posters/map_gz_1783131324445.png",
+    "videoPath": "/mock/videos/map_gz_1783131324445.mp4",
+    "mapPath": "/mock/maps/map_gz_1783131324445.view.json"
+  },
+  "providerMode": "live",
+  "startedAt": "2026-07-06T00:18:02.765Z",
+  "endedAt": "2026-07-06T00:19:27.611Z"
+}

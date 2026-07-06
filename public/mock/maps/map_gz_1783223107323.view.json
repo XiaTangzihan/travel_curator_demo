@@ -4,10 +4,14 @@
   "mapName": "广州-10b",
   "city": "广州",
   "style": "storybook",
+  "imageModel": "unknown",
+  "currentVideoRunId": "run_20260706075232_jiyv",
+  "videoDurationSeconds": 5,
+  "videoModel": "seedance-1-0-pro-fast",
   "posterPath": "/mock/posters/map_gz_1783223107323.png",
   "routeMarkdown": "---\nmap_name: 广州-10b\ncity: 广州\nstyle: 治愈绘本插画风\ndays: 2\nevent_count: 8\nknowledge_count: 4\n---\n\n## Important Rules\n- 所有 event 配图统一服从给定 style，不得自行发散风格。\n- 背景地标只作为背景视觉参考，不给地标配文。\n- 所有 event 主体图标内部禁止出现任何可读文字、字母、数字、logo、水印、菜单、招牌或屏幕字幕。\n- 点位名称和编号只能作为节点外部标注，不能嵌入主体图标内部。\n- 若场景天然包含店招、路牌、菜单或电子屏，统一简化为无字形状，不保留可读字符。\n- 主路径必须从画面左侧起、向右侧结束，节点编号顺序必须与空间阅读顺序一致。\n- 节点中心点横向位置应随编号递增，只允许轻微上下起伏，不允许回头路、环形主路径或纵向堆叠成为主顺序。\n- 每个 event 的 subject 必须是 1 个简短中文名词和 1 个简短中文形容词，用顿号连接，顺序固定为“名词、形容词”。\n- 每个 event 的 avoid 必须是 3-5 个要避免的意象词。\n\n# Day 1 (2024:06:01)\n\n## Event 1 · 粒上皇\n- sequence: 1\n- poi: 粒上皇(叠景路店)\n- short_name: 粒上皇\n- 类目: 购物 / 食品/滋补品 / 零食\n- 文案: 口味一般，不太好剥，最后超了几毛钱还让我补🌚\n- 配图: /mock/files/comments/sheet_guangzhou_7372159912745158667_1.jpeg\n- subject: 炒栗子、焦香\n- avoid: 店招文字, 收款金额, 补款提示\n\n## Event 2 · 幻境空间\n- sequence: 2\n- poi: 幻境空间·超级元宇宙(广州旗舰店)\n- short_name: 幻境空间\n- 类目: 休闲娱乐 / 新奇体验 / 新奇体验\n- 文案: 重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性价比一般吧\n- 配图: /mock/files/comments/sheet_guangzhou_7372154217059895331_1.jpeg\n- subject: 镜面空间、炫亮\n- avoid: 影片字幕, 时长提示, 票价字样\n\n# Day 2 (2024:06:02)\n\n## Event 3 · 金元泰\n- sequence: 3\n- poi: 金元泰·泰式按摩·SPA(丽影广场客村店)\n- short_name: 金元泰\n- 类目: 休闲娱乐 / 洗浴按摩 / 足疗/按摩\n- 文案: 电梯上三楼，过了一家桌游店就是这家泰式按摩了。团了99元爆品套餐，先换鞋-沐足，然后开始泰式按摩，整体按得很舒适，但技术会比想象中的略逊一筹。服务态度都挺好的，最后按完老板还给了一碗糖水。\n- 配图: /mock/files/comments/sheet_guangzhou_7373235607771924519_1.jpeg\n- subject: 按摩床、松软\n- avoid: 楼层数字, 套餐价格, 电梯标识, 店招文字\n\n## Event 4 · 佳叽Jargee\n- sequence: 4\n- poi: 佳叽Jargee(广州嘉禾金铂天地店)\n- short_name: 佳叽Jargee\n- 类目: 休闲娱乐 / 传统娱乐 / 游戏厅\n- 文案: 小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体玩下来还是很开心的!这个1元团10个币也是很实惠啦\n- 配图: /mock/files/comments/sheet_guangzhou_7372591657847441447_1.jpeg\n- subject: 布娃娃、软萌\n- avoid: 价格字样, 币值标识, 服务提示牌\n\n## Event 5 · 大榕树下\n- sequence: 5\n- poi: 大榕树下·臻品顺德菜(广州塔店)\n- short_name: 大榕树下\n- 类目: 美食 / 地方菜 / 粤菜\n- 文案: 广州塔附近的一家顺德菜馆，工作日晚上去的，无须排队。印象深刻的是顺德拌鱼皮和咸蛋黄啫鲜虾，鱼皮很鲜嫩，酸甜可口和这前在顺德当地吃得差异不大，鲜虾也还不错，咸蛋黄味道刚好合适。这家店聚个餐没啥问题，上菜速度也还行。\n- 配图: /mock/files/comments/sheet_guangzhou_7504663064977934345_1.jpeg\n- subject: 鲜虾、鲜爽\n- avoid: 排队提示, 店招文字, 菜单字样, 广州塔标识\n\n## Event 6 · 彬媽糖水\n- sequence: 6\n- poi: 彬媽糖水(马场路店)\n- short_name: 彬媽糖水\n- 类目: 美食 / 面包甜点 / 甜品\n- 文案: 农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，味道适中，酒酿桃胶汤圆有点子酸酸甜甜的，然后姜撞奶姜味有点子重哈哈，如果喝不习惯的话可能会觉得怪吧，其它品类有机会可以尝尝。\n- 配图: /mock/files/comments/sheet_guangzhou_7504217745764993062_1.jpeg\n- subject: 姜撞奶、滑嫩\n- avoid: 银行标识, 店招文字, 价目表字样\n\n## Event 7 · 广州白云国际会议中心越秀万豪酒店\n- sequence: 7\n- poi: 广州白云国际会议中心越秀万豪酒店\n- short_name: 广州白云国际会议中心越秀万豪酒店\n- 类目: 住宿 / 酒店宾馆 / 豪华型酒店\n- 文案: 白云文化广场地铁站附近的一家万豪，大是真得大，入住的房间走到早餐处要走2-3min[微笑]房间的智能马桶还阔以，不过红外线识别太灵敏了，有时人未靠近就自动升盖了[捂脸]早餐是相当丰富，记得早点去品尝广式特色。\n- 配图: /mock/files/comments/sheet_guangzhou_7504994720712558630_1.jpeg\n- subject: 客房、整洁\n- avoid: 地铁标识, 时长提示, 楼层指示牌\n\n## Event 8 · YOJO啤酒厂\n- sequence: 8\n- poi: YOJO啤酒厂(保利广场店)\n- short_name: YOJO啤酒厂\n- 类目: 休闲娱乐 / 酒吧 / 清吧\n- 文案: 晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几个选项，酸甜各有差异，按需选择。点的盐湖和金桔，盐湖里话梅口感还是有的，喝得还比较习惯，金桔味道适中，不酸不甜，另外推荐下粗薯条🍟。\n- 配图: /mock/files/comments/sheet_guangzhou_7504992594020026419_1.jpeg\n- subject: 精酿啤酒、冰爽\n- avoid: 地铁标识, 菜单字样, 价目表文字, 店招文字\n",
   "selectedEventId": "evt_001",
-  "generatedAt": "2026-07-05T03:47:01.949Z",
+  "generatedAt": "2026-07-05T23:53:04.777Z",
   "knowledge": [
     {
       "name": "广州塔",
@@ -96,6 +100,7 @@
     {
       "eventId": "evt_001",
       "commentId": "sheet_guangzhou_7372159912745158667",
+      "sequence": 1,
       "day": "2024:06:01",
       "time": "10:20:00",
       "commentText": "口味一般，不太好剥，最后超了几毛钱还让我补🌚",
@@ -105,6 +110,8 @@
           "name": "sheet_guangzhou_7372159912745158667_1.jpeg"
         }
       ],
+      "canonicalName": "粒上皇(叠景路店)",
+      "shortName": "粒上皇",
       "poiName": "粒上皇(叠景路店)",
       "poiLocation": "叠景路193号101铺之一",
       "poiProvince": "广东省",
@@ -113,20 +120,18 @@
       "categoryL1": "购物",
       "categoryL2": "食品/滋补品",
       "categoryL3": "零食",
-      "authorName": "旅行者小夏",
-      "sequence": 1,
-      "canonicalName": "粒上皇(叠景路店)",
-      "shortName": "粒上皇",
       "subject": "炒栗子、焦香",
       "avoid": [
         "店招文字",
         "收款金额",
         "补款提示"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_003",
       "commentId": "sheet_guangzhou_7372154217059895331",
+      "sequence": 2,
       "day": "2024:06:01",
       "time": "12:50:00",
       "commentText": "重返地球+地宫历险记+惊险之旅，一共3部，27min，看起来惊险刺激，不过看完有点头晕😵整体性价比一般吧",
@@ -144,6 +149,8 @@
           "name": "sheet_guangzhou_7372154217059895331_3.jpeg"
         }
       ],
+      "canonicalName": "幻境空间·超级元宇宙(广州旗舰店)",
+      "shortName": "幻境空间",
       "poiName": "幻境空间·超级元宇宙(广州旗舰店)",
       "poiLocation": "体育西路54号北段星之光潮领地1A005铺(体育西路地铁站E出口北300米)",
       "poiProvince": "广东省",
@@ -152,20 +159,18 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "新奇体验",
       "categoryL3": "新奇体验",
-      "authorName": "旅行者小夏",
-      "sequence": 2,
-      "canonicalName": "幻境空间·超级元宇宙(广州旗舰店)",
-      "shortName": "幻境空间",
       "subject": "镜面空间、炫亮",
       "avoid": [
         "影片字幕",
         "时长提示",
         "票价字样"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_005",
       "commentId": "sheet_guangzhou_7373235607771924519",
+      "sequence": 3,
       "day": "2024:06:02",
       "time": "10:20:00",
       "commentText": "电梯上三楼，过了一家桌游店就是这家泰式按摩了。团了99元爆品套餐，先换鞋-沐足，然后开始泰式按摩，整体按得很舒适，但技术会比想象中的略逊一筹。服务态度都挺好的，最后按完老板还给了一碗糖水。",
@@ -183,6 +188,8 @@
           "name": "sheet_guangzhou_7373235607771924519_3.jpeg"
         }
       ],
+      "canonicalName": "金元泰·泰式按摩·SPA(丽影广场客村店)",
+      "shortName": "金元泰",
       "poiName": "金元泰·泰式按摩·SPA(丽影广场客村店)",
       "poiLocation": "艺苑南路13号大院13号302房",
       "poiProvince": "广东省",
@@ -191,21 +198,19 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "洗浴按摩",
       "categoryL3": "足疗/按摩",
-      "authorName": "旅行者小夏",
-      "sequence": 3,
-      "canonicalName": "金元泰·泰式按摩·SPA(丽影广场客村店)",
-      "shortName": "金元泰",
       "subject": "按摩床、松软",
       "avoid": [
         "楼层数字",
         "套餐价格",
         "电梯标识",
         "店招文字"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_006",
       "commentId": "sheet_guangzhou_7372591657847441447",
+      "sequence": 4,
       "day": "2024:06:02",
       "time": "11:22:00",
       "commentText": "小哥哥小姐姐态度好，服务到位，娃娃种类很多，如果有需要也可以找工作人员帮忙调整下娃娃的位置，整体玩下来还是很开心的!这个1元团10个币也是很实惠啦",
@@ -219,6 +224,8 @@
           "name": "sheet_guangzhou_7372591657847441447_2.jpeg"
         }
       ],
+      "canonicalName": "佳叽Jargee(广州嘉禾金铂天地店)",
+      "shortName": "佳叽Jargee",
       "poiName": "佳叽Jargee(广州嘉禾金铂天地店)",
       "poiLocation": "鹤龙二路85号嘉禾金铂天地一层116号铺（1号门右手边手扶梯Nike对面）",
       "poiProvince": "广东省",
@@ -227,20 +234,18 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "传统娱乐",
       "categoryL3": "游戏厅",
-      "authorName": "旅行者小夏",
-      "sequence": 4,
-      "canonicalName": "佳叽Jargee(广州嘉禾金铂天地店)",
-      "shortName": "佳叽Jargee",
       "subject": "布娃娃、软萌",
       "avoid": [
         "价格字样",
         "币值标识",
         "服务提示牌"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_007",
       "commentId": "sheet_guangzhou_7504663064977934345",
+      "sequence": 5,
       "day": "2024:06:02",
       "time": "12:52:00",
       "commentText": "广州塔附近的一家顺德菜馆，工作日晚上去的，无须排队。印象深刻的是顺德拌鱼皮和咸蛋黄啫鲜虾，鱼皮很鲜嫩，酸甜可口和这前在顺德当地吃得差异不大，鲜虾也还不错，咸蛋黄味道刚好合适。这家店聚个餐没啥问题，上菜速度也还行。",
@@ -262,6 +267,8 @@
           "name": "sheet_guangzhou_7504663064977934345_4.jpeg"
         }
       ],
+      "canonicalName": "大榕树下·臻品顺德菜(广州塔店)",
+      "shortName": "大榕树下",
       "poiName": "大榕树下·臻品顺德菜(广州塔店)",
       "poiLocation": "赤岗街道广州塔路广州塔广场B1层B161号商铺大榕树下(广州塔广场店)",
       "poiProvince": "广东省",
@@ -270,21 +277,19 @@
       "categoryL1": "美食",
       "categoryL2": "地方菜",
       "categoryL3": "粤菜",
-      "authorName": "旅行者小夏",
-      "sequence": 5,
-      "canonicalName": "大榕树下·臻品顺德菜(广州塔店)",
-      "shortName": "大榕树下",
       "subject": "鲜虾、鲜爽",
       "avoid": [
         "排队提示",
         "店招文字",
         "菜单字样",
         "广州塔标识"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_008",
       "commentId": "sheet_guangzhou_7504217745764993062",
+      "sequence": 6,
       "day": "2024:06:02",
       "time": "14:06:00",
       "commentText": "农行后面的一家糖水店，小两层。品类不多，只有六种，点了姜撞奶、大满贯和汤圆。整体口感没那么甜腻，味道适中，酒酿桃胶汤圆有点子酸酸甜甜的，然后姜撞奶姜味有点子重哈哈，如果喝不习惯的话可能会觉得怪吧，其它品类有机会可以尝尝。",
@@ -306,6 +311,8 @@
           "name": "sheet_guangzhou_7504217745764993062_4.jpeg"
         }
       ],
+      "canonicalName": "彬媽糖水(马场路店)",
+      "shortName": "彬媽糖水",
       "poiName": "彬媽糖水(马场路店)",
       "poiLocation": "马场路珠光新城国际商务中心B座首层103（甲子路东北段）",
       "poiProvince": "广东省",
@@ -314,20 +321,18 @@
       "categoryL1": "美食",
       "categoryL2": "面包甜点",
       "categoryL3": "甜品",
-      "authorName": "旅行者小夏",
-      "sequence": 6,
-      "canonicalName": "彬媽糖水(马场路店)",
-      "shortName": "彬媽糖水",
       "subject": "姜撞奶、滑嫩",
       "avoid": [
         "银行标识",
         "店招文字",
         "价目表字样"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_009",
       "commentId": "sheet_guangzhou_7504994720712558630",
+      "sequence": 7,
       "day": "2024:06:02",
       "time": "15:15:00",
       "commentText": "白云文化广场地铁站附近的一家万豪，大是真得大，入住的房间走到早餐处要走2-3min[微笑]房间的智能马桶还阔以，不过红外线识别太灵敏了，有时人未靠近就自动升盖了[捂脸]早餐是相当丰富，记得早点去品尝广式特色。",
@@ -353,6 +358,8 @@
           "name": "sheet_guangzhou_7504994720712558630_5.jpeg"
         }
       ],
+      "canonicalName": "广州白云国际会议中心越秀万豪酒店",
+      "shortName": "广州白云国际会议中心越秀万豪酒店",
       "poiName": "广州白云国际会议中心越秀万豪酒店",
       "poiLocation": "云城街云城中二路6号、8号、10号",
       "poiProvince": "广东省",
@@ -361,20 +368,18 @@
       "categoryL1": "住宿",
       "categoryL2": "酒店宾馆",
       "categoryL3": "豪华型酒店",
-      "authorName": "旅行者小夏",
-      "sequence": 7,
-      "canonicalName": "广州白云国际会议中心越秀万豪酒店",
-      "shortName": "广州白云国际会议中心越秀万豪酒店",
       "subject": "客房、整洁",
       "avoid": [
         "地铁标识",
         "时长提示",
         "楼层指示牌"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     },
     {
       "eventId": "evt_011",
       "commentId": "sheet_guangzhou_7504992594020026419",
+      "sequence": 8,
       "day": "2024:06:02",
       "time": "20:06:00",
       "commentText": "晚上去的一家户外酒吧，实际上是在地铁站附近广场搞的露营地。精酿可以去前台试饮后决策选哪款，有好几个选项，酸甜各有差异，按需选择。点的盐湖和金桔，盐湖里话梅口感还是有的，喝得还比较习惯，金桔味道适中，不酸不甜，另外推荐下粗薯条🍟。",
@@ -392,6 +397,8 @@
           "name": "sheet_guangzhou_7504992594020026419_3.jpeg"
         }
       ],
+      "canonicalName": "YOJO啤酒厂(保利广场店)",
+      "shortName": "YOJO啤酒厂",
       "poiName": "YOJO啤酒厂(保利广场店)",
       "poiLocation": "新港东路10号保利广场一层外广场",
       "poiProvince": "广东省",
@@ -400,17 +407,16 @@
       "categoryL1": "休闲娱乐",
       "categoryL2": "酒吧",
       "categoryL3": "清吧",
-      "authorName": "旅行者小夏",
-      "sequence": 8,
-      "canonicalName": "YOJO啤酒厂(保利广场店)",
-      "shortName": "YOJO啤酒厂",
       "subject": "精酿啤酒、冰爽",
       "avoid": [
         "地铁标识",
         "菜单字样",
         "价目表文字",
         "店招文字"
-      ]
+      ],
+      "authorName": "旅行者小夏"
     }
-  ]
+  ],
+  "videoPath": "/mock/videos/map_gz_1783223107323.mp4",
+  "videoUpdatedAt": "2026-07-05T23:53:04.777Z"
 }

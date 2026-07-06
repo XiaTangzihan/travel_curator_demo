@@ -11,6 +11,7 @@ export const storagePaths = {
   events: path.join(mockDir, "events"),
   routes: path.join(mockDir, "routes"),
   posters: path.join(mockDir, "posters"),
+  videos: path.join(mockDir, "videos"),
   maps: path.join(mockDir, "maps"),
   runs: path.join(mockDir, "runs"),
   files: path.join(mockDir, "files"),
@@ -60,6 +61,17 @@ export async function writeTextFile(filePath: string, value: string) {
 export async function readTextFile(filePath: string): Promise<string | null> {
   try {
     return await readFile(filePath, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function readBinaryFile(filePath: string): Promise<Buffer | null> {
+  try {
+    return await readFile(filePath);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
